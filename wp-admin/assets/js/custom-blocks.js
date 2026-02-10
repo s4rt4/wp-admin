@@ -140,7 +140,7 @@ function addCustomBlocks(editor) {
             </div>
         `
     });
-    
+
     // 6. Pricing Table (New)
     bm.add('pricing-table', {
         label: 'Pricing Table',
@@ -173,6 +173,91 @@ function addCustomBlocks(editor) {
                     <a href="#" style="display: block; background-color: #4299e1; color: white; padding: 0.75rem; text-decoration: none; border-radius: 4px;">Choose Pro</a>
                 </div>
             </div>
+        `
+    });
+
+    // 7. Basic List (User Requested)
+    bm.add('basic-list', {
+        label: 'List',
+        category: 'Basic',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>',
+        content: `
+            <ul style="padding-left: 2rem; margin-bottom: 1rem;">
+                <li>List item 1</li>
+                <li>List item 2</li>
+                <li>List item 3</li>
+            </ul>
+        `
+    });
+
+    // 8. Media List (Image Left + Text Right)
+    bm.add('media-list', {
+        label: 'Media List',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 6h3v12H4V6zm5 2h11v2H9V8zm0 6h11v2H9v-2z"/></svg>',
+        content: `
+            <div class="media-list-container" style="padding: 1rem;">
+                <!-- Item 1 -->
+                <div class="media-list-item" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-start;">
+                    <div style="flex: 0 0 100px; max-width: 100px;">
+                        <img src="https://via.placeholder.com/100" style="width: 100%; height: auto; border-radius: 4px; object-fit: cover;" alt="Image">
+                    </div>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem;">Title Here</h3>
+                        <p style="margin: 0; color: #555;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</p>
+                    </div>
+                </div>
+                
+                <!-- Item 2 -->
+                <div class="media-list-item" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-start;">
+                    <div style="flex: 0 0 100px; max-width: 100px;">
+                        <img src="https://via.placeholder.com/100" style="width: 100%; height: auto; border-radius: 4px; object-fit: cover;" alt="Image">
+                    </div>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem;">Title Here</h3>
+                        <p style="margin: 0; color: #555;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</p>
+                    </div>
+                </div>
+            </div>
+        `
+    });
+
+    // 9. Styled Form (User Requested)
+    bm.add('styled-form', {
+        label: 'Styled Form',
+        category: 'Form',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M19,19H5V5H19V19M7,7H17V9H7V7M7,11H17V13H7V11M7,15H13V17H7V15Z" /></svg>',
+        content: `
+            <form class="styled-form" style="padding: 2rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-width: 500px; margin: 0 auto;">
+                <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: #2d3748; text-align: center;">Contact Us</h3>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #4a5568; font-weight: 500;">Name</label>
+                    <input type="text" name="name" placeholder="Your Name" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 1rem; color: #2d3748; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #4a5568; font-weight: 500;">Email</label>
+                    <input type="email" name="email" placeholder="your@email.com" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 1rem; color: #2d3748; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #4a5568; font-weight: 500;">Subject</label>
+                    <select name="subject" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 1rem; color: #2d3748; box-sizing: border-box; background-color: white;">
+                        <option value="">Select a subject</option>
+                        <option value="support">Support</option>
+                        <option value="sales">Sales</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #4a5568; font-weight: 500;">Message</label>
+                    <textarea name="message" rows="4" placeholder="Your message..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 1rem; color: #2d3748; box-sizing: border-box; font-family: inherit;"></textarea>
+                </div>
+                
+                <button type="button" style="width: 100%; padding: 0.75rem; background-color: #4299e1; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s;">Send Message</button>
+            </form>
         `
     });
 }
