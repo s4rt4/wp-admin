@@ -1,0 +1,15 @@
+RewriteEngine On
+RewriteBase /word-press/
+
+# 1. Do not rewrite if requesting a real file or directory
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# 2. Friendly URLs for Pages (view.php)
+# Example: /word-press/page/about -> view.php?slug=about
+RewriteRule ^page/([^/]+)/?$ view.php?slug=$1 [L,QSA]
+
+# 3. Friendly URLs for Posts (read.php)
+# Example: /word-press/post/hello-world -> read.php?slug=hello-world
+RewriteRule ^post/([^/]+)/?$ read.php?slug=$1 [L,QSA]

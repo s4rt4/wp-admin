@@ -1,0 +1,733 @@
+:root {
+    --wp-admin-bg: #23282d;
+    --wp-admin-bg-hover: #1d2327;
+    --wp-menu-text: #a7aaad;
+    --wp-menu-text-active: #fff;
+    --wp-menu-highlight: #0073aa;
+    --wp-submenu-bg: #2c3338;
+    --wp-content-bg: #f0f0f1;
+    --wp-widget-bg: #fff;
+    --wp-border: #ccd0d4;
+    --wp-text: #3c434a;
+    --wp-button: #0073aa;
+    --wp-button-hover: #005f8a;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    background: var(--wp-content-bg);
+    color: var(--wp-text);
+}
+
+a {
+    color: var(--wp-button);
+    text-decoration: none;
+}
+
+#wpcontent a:hover {
+    color: var(--wp-button-hover);
+}
+
+/* 1. Top Admin Bar */
+#wpadminbar {
+    height: 32px;
+    background: var(--wp-admin-bg);
+    color: var(--wp-menu-text);
+    width: 100%;
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#wpadminbar .quicklinks {
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+}
+
+#wpadminbar>.quicklinks>ul {
+    list-style: none;
+    display: flex;
+}
+
+#wpadminbar .ab-item {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    height: 32px;
+    color: var(--wp-menu-text);
+    font-size: 13px;
+}
+
+#wpadminbar .ab-item:hover {
+    background: var(--wp-admin-bg-hover);
+    color: var(--wp-menu-text-active);
+}
+
+#wpadminbar ul li {
+    position: relative;
+}
+
+/* Top Bar Icons */
+.ab-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    background-color: var(--wp-menu-text);
+    mask-size: cover;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+#wpadminbar .ab-item:hover .ab-icon {
+    background-color: var(--wp-menu-text-active);
+}
+
+/* Dropdown Menu */
+.ab-submenu {
+    display: none;
+    position: absolute;
+    top: 32px;
+    right: 0;
+    background: #1d2327;
+    min-width: 200px;
+    list-style: none;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+}
+
+#wpadminbar ul li:hover>.ab-submenu {
+    display: block;
+}
+
+.ab-submenu .ab-item {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    color: #b4b9be;
+    font-size: 13px;
+}
+
+.ab-submenu .ab-item:hover {
+    background: none;
+    color: #0073aa;
+}
+
+/* User Info Dropdown Specifics */
+#wp-admin-bar-user-info .ab-item {
+    height: auto !important;
+    padding: 10px 15px !important;
+    display: flex !important;
+    align-items: center;
+    background: transparent !important;
+    color: #fff !important;
+    cursor: default;
+}
+
+#wp-admin-bar-user-info .ab-item:hover {
+    background: transparent !important;
+    color: #fff !important;
+}
+
+#wp-admin-bar-user-info img.avatar {
+    margin-right: 12px !important;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid #555;
+}
+
+.user-info-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.display-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.edit-profile {
+    font-size: 12px;
+    color: #a7aaad;
+}
+
+.edit-profile:hover {
+    color: #0073aa;
+}
+
+#wp-admin-bar-logout .ab-item {
+    border-top: 1px solid #3c434a;
+}
+
+#wp-admin-bar-logout .ab-item:hover {
+    color: #d63638 !important;
+}
+
+
+.content-wrapper {
+    display: flex;
+    padding-top: 32px;
+}
+
+/* 3. Main Navigation Menu (Sidebar) */
+#adminmenumain {
+    width: 160px;
+    background: var(--wp-admin-bg);
+    flex-shrink: 0;
+    min-height: calc(100vh - 32px);
+    transition: width 0.1s ease-in-out;
+    position: relative;
+    z-index: 99;
+}
+
+#adminmenu {
+    list-style: none;
+}
+
+#adminmenu>li {
+    position: relative;
+}
+
+#adminmenu>li>a,
+#adminmenu>li>button {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    color: var(--wp-menu-text);
+    font-size: 14px;
+    border: none;
+    text-decoration: none;
+    width: 100%;
+    background: transparent;
+}
+
+#adminmenu>li>a:hover,
+#adminmenu {
+    background: var(--wp-admin-bg-hover);
+    color: var(--wp-menu-text-active);
+    cursor: pointer;
+}
+
+#adminmenu .wp-has-current-submenu>a {
+    background: var(--wp-menu-highlight);
+    color: var(--wp-menu-text-active);
+    position: relative;
+    z-index: 2;
+}
+
+/* Icon Styling (Diubah ke Mask) */
+.wp-menu-image {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    background-color: var(--wp-menu-text);
+
+    mask-size: 20px 20px;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+#adminmenu a:hover .wp-menu-image,
+#adminmenu .wp-has-current-submenu>a .wp-menu-image,
+#adminmenu .wp-has-submenu.menu-open>a .wp-menu-image {
+    background-color: var(--wp-menu-text-active);
+}
+
+.wp-menu-name {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.wp-menu-separator {
+    height: 1px;
+    background: #444;
+    margin: 5px 0;
+}
+
+.wp-menu-arrow-active {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 7px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 10px 10px 0;
+    border-color: transparent var(--wp-content-bg) transparent transparent;
+    z-index: 3;
+}
+
+.wp-has-current-submenu .wp-menu-arrow-active {
+    display: block;
+}
+
+.wp-submenu {
+    display: none;
+    list-style: none;
+    background: var(--wp-submenu-bg);
+    padding-left: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.wp-has-submenu.menu-open>.wp-submenu {
+    display: block;
+}
+
+/* === BLOK INI TELAH DIPERBAIKI === */
+
+/* 1. Atur TAMPILAN DEFAULT (termasuk border transparan) */
+.wp-submenu a {
+    display: block;
+    padding-left: 17px;
+    /* (17px + 3px border = 20px) */
+    font-size: 14px;
+    color: #ccc;
+    border-left: 5px solid transparent;
+    padding-top: 4px;
+    /* <-- TAMBAHKAN INI */
+    padding-bottom: 4px;
+    /* <-- TAMBAHKAN INI */
+}
+
+/* 2. Atur TAMPILAN HOVER (HANYA untuk link yang BUKAN .current) */
+.wp-submenu a:not(.current):hover {
+    color: var(--wp-menu-highlight);
+    border-left-color: var(--wp-menu-highlight);
+}
+
+/* 3. Atur TAMPILAN AKTIF (Item .current) */
+.wp-submenu .current {
+    font-weight: bold;
+    color: var(--wp-menu-text-active);
+
+}
+
+.wp-submenu .current:hover {
+    border-left-color: var(--wp-menu-text-active);
+    /* var(--wp-menu-text-active) adalah putih */
+}
+
+/* === AKHIR DARI BLOK PERBAIKAN === */
+
+
+#collapse-menu {
+    position: absolute;
+    bottom: 0;
+    width: 160px;
+    transition: width 0.1s ease-in-out;
+}
+
+#collapse-button .wp-menu-image {
+    transition: transform 0.2s;
+}
+
+/* 4. Main Content Area */
+#wpcontent {
+    flex-grow: 1;
+    transition: margin-left 0.1s ease-in-out;
+    position: relative;
+    z-index: 1;
+    padding-left: 20px;
+    /* Added spacing from sidebar */
+    padding-right: 20px;
+    /* Added spacing from right edge */
+}
+
+/* ... */
+
+.wrap {
+    margin: 10px 0 0 0;
+    /* Margins handled by container padding now */
+    max-width: 1200px;
+    /* Optional: limit width for better reading on huge screens */
+}
+
+.wrap h1 {
+    font-size: 23px;
+    font-weight: 400;
+    margin-bottom: 20px;
+}
+
+#dashboard-widgets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.postbox-container {
+    flex-basis: 300px;
+    flex-grow: 1;
+}
+
+.postbox {
+    background: var(--wp-widget-bg);
+    border: 1px solid var(--wp-border);
+    border-radius: 3px;
+    margin-bottom: 20px;
+}
+
+.postbox summary.hndle {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--wp-border);
+    cursor: pointer;
+    list-style: none;
+}
+
+.postbox summary.hndle::-webkit-details-marker {
+    display: none;
+}
+
+.postbox summary.hndle::before {
+    content: '▾';
+    margin-right: 8px;
+    font-size: 1.2em;
+    display: inline-block;
+}
+
+.postbox[open] summary.hndle::before {
+    transform: rotate(-180deg);
+}
+
+.postbox .inside {
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.empty-widget-area {
+    border: 2px dashed var(--wp-border);
+    padding: 20px;
+    text-align: center;
+    color: #777;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+}
+
+/* === STATE: COLLAPSED === */
+body.is-collapsed #adminmenumain,
+body.is-collapsed #collapse-menu {
+    width: 50px;
+}
+
+body.is-collapsed .wp-menu-name,
+body.is-collapsed .wp-menu-arrow-active {
+    display: none;
+}
+
+body.is-collapsed #collapse-button .wp-menu-image {
+    transform: rotate(180deg);
+}
+
+body.is-collapsed .wp-submenu {
+    display: none;
+}
+
+body.is-collapsed #adminmenu>li:hover>.wp-submenu {
+    display: block;
+    position: absolute;
+    left: 50px;
+    top: 0;
+    width: 160px;
+    background: var(--wp-admin-bg-hover);
+    z-index: 100;
+    padding-left: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+body.is-collapsed #adminmenu>li:hover>.wp-submenu .wp-menu-name {
+    display: inline-block;
+}
+
+body.is-collapsed .wp-submenu a {
+    padding-left: 10px;
+}
+
+body.is-collapsed #adminmenu>li:hover {
+    z-index: 999;
+}
+
+/*
+ * === IKON SPESIFIK (BARU) ===
+ * Menggunakan path relatif ke folder ikon Anda.
+ */
+.dashicons-admin-comments {
+    mask-image: url('dashicons-svg-min/admin-comments.svg');
+}
+
+.dashicons-plus {
+    mask-image: url('dashicons-svg-min/plus.svg');
+}
+
+.dashicons-dashboard {
+    mask-image: url('dashicons-svg-min/dashboard.svg');
+}
+
+.dashicons-admin-post {
+    mask-image: url('dashicons-svg-min/admin-post.svg');
+}
+
+.dashicons-admin-media {
+    mask-image: url('dashicons-svg-min/admin-media.svg');
+}
+
+.dashicons-admin-page {
+    mask-image: url('dashicons-svg-min/admin-page.svg');
+}
+
+.dashicons-admin-appearance {
+    mask-image: url('dashicons-svg-min/admin-appearance.svg');
+}
+
+.dashicons-admin-plugins {
+    mask-image: url('dashicons-svg-min/admin-plugins.svg');
+}
+
+.dashicons-admin-users {
+    mask-image: url('dashicons-svg-min/admin-users.svg');
+}
+
+.dashicons-admin-tools {
+    mask-image: url('dashicons-svg-min/admin-tools.svg');
+}
+
+.dashicons-admin-settings {
+    mask-image: url('dashicons-svg-min/admin-settings.svg');
+}
+
+.dashicons-admin-collapse {
+    mask-image: url('dashicons-svg-min/admin-collapse.svg');
+}
+
+.dashicons-admin-home {
+    mask-image: url('dashicons-svg-min/admin-home.svg');
+}
+
+/* ==========================================================================
+   5. List Tables (WP Standard)
+   ========================================================================== */
+
+/* Subsubsub (Filters) */
+ul.subsubsub {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    font-size: 13px;
+    float: left;
+    color: #646970;
+}
+
+ul.subsubsub li {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+
+ul.subsubsub li a {
+    color: #2271b1;
+    /* WP Blue */
+    line-height: 2;
+    padding: 0.2em;
+    text-decoration: none;
+}
+
+ul.subsubsub li a.current {
+    color: #000;
+    font-weight: 600;
+    border: none;
+}
+
+ul.subsubsub li a:hover {
+    color: #135e96;
+}
+
+ul.subsubsub li .count {
+    color: #50575e;
+    font-weight: 400;
+}
+
+/* WP List Table */
+.wp-list-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+    clear: both;
+}
+
+.widefat {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+}
+
+.widefat thead th,
+.widefat tfoot th {
+    border-bottom: 1px solid #c3c4c7;
+    background: #fff;
+    color: #1d2327;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4em;
+    padding: 8px 10px;
+    text-align: left;
+}
+
+.widefat td {
+    color: #50575e;
+    font-size: 13px;
+    padding: 8px 10px;
+    vertical-align: top;
+}
+
+.widefat .check-column {
+    padding: 9px 0 0 3px;
+    vertical-align: top;
+    width: 2.2em;
+}
+
+/* Striped Rows */
+.striped>tbody> :nth-child(odd) {
+    background-color: #f6f7f7;
+}
+
+.widefat tr:hover td {
+    background-color: #f0f0f1;
+}
+
+/* Columns */
+.column-author {
+    width: 20%;
+}
+
+.column-date {
+    width: 15%;
+}
+
+.column-response {
+    width: 15%;
+}
+
+.column-author strong img {
+    float: left;
+    margin-right: 10px;
+}
+
+/* Row Actions (Hover Links) */
+.row-actions {
+    color: #ddd;
+    font-size: 13px;
+    padding: 2px 0 0;
+    visibility: hidden;
+    position: relative;
+    left: -9999px;
+    /* Hide but keep accessible? No, WP uses visibility */
+    left: auto;
+}
+
+.row-actions span {
+    color: #a7aaad;
+    /* separator color */
+}
+
+.row-actions span a {
+    text-decoration: none;
+}
+
+.row-actions span.approve a {
+    color: #007017;
+}
+
+.row-actions span.unapprove a {
+    color: #d63638;
+}
+
+.row-actions span.spam a,
+.row-actions span.trash a,
+.row-actions span.delete a {
+    color: #d63638;
+}
+
+tr:hover .row-actions,
+.mobile .row-actions {
+    visibility: visible;
+}
+
+/* Comments Specific */
+.comment .author strong {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.comment .author a {
+    color: #2271b1;
+}
+
+.comment-count-approved {
+    background-color: #007017;
+    color: #fff;
+}
+
+.comment-count-pending {
+    background-color: #d63638;
+    color: #fff;
+}
+
+/* Status Styles in Table */
+.unapproved th,
+.unapproved td {
+    background-color: #fef7f1 !important;
+    /* Pending color */
+}
+
+.unapproved .row-actions span.unapprove {
+    display: none;
+}
+
+.approved .row-actions span.approve {
+    display: none;
+}
+
+/* Links inside table */
+.widefat a {
+    text-decoration: none;
+    color: #2271b1;
+}
+
+.widefat a:hover {
+    color: #135e96;
+}
+
+/* Pagination (if added later) */
+.tablenav {
+    height: 30px;
+    margin: 6px 0 4px;
+    vertical-align: top;
+}
+
+.tablenav .tablenav-pages {
+    float: right;
+    cursor: default;
+    color: #555;
+    margin-top: 3px;
+}

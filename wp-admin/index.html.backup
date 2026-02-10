@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard UI - V6 (Dynamic Highlight)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="wp-admin">
+
+    <div id="wpadminbar">
+        <div class="quicklinks">
+            <ul class="ab-top-menu">
+                <li id="wp-admin-bar-site-name"><a class="ab-item" href="#"><span class="ab-icon dashicons-admin-home"></span>My Admin Panel</a></li>
+                <li id="wp-admin-bar-comments"><a class="ab-item" href="#"><span class="ab-icon dashicons-admin-comments"></span><span class="ab-label">0</span></a></li>
+                <li id="wp-admin-bar-new-content"><a class="ab-item" href="#"><span class="ab-icon dashicons-plus"></span><span class="ab-label">New</span></a></li>
+            </ul>
+            <ul class="ab-top-secondary">
+                <li id="wp-admin-bar-my-account">
+                    <a class="ab-item" href="#"><span class="ab-icon dashicons-admin-users"></span>Hello, [Admin Name]<span class="avatar"></span></a>
+                    <ul class="ab-submenu">
+                        <li id="wp-admin-bar-user-info"><a class="ab-item" href="#">admin</a></li>
+                        <li id="wp-admin-bar-edit-profile"><a class="ab-item" href="#">Edit Profile</a></li>
+                        <li id="wp-admin-bar-logout"><a class="ab-item" href="#">Log Out</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+
+        <div id="adminmenumain">
+            <ul id="adminmenu">
+                
+                <li class="wp-has-submenu"> 
+                    <a href="#"> 
+                        <div class="wp-menu-image dashicons-dashboard"></div>
+                        <div class="wp-menu-name">Dashboard</div>
+                    </a>
+                    <div class="wp-menu-arrow-active"></div> 
+                    <ul class="wp-submenu">
+                        <li class="wp-first-item"><a href="#">Home</a></li>
+                        <li><a href="#">Updates</a></li>
+                    </ul>
+                </li>
+                <li class="wp-menu-separator"></li>
+                
+                <li class="wp-has-submenu">
+                    <a href="#">
+                        <div class="wp-menu-image dashicons-admin-post"></div>
+                        <div class="wp-menu-name">Posts</div>
+                    </a>
+                    <div class="wp-menu-arrow-active"></div> <ul class="wp-submenu">
+                        <li class="wp-first-item"><a href="#">All Posts</a></li>
+                        <li><a href="#">Add New</a></li>
+                        <li><a href="#">Categories</a></li>
+                        <li><a href="#">Tags</a></li>
+                    </ul>
+                </li>
+                
+                <li class="wp-has-submenu">
+                    <a href="#">
+                        <div class="wp-menu-image dashicons-admin-media"></div>
+                        <div class="wp-menu-name">Media</div>
+                    </a>
+                    <div class="wp-menu-arrow-active"></div> <ul class="wp-submenu">
+                        <li class="wp-first-item"><a href="#">Library</a></li>
+                        <li><a href="#">Add New</a></li>
+                    </ul>
+                </li>
+                
+                <li class="wp-has-submenu">
+                    <a href="#">
+                        <div class="wp-menu-image dashicons-admin-page"></div>
+                        <div class="wp-menu-name">Pages</div>
+                    </a>
+                    <div class="wp-menu-arrow-active"></div> <ul class="wp-submenu">
+                        <li class="wp-first-item"><a href="#">All Pages</a></li>
+                        <li><a href="#">Add New</a></li>
+                    </ul>
+                </li>
+
+                <li> 
+                    <a href="#">
+                        <div class="wp-menu-image dashicons-admin-comments"></div>
+                        <div class="wp-menu-name">Comments</div>
+                    </a>
+                    </li>
+
+                <li class="wp-menu-separator"></li>
+                
+                <li class="wp-has-submenu">
+                    <a href="#"><div class="wp-menu-image dashicons-admin-appearance"></div><div class="wp-menu-name">Appearance</div></a>
+                    <div class="wp-menu-arrow-active"></div>
+                    <ul class="wp-submenu">
+                        <li class="wp-first-item"><a href="#">Themes</a></li>
+                        <li><a href="#">Customize</a></li>
+                        <li><a href="#">Widgets</a></li>
+                        <li><a href="#">Menus</a></li>
+                    </ul>
+                </li>
+                <li class="wp-has-submenu">
+                    <a href="#"><div class="wp-menu-image dashicons-admin-plugins"></div><div class="wp-menu-name">Plugins</div></a>
+                    <div class="wp-menu-arrow-active"></div>
+                    <ul class="wp-submenu">
+                        <li class="wp-first-item"><a href="#">Installed Plugins</a></li>
+                        <li><a href="#">Add New</a></li>
+                    </ul>
+                </li>
+                <li class="wp-has-submenu">
+                    <a href="#"><div class="wp-menu-image dashicons-admin-users"></div><div class="wp-menu-name">Users</div></a>
+                    <div class="wp-menu-arrow-active"></div>
+                    <ul class="wp-submenu">
+                        <li class="wp-first-item"><a href="#">All Users</a></li>
+                        <li><a href="#">Add New</a></li>
+                        <li><a href="#">Profile</a></li>
+                    </ul>
+                </li>
+                <li class="wp-has-submenu">
+                    <a href="#"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
+                    <div class="wp-menu-arrow-active"></div>
+                    <ul class="wp-submenu">
+                        <li class="wp-first-item"><a href="#">Available Tools</a></li>
+                        <li><a href="#">Import</a></li>
+                        <li><a href="#">Export</a></li>
+                    </ul>
+                </li>
+                <li class="wp-has-submenu">
+                    <a href="#"><div class="wp-menu-image dashicons-admin-settings"></div><div class="wp-menu-name">Settings</div></a>
+                    <div class="wp-menu-arrow-active"></div>
+                    <ul class="wp-submenu">
+                        <li class="wp-first-item"><a href="#">General</a></li>
+                        <li><a href="#">Writing</a></li>
+                        <li><a href="#">Reading</a></li>
+                        <li><a href="#">Permalinks</a></li>
+                    </ul>
+                </li>
+
+                <li id="collapse-menu">
+                    <button type="button" id="collapse-button">
+                        <div class="wp-menu-image dashicons-admin-collapse"></div>
+                        <div class="wp-menu-name collapse-label">Collapse menu</div>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div id="wpcontent">
+            <div id="wpbody">
+                <div id="wpbody-content">
+                    <div id="screen-meta-links">
+                        <button type="button" id="contextual-help-link" class="button">Help</button>
+                        <button type="button" id="show-settings-link" class="button">Screen Options</button>
+                    </div>
+                    <div id="contextual-help-wrap" class="hidden"><p>[Help Text]</p></div>
+                    <div id="screen-options-wrap" class="hidden"><p>[Screen Options]</p></div>
+                    <div class="wrap">
+                        <h1>Dashboard</h1>
+                        <div id="dashboard-widgets-wrap">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
