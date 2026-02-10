@@ -49,7 +49,9 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - Serve the project via your preferred web server (Apache/Nginx) or use a local environment like Laragon/XAMPP.
     - Access the admin panel at `/wp-admin/`.
 
-## standard Credentials
+## Default Admin Login
+
+Use the following credentials to access the admin panel:
 
 - **Username:** `admin`
 - **Password:** `admin123`
