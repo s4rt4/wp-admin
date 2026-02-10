@@ -180,7 +180,7 @@ function addCustomBlocks(editor) {
     bm.add('basic-list', {
         label: 'List',
         category: 'Basic',
-        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h14v2H7V5zm0 8h14v2H7v-2zm0 8h14v2H7v-2zM3 6h2v2H3V6zm0 8h2v2H3v-2zm0 8h2v2H3v-2z"/></svg>',
         content: `
             <ul style="padding-left: 2rem; margin-bottom: 1rem;">
                 <li>List item 1</li>
@@ -265,7 +265,7 @@ function addCustomBlocks(editor) {
     bm.add('icon-list', {
         label: 'Icon List',
         category: 'Sections',
-        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2zM7 5.5l5 3 5-3L12 2 7 5.5z"/></svg>', // Generic list icon
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h14v2H7V5zm0 8h14v2H7v-2zm0 8h14v2H7v-2zM3 6h2v2H3V6zm0 8h2v2H3v-2zm0 8h2v2H3v-2z"/></svg>',
         content: `
             <ul style="list-style: none; padding: 0; margin: 0;">
                 <li style="display: flex; align-items: center; margin-bottom: 0.75rem; color: #4a5568;">
@@ -409,7 +409,7 @@ function addCustomBlocks(editor) {
     bm.add('custom-navbar', {
         label: 'Navbar (Responsive)',
         category: 'Sections',
-        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 5H3v14h18V5zm-2 12H5V7h14v10zM7 9h10v2H7V9z"/></svg>',
         content: `
             <header class="custom-navbar-block" style="background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;">
                 <style>
@@ -474,57 +474,50 @@ function addCustomBlocks(editor) {
     bm.add('gallery-grid', {
         label: 'Gallery (3x2)',
         category: 'Sections',
-        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/></svg>',
         content: `
             <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; padding: 2rem;">
-                <style>
-                    .gallery-item { position: relative; overflow: hidden; border-radius: 8px; cursor: pointer; height: 250px; }
-                    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; display: block; }
-                    .gallery-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; color: white; padding: 1rem; text-align: center; }
-                    .gallery-item:hover .gallery-overlay { opacity: 1; }
-                    .gallery-item:hover img { transform: scale(1.1); }
-                </style>
                 <!-- Generate 6 items -->
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/400x300?text=Image+1" alt="Gallery Image 1">
-                    <div class="gallery-overlay">
-                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 1</h3>
-                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                <div class="gallery-item" style="overflow: hidden; border-radius: 8px; cursor: pointer; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <img src="https://via.placeholder.com/400x300?text=Image+1" style="width: 100%; height: 200px; object-fit: cover; display: block;" alt="Gallery Image 1">
+                    <div class="gallery-caption" style="padding: 1rem; text-align: center;">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem; color: #333;">Image Title 1</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: #666;">Description of the image goes here.</p>
                     </div>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/400x300?text=Image+2" alt="Gallery Image 2">
-                    <div class="gallery-overlay">
-                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 2</h3>
-                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                <div class="gallery-item" style="overflow: hidden; border-radius: 8px; cursor: pointer; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <img src="https://via.placeholder.com/400x300?text=Image+2" style="width: 100%; height: 200px; object-fit: cover; display: block;" alt="Gallery Image 2">
+                    <div class="gallery-caption" style="padding: 1rem; text-align: center;">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem; color: #333;">Image Title 2</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: #666;">Description of the image goes here.</p>
                     </div>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/400x300?text=Image+3" alt="Gallery Image 3">
-                    <div class="gallery-overlay">
-                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 3</h3>
-                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                <div class="gallery-item" style="overflow: hidden; border-radius: 8px; cursor: pointer; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <img src="https://via.placeholder.com/400x300?text=Image+3" style="width: 100%; height: 200px; object-fit: cover; display: block;" alt="Gallery Image 3">
+                    <div class="gallery-caption" style="padding: 1rem; text-align: center;">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem; color: #333;">Image Title 3</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: #666;">Description of the image goes here.</p>
                     </div>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/400x300?text=Image+4" alt="Gallery Image 4">
-                    <div class="gallery-overlay">
-                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 4</h3>
-                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                <div class="gallery-item" style="overflow: hidden; border-radius: 8px; cursor: pointer; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <img src="https://via.placeholder.com/400x300?text=Image+4" style="width: 100%; height: 200px; object-fit: cover; display: block;" alt="Gallery Image 4">
+                    <div class="gallery-caption" style="padding: 1rem; text-align: center;">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem; color: #333;">Image Title 4</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: #666;">Description of the image goes here.</p>
                     </div>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/400x300?text=Image+5" alt="Gallery Image 5">
-                    <div class="gallery-overlay">
-                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 5</h3>
-                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                <div class="gallery-item" style="overflow: hidden; border-radius: 8px; cursor: pointer; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <img src="https://via.placeholder.com/400x300?text=Image+5" style="width: 100%; height: 200px; object-fit: cover; display: block;" alt="Gallery Image 5">
+                    <div class="gallery-caption" style="padding: 1rem; text-align: center;">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem; color: #333;">Image Title 5</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: #666;">Description of the image goes here.</p>
                     </div>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/400x300?text=Image+6" alt="Gallery Image 6">
-                    <div class="gallery-overlay">
-                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 6</h3>
-                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                <div class="gallery-item" style="overflow: hidden; border-radius: 8px; cursor: pointer; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <img src="https://via.placeholder.com/400x300?text=Image+6" style="width: 100%; height: 200px; object-fit: cover; display: block;" alt="Gallery Image 6">
+                    <div class="gallery-caption" style="padding: 1rem; text-align: center;">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem; color: #333;">Image Title 6</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: #666;">Description of the image goes here.</p>
                     </div>
                 </div>
             </div>
@@ -585,7 +578,7 @@ function addCustomBlocks(editor) {
     bm.add('off-canvas-menu', {
         label: 'Off-Canvas Menu',
         category: 'Sections',
-        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v16H3V4zm6 14h10V6H9v12zm-4-2h2V8H5v8z"/></svg>',
         content: `
             <div>
                 <style>
