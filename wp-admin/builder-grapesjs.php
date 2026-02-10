@@ -248,6 +248,24 @@ if ($pageId > 0) {
                     },
                     'gjs-blocks-basic': {
                         flexGrid: true
+                    },
+                    'grapesjs-tabs': {
+                        tabsBlock: { category: 'Sections' }
+                    },
+                    'grapesjs-typed': {
+                        block: { category: 'Sections' }
+                    },
+                    'grapesjs-navbar': {
+                        block: { category: 'Sections' }
+                    },
+                    'grapesjs-component-countdown': {
+                        block: { category: 'Sections' }
+                    },
+                    'grapesjs-custom-code': {
+                        blockCustomCode: { category: 'Sections' }
+                    },
+                    'grapesjs-tooltip': {
+                        blockTooltip: { category: 'Sections' }
                     }
                 },
                 

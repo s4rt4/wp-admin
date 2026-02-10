@@ -10,7 +10,7 @@ function addCustomBlocks(editor) {
     bm.add('card-block', {
         label: 'Card',
         media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20,2H4C2.9,2 2,2.9 2,4V20C2,21.1 2.9,22 4,22H20C21.1,22 22,21.1 22,20V4C22,2.9 21.1,2 20,2M20,20H4V13H20V20M20,11H4V4H20V11Z" /></svg>',
-        category: 'Basic',
+        category: 'Sections',
         content: {
             type: 'div',
             classes: ['card'],
@@ -69,7 +69,7 @@ function addCustomBlocks(editor) {
     bm.add('hero-section', {
         label: 'Hero Section',
         media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M2,2H22V22H2V2M4,4V20H20V4H4M6,6H18V10H6V6M6,12H18V14H6V12M6,16H18V18H6V16Z" /></svg>',
-        category: 'Basic',
+        category: 'Sections',
         content: `
             <section class="hero-section" style="padding: 4rem 2rem; text-align: center; background-color: #f7fafc; border-bottom: 1px solid #e2e8f0;">
                 <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: #2d3748;">Welcome to My Website</h1>
@@ -225,7 +225,7 @@ function addCustomBlocks(editor) {
     // 9. Styled Form (User Requested)
     bm.add('styled-form', {
         label: 'Styled Form',
-        category: 'Form',
+        category: 'Sections',
         media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M19,19H5V5H19V19M7,7H17V9H7V7M7,11H17V13H7V11M7,15H13V17H7V15Z" /></svg>',
         content: `
             <form class="styled-form" style="padding: 2rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-width: 500px; margin: 0 auto;">
@@ -258,6 +258,135 @@ function addCustomBlocks(editor) {
                 
                 <button type="button" style="width: 100%; padding: 0.75rem; background-color: #4299e1; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s;">Send Message</button>
             </form>
+        `
+    });
+
+    // 10. Icon List (User Requested)
+    bm.add('icon-list', {
+        label: 'Icon List',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2zM7 5.5l5 3 5-3L12 2 7 5.5z"/></svg>', // Generic list icon
+        content: `
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="display: flex; align-items: center; margin-bottom: 0.75rem; color: #4a5568;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; background: #e6fffa; color: #38b2ac; border-radius: 50%; padding: 4px; margin-right: 0.75rem;">
+                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </span>
+                    <span>High quality component library</span>
+                </li>
+                <li style="display: flex; align-items: center; margin-bottom: 0.75rem; color: #4a5568;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; background: #e6fffa; color: #38b2ac; border-radius: 50%; padding: 4px; margin-right: 0.75rem;">
+                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </span>
+                    <span>Easy to customize with CSS</span>
+                </li>
+                <li style="display: flex; align-items: center; margin-bottom: 0.75rem; color: #4a5568;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; background: #e6fffa; color: #38b2ac; border-radius: 50%; padding: 4px; margin-right: 0.75rem;">
+                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </span>
+                    <span>Responsive and mobile ready</span>
+                </li>
+            </ul>
+        `
+    });
+
+    // 11. Review Section (User Requested)
+    bm.add('review-section', {
+        label: 'Reviews',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg>',
+        content: `
+            <div style="padding: 3rem 1rem; background-color: #f9fafb;">
+                <h2 style="text-align: center; margin-bottom: 2.5rem; color: #1a202c; font-size: 2rem;">Customer Reviews</h2>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem;">
+                    <!-- Review Card 1 -->
+                    <div style="flex: 1 1 300px; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="color: #ecc94b; margin-bottom: 0.75rem;">★★★★★</div>
+                        <p style="color: #4a5568; font-style: italic; margin-bottom: 1.25rem;">"Absolutely amazing! The features are top-notch and the support team is incredible."</p>
+                        <div style="display: flex; align-items: center;">
+                             <img src="https://via.placeholder.com/40" style="border-radius: 50%; margin-right: 0.75rem;" alt="User">
+                             <div>
+                                 <strong style="display: block; color: #2d3748; font-size: 0.9rem;">John Smith</strong>
+                                 <span style="font-size: 0.8rem; color: #718096;">Marketing Director</span>
+                             </div>
+                        </div>
+                    </div>
+                    <!-- Review Card 2 -->
+                    <div style="flex: 1 1 300px; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="color: #ecc94b; margin-bottom: 0.75rem;">★★★★★</div>
+                        <p style="color: #4a5568; font-style: italic; margin-bottom: 1.25rem;">"Great value for money. It has helped us streamline our workflow significantly."</p>
+                        <div style="display: flex; align-items: center;">
+                             <img src="https://via.placeholder.com/40" style="border-radius: 50%; margin-right: 0.75rem;" alt="User">
+                             <div>
+                                 <strong style="display: block; color: #2d3748; font-size: 0.9rem;">Sarah Johnson</strong>
+                                 <span style="font-size: 0.8rem; color: #718096;">Small Business Owner</span>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `
+    });
+
+    // 12. Carousel Slider (CSS Only)
+    bm.add('carousel-slider', {
+        label: 'Carousel',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 19h10V4H7v15zm-5-2h4V6H2v11zM18 6v11h4V6h-4z"/></svg>',
+        content: `
+            <div class="carousel-container" style="position: relative; max-width: 800px; margin: 0 auto; overflow: hidden; border-radius: 8px;">
+                <div class="carousel-slides" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                    <!-- Slide 1 -->
+                    <div class="carousel-slide" style="flex: 0 0 100%; scroll-snap-align: center; position: relative;">
+                        <img src="https://via.placeholder.com/800x400/4299e1/ffffff?text=Slide+1" style="width: 100%; display: block;" alt="Slide 1">
+                        <div style="position: absolute; bottom: 20px; left: 20px; color: white; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 4px;">
+                            <h3 style="margin: 0;">Amazing Slide 1</h3>
+                        </div>
+                    </div>
+                    <!-- Slide 2 -->
+                    <div class="carousel-slide" style="flex: 0 0 100%; scroll-snap-align: center; position: relative;">
+                        <img src="https://via.placeholder.com/800x400/48bb78/ffffff?text=Slide+2" style="width: 100%; display: block;" alt="Slide 2">
+                        <div style="position: absolute; bottom: 20px; left: 20px; color: white; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 4px;">
+                            <h3 style="margin: 0;">Incredible Slide 2</h3>
+                        </div>
+                    </div>
+                    <!-- Slide 3 -->
+                    <div class="carousel-slide" style="flex: 0 0 100%; scroll-snap-align: center; position: relative;">
+                        <img src="https://via.placeholder.com/800x400/ed8936/ffffff?text=Slide+3" style="width: 100%; display: block;" alt="Slide 3">
+                        <div style="position: absolute; bottom: 20px; left: 20px; color: white; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 4px;">
+                            <h3 style="margin: 0;">Fantastic Slide 3</h3>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 0.5rem; color: #718096; font-size: 0.8rem;">
+                    (Scroll horizontally to see more)
+                </div>
+            </div>
+        `
+    });
+
+    // 13. Hero Section (2 Columns)
+    bm.add('hero-2-col', {
+        label: 'Hero (2 Col)',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 5h16v14H4V5zm2 2v10h5V7H6zm7 0v10h5V7h-5z"/></svg>',
+        content: `
+            <section class="hero-2-col" style="padding: 4rem 2rem; background-color: #f7fafc; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2rem;">
+                <!-- Left Column: Content -->
+                <div style="flex: 1 1 400px; padding-right: 1rem;">
+                    <h1 style="font-size: 3rem; margin-bottom: 1.5rem; color: #1a202c; line-height: 1.2;">Design Better Websites Faster</h1>
+                    <p style="font-size: 1.25rem; color: #4a5568; margin-bottom: 2rem; line-height: 1.6;">Build responsive, mobile-first projects on the web with the world's most popular front-end component library.</p>
+                    <div style="display: flex; gap: 1rem;">
+                        <a href="#" style="background-color: #3182ce; color: white; padding: 0.75rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 1.1rem;">Get Started</a>
+                        <a href="#" style="background-color: transparent; color: #3182ce; padding: 0.75rem 2rem; text-decoration: none; border: 2px solid #3182ce; border-radius: 4px; font-weight: 600; font-size: 1.1rem;">Learn More</a>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Image -->
+                <div style="flex: 1 1 400px; display: flex; justify-content: center;">
+                    <img src="https://via.placeholder.com/600x400" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);" alt="Hero Image">
+                </div>
+            </section>
         `
     });
 }
