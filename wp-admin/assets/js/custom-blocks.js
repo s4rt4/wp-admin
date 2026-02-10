@@ -389,4 +389,256 @@ function addCustomBlocks(editor) {
             </section>
         `
     });
+
+    // 14. Search Bar (User Requested)
+    bm.add('search-bar', {
+        label: 'Search Bar',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>',
+        content: `
+            <form action="index.php" method="get" class="search-bar-block" style="display: flex; max-width: 400px; width: 100%; gap: 0.5rem; margin: 1rem 0;">
+                <input type="text" name="search" placeholder="Search..." style="flex: 1; padding: 0.75rem; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 1rem; outline: none; transition: border-color 0.2s;">
+                <button type="submit" style="padding: 0.75rem 1.5rem; background-color: #4299e1; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;">
+                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+            </form>
+        `
+    });
+
+    // 15. Navbar Responsive (Logo + Dropdown + Hamburger)
+    bm.add('custom-navbar', {
+        label: 'Navbar (Responsive)',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>',
+        content: `
+            <header class="custom-navbar-block" style="background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;">
+                <style>
+                    .nav-container { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+                    .nav-menu { display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0; }
+                    .nav-item { position: relative; }
+                    .nav-link { text-decoration: none; color: #4a5568; font-weight: 500; font-size: 1rem; transition: color 0.2s; }
+                    .nav-link:hover { color: #4299e1; }
+                    .nav-toggle-label { display: none; cursor: pointer; }
+                    .nav-toggle { display: none; }
+                    
+                    /* Dropdown */
+                    .dropdown-content { display: none; position: absolute; top: 100%; left: 0; background: white; min-width: 150px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 4px; padding: 0.5rem 0; z-index: 20; }
+                    .dropdown-item { display: block; padding: 0.5rem 1rem; color: #4a5568; text-decoration: none; }
+                    .dropdown-item:hover { background-color: #f7fafc; color: #4299e1; }
+                    .nav-item:hover .dropdown-content { display: block; }
+                    
+                    @media (max-width: 768px) {
+                        .nav-menu { display: none; width: 100%; flex-direction: column; gap: 0; margin-top: 1rem; }
+                        .nav-menu li { width: 100%; }
+                        .nav-link { display: block; padding: 0.75rem 0; border-bottom: 1px solid #edf2f7; }
+                        .nav-toggle-label { display: block; }
+                        #nav-toggle:checked ~ .nav-menu { display: flex; }
+                        .dropdown-content { position: static; box-shadow: none; padding-left: 1rem; display: none; }
+                        .nav-item:hover .dropdown-content { display: block; }
+                    }
+                </style>
+                
+                <div class="nav-container">
+                    <!-- Logo -->
+                    <a href="#" style="font-size: 1.5rem; font-weight: bold; color: #2d3748; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg style="width: 32px; height: 32px; color: #4299e1;" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5 10 5 10-5-5-2.5-5 2.5z"/></svg>
+                        <span>Brand</span>
+                    </a>
+                    
+                    <!-- Hamburger Checkbox Hack -->
+                    <input type="checkbox" id="nav-toggle" class="nav-toggle">
+                    <label for="nav-toggle" class="nav-toggle-label">
+                        <svg style="width: 24px; height: 24px; color: #4a5568;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </label>
+                    
+                    <!-- Menu -->
+                    <ul class="nav-menu">
+                        <li class="nav-item"><a href="#" class="nav-link">Home</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">About</a></li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" style="display: flex; align-items: center; gap: 4px;">Services <svg style="width: 12px; height: 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></a>
+                            <div class="dropdown-content">
+                                <a href="#" class="dropdown-item">Web Design</a>
+                                <a href="#" class="dropdown-item">SEO</a>
+                                <a href="#" class="dropdown-item">Marketing</a>
+                            </div>
+                        </li>
+                        <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+                    </ul>
+                </div>
+            </header>
+        `
+    });
+
+    // 16. Gallery Grid (3 Columns x 2 Rows, Hover Overlay)
+    bm.add('gallery-grid', {
+        label: 'Gallery (3x2)',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>',
+        content: `
+            <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; padding: 2rem;">
+                <style>
+                    .gallery-item { position: relative; overflow: hidden; border-radius: 8px; cursor: pointer; height: 250px; }
+                    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; display: block; }
+                    .gallery-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; color: white; padding: 1rem; text-align: center; }
+                    .gallery-item:hover .gallery-overlay { opacity: 1; }
+                    .gallery-item:hover img { transform: scale(1.1); }
+                </style>
+                <!-- Generate 6 items -->
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/400x300?text=Image+1" alt="Gallery Image 1">
+                    <div class="gallery-overlay">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 1</h3>
+                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/400x300?text=Image+2" alt="Gallery Image 2">
+                    <div class="gallery-overlay">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 2</h3>
+                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/400x300?text=Image+3" alt="Gallery Image 3">
+                    <div class="gallery-overlay">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 3</h3>
+                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/400x300?text=Image+4" alt="Gallery Image 4">
+                    <div class="gallery-overlay">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 4</h3>
+                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/400x300?text=Image+5" alt="Gallery Image 5">
+                    <div class="gallery-overlay">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 5</h3>
+                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/400x300?text=Image+6" alt="Gallery Image 6">
+                    <div class="gallery-overlay">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Image Title 6</h3>
+                        <p style="margin: 0; font-size: 0.9rem;">Description of the image goes here.</p>
+                    </div>
+                </div>
+            </div>
+        `
+    });
+
+    // 17. Post Grid (Blog Cards)
+    bm.add('post-grid', {
+        label: 'Post Grid',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>',
+        content: `
+            <div class="post-grid" style="display: flex; flex-wrap: wrap; gap: 2rem; padding: 2rem; justify-content: center;">
+                <!-- Post Card 1 -->
+                <article style="flex: 1 1 300px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <img src="https://via.placeholder.com/600x400" style="width: 100%; height: 200px; object-fit: cover;" alt="Post Cover">
+                    <div style="padding: 1.5rem;">
+                        <span style="font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 1px;">Technology</span>
+                        <h3 style="margin: 0.5rem 0 1rem; font-size: 1.5rem; color: #2d3748;">The Future of Web Design</h3>
+                        <div style="font-size: 0.875rem; color: #a0aec0; margin-bottom: 1rem;">
+                            <span>Feb 10, 2026</span> • <span>By John Doe</span>
+                        </div>
+                        <p style="color: #4a5568; margin-bottom: 1.5rem; line-height: 1.6;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <a href="#" style="display: inline-block; padding: 0.5rem 1rem; border: 1px solid #4299e1; color: #4299e1; border-radius: 4px; text-decoration: none; font-weight: 500; transition: all 0.2s;">Read More</a>
+                    </div>
+                </article>
+                <!-- Post Card 2 -->
+                <article style="flex: 1 1 300px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <img src="https://via.placeholder.com/600x400" style="width: 100%; height: 200px; object-fit: cover;" alt="Post Cover">
+                    <div style="padding: 1.5rem;">
+                        <span style="font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 1px;">Lifestyle</span>
+                        <h3 style="margin: 0.5rem 0 1rem; font-size: 1.5rem; color: #2d3748;">10 Tips for Productivity</h3>
+                        <div style="font-size: 0.875rem; color: #a0aec0; margin-bottom: 1rem;">
+                            <span>Feb 08, 2026</span> • <span>By Sarah Jane</span>
+                        </div>
+                        <p style="color: #4a5568; margin-bottom: 1.5rem; line-height: 1.6;">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                        <a href="#" style="display: inline-block; padding: 0.5rem 1rem; border: 1px solid #4299e1; color: #4299e1; border-radius: 4px; text-decoration: none; font-weight: 500; transition: all 0.2s;">Read More</a>
+                    </div>
+                </article>
+                <!-- Post Card 3 -->
+                <article style="flex: 1 1 300px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <img src="https://via.placeholder.com/600x400" style="width: 100%; height: 200px; object-fit: cover;" alt="Post Cover">
+                    <div style="padding: 1.5rem;">
+                        <span style="font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 1px;">Travel</span>
+                        <h3 style="margin: 0.5rem 0 1rem; font-size: 1.5rem; color: #2d3748;">Exploring the Mountains</h3>
+                        <div style="font-size: 0.875rem; color: #a0aec0; margin-bottom: 1rem;">
+                            <span>Feb 05, 2026</span> • <span>By Mike Smith</span>
+                        </div>
+                        <p style="color: #4a5568; margin-bottom: 1.5rem; line-height: 1.6;">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                        <a href="#" style="display: inline-block; padding: 0.5rem 1rem; border: 1px solid #4299e1; color: #4299e1; border-radius: 4px; text-decoration: none; font-weight: 500; transition: all 0.2s;">Read More</a>
+                    </div>
+                </article>
+            </div>
+        `
+    });
+
+    // 18. Off-Canvas Menu (Slide-in Sidebar)
+    bm.add('off-canvas-menu', {
+        label: 'Off-Canvas Menu',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>',
+        content: `
+            <div>
+                <style>
+                    .offcanvas-trigger-btn { padding: 0.75rem 1.5rem; background: #2d3748; color: white; border: none; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+                    .offcanvas-toggle { display: none; }
+                    .offcanvas-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 999; }
+                    .offcanvas-panel { position: fixed; top: 0; right: 0; width: 300px; height: 100%; background: white; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; box-shadow: -2px 0 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+                    
+                    #offcanvas-toggle:checked ~ .offcanvas-overlay { opacity: 1; visibility: visible; }
+                    #offcanvas-toggle:checked ~ .offcanvas-panel { transform: translateX(0); }
+                    
+                    .offcanvas-header { padding: 1.5rem; border-bottom: 1px solid #edf2f7; display: flex; justify-content: space-between; align-items: center; }
+                    .offcanvas-close { cursor: pointer; background: none; border: none; color: #a0aec0; font-size: 1.5rem; line-height: 1; }
+                    .offcanvas-close:hover { color: #4a5568; }
+                    .offcanvas-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
+                    .offcanvas-menu { list-style: none; padding: 0; margin: 0; }
+                    .offcanvas-link { display: block; padding: 0.75rem 0; color: #4a5568; text-decoration: none; border-bottom: 1px solid #edf2f7; font-size: 1.1rem; }
+                    .offcanvas-link:hover { color: #4299e1; padding-left: 0.5rem; transition: padding 0.2s; }
+                </style>
+                
+                <input type="checkbox" id="offcanvas-toggle" class="offcanvas-toggle">
+                
+                <!-- Trigger Button -->
+                <label for="offcanvas-toggle" class="offcanvas-trigger-btn">
+                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    Open Menu
+                </label>
+                
+                <!-- Overlay -->
+                <label for="offcanvas-toggle" class="offcanvas-overlay"></label>
+                
+                <!-- Panel -->
+                <aside class="offcanvas-panel">
+                    <div class="offcanvas-header">
+                        <h2 style="margin: 0; font-size: 1.25rem;">Menu</h2>
+                        <label for="offcanvas-toggle" class="offcanvas-close">&times;</label>
+                    </div>
+                    <div class="offcanvas-body">
+                        <ul class="offcanvas-menu">
+                            <li><a href="#" class="offcanvas-link">Home</a></li>
+                            <li><a href="#" class="offcanvas-link">About Us</a></li>
+                            <li><a href="#" class="offcanvas-link">Services</a></li>
+                            <li><a href="#" class="offcanvas-link">Portfolio</a></li>
+                            <li><a href="#" class="offcanvas-link">Contact</a></li>
+                        </ul>
+                        <div style="margin-top: 2rem;">
+                            <h3 style="font-size: 1rem; color: #718096; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Contact Info</h3>
+                            <p style="color: #718096; font-size: 0.9rem; margin-bottom: 0.5rem;">email@example.com</p>
+                            <p style="color: #718096; font-size: 0.9rem;">+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        `
+    });
 }

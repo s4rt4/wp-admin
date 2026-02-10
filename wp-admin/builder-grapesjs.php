@@ -411,6 +411,58 @@ if ($pageId > 0) {
                 attributes: { title: 'Toggle Dark Mode' }
             }]);
             
+            // Custom Block Search Implementation
+            grapesEditor.on('load', () => {
+                // We need to wait a moment for the panel to be fully rendered
+                setTimeout(() => {
+                    const blocksPanel = document.querySelector('.gjs-blocks-cs');
+                    if (blocksPanel) {
+                        const searchContainer = document.createElement('div');
+                        searchContainer.className = 'gjs-block-search';
+                        searchContainer.style.padding = '10px';
+                        searchContainer.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+                        
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.placeholder = 'Search widgets...';
+                        input.style.width = '100%';
+                        input.style.padding = '8px';
+                        input.style.borderRadius = '3px';
+                        input.style.border = '1px solid rgba(255,255,255,0.2)';
+                        input.style.background = 'rgba(0,0,0,0.2)';
+                        input.style.color = '#fff';
+                        
+                        searchContainer.appendChild(input);
+                        blocksPanel.insertBefore(searchContainer, blocksPanel.firstChild);
+                        
+                        input.addEventListener('input', (e) => {
+                            const term = e.target.value.toLowerCase();
+                            const blocks = document.querySelectorAll('.gjs-block');
+                            const categories = document.querySelectorAll('.gjs-block-category');
+                            
+                            blocks.forEach(block => {
+                                const label = block.textContent.trim().toLowerCase();
+                                if (label.includes(term)) {
+                                    block.style.display = '';
+                                } else {
+                                    block.style.display = 'none';
+                                }
+                            });
+                            
+                            // Hide empty categories
+                            categories.forEach(cat => {
+                                const visibleBlocks = cat.querySelectorAll('.gjs-block:not([style*="display: none"])');
+                                if (visibleBlocks.length === 0) {
+                                    cat.style.display = 'none';
+                                } else {
+                                    cat.style.display = '';
+                                }
+                            });
+                        });
+                    }
+                }, 500);
+            });
+
             // Check and apply dark mode preference
             if (localStorage.getItem('gjs-dark-mode') === '1') {
                 document.body.classList.add('dark-mode');
