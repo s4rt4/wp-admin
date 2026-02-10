@@ -96,12 +96,18 @@ a {
     display: none;
     position: absolute;
     top: 32px;
-    right: 0;
+    left: 0;
+    margin-right: 0;
     background: #1d2327;
     min-width: 200px;
     list-style: none;
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
     z-index: 1001;
+}
+
+.ab-top-secondary .ab-submenu {
+    left: auto;
+    right: 0;
 }
 
 #wpadminbar ul li:hover>.ab-submenu {
@@ -730,4 +736,445 @@ tr:hover .row-actions,
     cursor: default;
     color: #555;
     margin-top: 3px;
+}
+
+/* Publish Meta Box Styling */
+#minor-publishing {
+    border-bottom: 1px solid #ddd;
+}
+
+#minor-publishing-actions {
+    padding: 10px 10px 0 10px;
+    clear: both;
+}
+
+#save-action {
+    float: left;
+}
+
+#preview-action {
+    float: right;
+}
+
+.misc-pub-section {
+    padding: 10px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.misc-pub-section:last-child {
+    border-bottom: none;
+}
+
+.misc-pub-section .dashicons {
+    color: #82878c;
+    vertical-align: text-top;
+    margin-right: 4px;
+}
+
+#major-publishing-actions {
+    padding: 10px;
+    background: #f5f5f5;
+    border-top: 1px solid #ddd;
+    clear: both;
+}
+
+#publishing-action {
+    float: right;
+    line-height: 23px;
+}
+
+#delete-action {
+    float: left;
+    line-height: 25px;
+    vertical-align: middle;
+}
+
+/* Category Tabs Styling */
+ul.category-tabs {
+    margin: 8px 0 0 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid #ddd;
+}
+
+ul.category-tabs li {
+    display: inline-block;
+    margin: 0;
+    margin-bottom: -1px;
+}
+
+ul.category-tabs li a {
+    display: block;
+    padding: 5px 10px;
+    text-decoration: none;
+    color: #2271b1;
+    border: 1px solid transparent;
+    border-bottom: none;
+}
+
+ul.category-tabs li.tabs a {
+    border: 1px solid #ddd;
+    border-bottom: 1px solid #fff;
+    background: #fff;
+    color: #1d2327;
+    position: relative;
+    top: 1px;
+}
+
+ul.category-tabs li a:hover {
+    color: #135e96;
+}
+
+#category-all {
+    border: 1px solid #ddd;
+    border-top: none;
+    background: #fdfdfd;
+    padding: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#category-pop {
+    border: 1px solid #ddd;
+    border-top: none;
+    background: #fdfdfd;
+    padding: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* --- WordPress Standard Button Styles --- */
+.button,
+.submit input[type="submit"],
+input[type="button"],
+input[type="submit"] {
+    display: inline-block;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 2.15384615;
+    min-height: 30px;
+    margin: 0;
+    padding: 0 10px;
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    -webkit-appearance: none;
+    border-radius: 3px;
+    white-space: nowrap;
+    box-sizing: border-box;
+    color: #2271b1;
+    border-color: #2271b1;
+    background: #f6f7f7;
+    vertical-align: middle;
+}
+
+.button:hover,
+input[type="submit"]:hover {
+    background: #f0f0f1;
+    border-color: #0a4b78;
+    color: #0a4b78;
+}
+
+.button-primary {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+
+.button-primary:hover {
+    background: #135e96 !important;
+    border-color: #135e96 !important;
+    color: #fff !important;
+}
+
+.button-large {
+    line-height: 2.30769231;
+    min-height: 32px;
+    padding: 0 12px;
+}
+
+.button-small {
+    line-height: 2;
+    min-height: 26px;
+    padding: 0 8px;
+    font-size: 11px;
+}
+
+/* Fix "Publish" button alignment */
+#publishing-action {
+    text-align: right;
+    float: right;
+    line-height: 23px;
+}
+
+#publishing-action .spinner {
+    float: left;
+    margin: 4px 4px 0;
+}
+
+/* Ensure one-line layout for status/visibility */
+.misc-pub-section {
+    padding: 10px 10px;
+    border-bottom: 1px solid #eee;
+    line-height: 1.4;
+}
+
+.misc-pub-section label {
+    vertical-align: baseline;
+}
+
+#post-status-display,
+#post-visibility-display,
+#timestamp {
+    font-weight: 600;
+    /* fall back if strong tag misses */
+}
+
+/* Clearfix for actions */
+.clear {
+    clear: both;
+}
+
+/* Category tabs specific fixes */
+#category-all,
+#category-pop {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-top: 0;
+    background: #fdfdfd;
+}
+
+/* Hide link decorations in meta boxes usually */
+.postbox a {
+    text-decoration: none;
+}
+
+.postbox a:hover {
+    text-decoration: underline;
+}
+
+.button:hover {
+    text-decoration: none;
+}
+
+/* Tags Meta Box Styles */
+.jaxtag {
+    margin-bottom: 10px;
+}
+
+.ajaxtag {
+    display: flex;
+    gap: 5px;
+}
+
+.newtag {
+    flex-grow: 1;
+    padding: 3px 8px;
+    font-size: 13px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    color: #2c3338;
+}
+
+.tagadd {
+    margin: 0;
+}
+
+.howto {
+    color: #646970;
+    font-style: italic;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+#tag-all,
+#tag-pop {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-top: 0;
+    background: #fdfdfd;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Permalink Editor Styling */
+#new-post-slug {
+    font-size: 13px;
+    height: 24px;
+    line-height: 24px;
+    margin: 0;
+    width: 20em;
+    padding: 0 5px;
+    border: 1px solid #8c8f94;
+    border-radius: 3px;
+    vertical-align: middle;
+}
+
+#edit-slug-buttons .button,
+#slug-input-span .button {
+    vertical-align: middle;
+    min-height: 24px;
+    line-height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+    margin-left: 5px;
+}
+
+.cancel-slug-edit {
+    margin-left: 5px;
+    font-size: 11px;
+    text-decoration: underline;
+    vertical-align: middle;
+    color: #0073aa;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+
+/* ==========================================================================
+   Wordpress Settings Page Styles (Form Table)
+   ========================================================================== */
+
+.form-table {
+    border-collapse: collapse;
+    margin-top: 0;
+    width: 100%;
+    clear: both;
+}
+
+.form-table th,
+.form-table td {
+    padding: 15px 10px;
+    border-bottom: 1px solid #f0f0f1;
+    /* Light divider */
+    vertical-align: top;
+}
+
+.form-table th {
+    scope: row;
+    text-align: left;
+    width: 220px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.form-table td {
+    margin-bottom: 9px;
+    line-height: 1.3;
+    font-size: 14px;
+}
+
+.form-table td p.description {
+    margin: 2px 0 5px;
+    color: #646970;
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* Input Fields */
+.regular-text {
+    width: 25em;
+    padding: 0 8px;
+    line-height: 2;
+    min-height: 30px;
+    box-shadow: 0 0 0 transparent;
+    border-radius: 4px;
+    border: 1px solid #8c8f94;
+    background-color: #fff;
+    color: #2c3338;
+}
+
+.small-text {
+    width: 60px;
+    padding: 0 8px;
+    line-height: 2;
+    min-height: 30px;
+    border-radius: 4px;
+    border: 1px solid #8c8f94;
+}
+
+.large-text {
+    width: 100%;
+    padding: 0 8px;
+    line-height: 2;
+    min-height: 30px;
+}
+
+.code {
+    font-family: Consolas, Monaco, monospace;
+}
+
+/* Fieldset & Radio/Checkbox */
+.form-table td fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.form-table td fieldset legend {
+    display: none;
+    /* Hide conflicting legends if any */
+}
+
+.form-table td fieldset label {
+    display: block;
+    margin-bottom: 0.3em;
+    vertical-align: middle;
+}
+
+.form-table input[type="radio"],
+.form-table input[type="checkbox"] {
+    margin-right: 4px;
+    margin-top: -2px;
+    /* Slight alignment fix */
+    vertical-align: middle;
+    border: 1px solid #8c8f94;
+    border-radius: 50%;
+    /* Radio defaults */
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.form-table input[type="checkbox"] {
+    border-radius: 3px;
+    /* Checkbox square */
+}
+
+/* Removed broken custom checkbox styling to use browser defaults */
+
+/* Inline labels for Custom layout */
+.form-table td fieldset label input[type="text"].small-text {
+    margin-left: 5px;
+    width: 100px;
+}
+
+.example {
+    margin-left: 5px;
+    font-style: italic;
+    color: #646970;
+}
+
+/* Select Box */
+select {
+    font-size: 14px;
+    line-height: 2;
+    color: #2c3338;
+    border-color: #8c8f94;
+    box-shadow: none;
+    border-radius: 3px;
+    padding: 0 24px 0 8px;
+    min-height: 30px;
+    max-width: 25rem;
+    -webkit-appearance: none;
+    background: #fff url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E") no-repeat right 5px top 55%;
+}
+
+/* Submit Button Area */
+p.submit {
+    padding-top: 20px;
+    margin-bottom: 20px;
 }

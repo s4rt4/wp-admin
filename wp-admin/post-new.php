@@ -171,7 +171,7 @@ $month_names = [
                         <div id="titlediv">
                             <div id="titlewrap">
                                 <label class="screen-reader-text" id="title-prompt-text" for="title">Enter title here</label>
-                                <input type="text" name="post_title" size="30" value="<?php echo htmlspecialchars($post['title']); ?>" id="title" spellcheck="true" autocomplete="off" placeholder="Add title">
+                                <input type="text" name="post_title" size="30" value="<?php echo htmlspecialchars($post['title']); ?>" id="title" spellcheck="true" autocomplete="off">
                             </div>
                             <!-- Permalink Editor -->
                             <div id="edit-slug-box" class="hide-if-no-js" style="margin-top: 5px; color: #666; font-size: 13px;">
@@ -196,6 +196,7 @@ $month_names = [
                         <div id="postdivrich" class="postarea edit-form-section" style="margin-top: 20px;">
                             <textarea id="content" name="content" style="display:none;"><?php echo htmlspecialchars($post['content']); ?></textarea>
                         </div>
+                        <div id="word-count" style="margin-top: 5px; color: #666; font-size: 13px;">Word count: 0</div>
                     </div><!-- /post-body-content -->
 
                     <!-- Sidebar Column -->
@@ -207,6 +208,9 @@ $month_names = [
                             <div class="inside">
                                 <div class="submitbox" id="submitpost">
                                     <div id="minor-publishing">
+                                        <div style="display:none;">
+                                            <input type="submit" name="save" value="Save">
+                                        </div>
                                         <div id="minor-publishing-actions">
                                             <div id="save-action">
                                                 <input type="submit" name="save" id="save-post" value="Save Draft" class="button">
@@ -222,35 +226,33 @@ $month_names = [
                                         </div>
 
                                         <div class="misc-pub-section misc-pub-post-status">
-                                            <span class="dashicons dashicons-flag" style="color:#888; margin-right:4px;"></span>
-                                            Status: <span id="post-status-display"><strong><?php echo ucfirst($post['status']); ?></strong></span>
-                                            <a href="#post_status" class="edit-visibility hide-if-no-js" onclick="toggleEdit('post-status-select')"><span aria-hidden="true">Edit</span></a>
+                                            <label for="post_status">Status:</label>
+                                            <span id="post-status-display"><strong><?php echo ucfirst($post['status']); ?></strong></span>
+                                            <a href="#post_status" class="edit-visibility hide-if-no-js" onclick="toggleEdit('post-status-select'); return false;"><span aria-hidden="true">Edit</span></a>
                                             <div id="post-status-select" class="hide-if-js" style="display:none; margin-top: 5px;">
                                                 <select name="post_status" id="post_status">
                                                     <option value="draft" <?php echo $post['status'] == 'draft' ? 'selected' : ''; ?>>Draft</option>
                                                     <option value="publish" <?php echo $post['status'] == 'publish' ? 'selected' : ''; ?>>Published</option>
                                                 </select>
-                                                <a href="#post_status" class="save-post-status hide-if-no-js button" onclick="toggleEdit('post-status-select'); updateDisplay('post-status-display', 'post_status')">OK</a>
-                                                <a href="#post_status" class="cancel-post-status hide-if-no-js" onclick="toggleEdit('post-status-select')">Cancel</a>
+                                                <a href="#post_status" class="save-post-status hide-if-no-js button" onclick="toggleEdit('post-status-select'); updateDisplay('post-status-display', 'post_status'); return false;">OK</a>
+                                                <a href="#post_status" class="cancel-post-status hide-if-no-js" onclick="toggleEdit('post-status-select'); return false;">Cancel</a>
                                             </div>
                                         </div>
 
                                         <div class="misc-pub-section misc-pub-visibility">
-                                            <span class="dashicons dashicons-visibility" style="color:#888; margin-right:4px;"></span>
                                             Visibility: <span id="post-visibility-display"><strong><?php echo ucfirst($post['visibility']); ?></strong></span>
-                                            <a href="#visibility" class="edit-visibility hide-if-no-js" onclick="toggleEdit('post-visibility-select')"><span aria-hidden="true">Edit</span></a>
+                                            <a href="#visibility" class="edit-visibility hide-if-no-js" onclick="toggleEdit('post-visibility-select'); return false;"><span aria-hidden="true">Edit</span></a>
                                             <div id="post-visibility-select" class="hide-if-js" style="display:none; margin-top: 5px;">
                                                 <input type="radio" name="visibility" id="visibility-radio-public" value="public" <?php echo $post['visibility'] == 'public' ? 'checked' : ''; ?>> <label for="visibility-radio-public" class="selectit">Public</label><br>
                                                 <input type="radio" name="visibility" id="visibility-radio-private" value="private" <?php echo $post['visibility'] == 'private' ? 'checked' : ''; ?>> <label for="visibility-radio-private" class="selectit">Private</label><br>
-                                                <a href="#visibility" class="save-post-visibility hide-if-no-js button" onclick="toggleEdit('post-visibility-select'); updateDisplay('post-visibility-display', 'visibility', true)">OK</a>
-                                                <a href="#visibility" class="cancel-post-visibility hide-if-no-js" onclick="toggleEdit('post-visibility-select')">Cancel</a>
+                                                <a href="#visibility" class="save-post-visibility hide-if-no-js button" onclick="toggleEdit('post-visibility-select'); updateDisplay('post-visibility-display', 'visibility', true); return false;">OK</a>
+                                                <a href="#visibility" class="cancel-post-visibility hide-if-no-js" onclick="toggleEdit('post-visibility-select'); return false;">Cancel</a>
                                             </div>
                                         </div>
 
                                         <div class="misc-pub-section curtime misc-pub-curtime">
-                                            <span class="dashicons dashicons-calendar-alt" style="color:#888; margin-right:4px;"></span>
                                             <span id="timestamp">Publish <b>immediately</b></span>
-                                            <a href="#edit_timestamp" class="edit-timestamp hide-if-no-js" onclick="toggleEdit('timestampdiv')"><span aria-hidden="true">Edit</span></a>
+                                            <a href="#edit_timestamp" class="edit-timestamp hide-if-no-js" onclick="toggleEdit('timestampdiv'); return false;"><span aria-hidden="true">Edit</span></a>
                                             <div id="timestampdiv" class="hide-if-js" style="display:none; margin-top: 5px;">
                                                 <div class="timestamp-wrap">
                                                     <select id="mm" name="mm">
@@ -264,8 +266,8 @@ $month_names = [
                                                     <input type="text" id="mn" name="mn" value="<?php echo $mn; ?>" size="2" maxlength="2" autocomplete="off">
                                                 </div>
                                                 <p>
-                                                    <a href="#edit_timestamp" class="save-timestamp hide-if-no-js button" onclick="toggleEdit('timestampdiv')">OK</a>
-                                                    <a href="#edit_timestamp" class="cancel-timestamp hide-if-no-js" onclick="toggleEdit('timestampdiv')">Cancel</a>
+                                                    <a href="#edit_timestamp" class="save-timestamp hide-if-no-js button" onclick="toggleEdit('timestampdiv'); return false;">OK</a>
+                                                    <a href="#edit_timestamp" class="cancel-timestamp hide-if-no-js" onclick="toggleEdit('timestampdiv'); return false;">Cancel</a>
                                                 </p>
                                             </div>
                                         </div>
@@ -290,10 +292,12 @@ $month_names = [
                         <div id="categorydiv" class="postbox">
                             <h2 class="hndle ui-sortable-handle"><span>Categories</span></h2>
                             <div class="inside">
-                                <ul id="category-tabs">
-                                    <li class="tabs"><a href="#category-all">All Categories</a></li>
-                                    <li class="hide-if-no-js"><a href="#category-pop">Most Used</a></li>
+                                <ul id="category-tabs" class="category-tabs">
+                                    <li class="tabs"><a href="#category-all" onclick="return false;">All Categories</a></li>
+                                    <li class="hide-if-no-js"><a href="#category-pop" onclick="return false;">Most Used</a></li>
                                 </ul>
+                                
+                                <!-- All Categories Tab -->
                                 <div id="category-all" class="tabs-panel">
                                     <ul id="categorychecklist" data-wp-lists="list:category" class="categorychecklist form-no-clear">
                                         <?php
@@ -312,7 +316,6 @@ $month_names = [
                                         if ($cats_result->num_rows > 0) {
                                             while($cat = $cats_result->fetch_assoc()) {
                                                 $checked = in_array($cat['id'], $selected_cats) ? 'checked' : '';
-                                                
                                                 echo '<li id="category-' . $cat['id'] . '" class="popular-category">';
                                                 echo '<label class="selectit"><input value="' . $cat['id'] . '" type="checkbox" name="post_category[]" id="in-category-' . $cat['id'] . '" ' . $checked . '> ' . htmlspecialchars($cat['name']) . '</label>';
                                                 echo '</li>';
@@ -323,8 +326,29 @@ $month_names = [
                                         ?>
                                     </ul>
                                 </div>
+
+                                <!-- Most Used Tab -->
+                                <div id="category-pop" class="tabs-panel" style="display: none;">
+                                    <ul id="categorychecklist-pop" class="categorychecklist form-no-clear">
+                                        <?php
+                                        $most_used_cats = $conn->query("SELECT c.id, c.name, COUNT(pc.post_id) as count FROM categories c JOIN post_categories pc ON c.id = pc.category_id GROUP BY c.id ORDER BY count DESC LIMIT 5");
+                                        
+                                        if ($most_used_cats && $most_used_cats->num_rows > 0) {
+                                            while($cat = $most_used_cats->fetch_assoc()) {
+                                                $checked = in_array($cat['id'], $selected_cats) ? 'checked' : '';
+                                                echo '<li id="popular-category-' . $cat['id'] . '" class="popular-category">';
+                                                echo '<label class="selectit"><input value="' . $cat['id'] . '" type="checkbox" name="post_category[]" id="in-popular-category-' . $cat['id'] . '" ' . $checked . '> ' . htmlspecialchars($cat['name']) . '</label>';
+                                                echo '</li>';
+                                            }
+                                        } else {
+                                            echo '<li>No popular categories yet.</li>';
+                                        }
+                                        ?>
+                                    </ul>
+                                </div>
+
                                 <div id="category-adder" class="wp-hidden-children">
-                                    <a id="category-add-toggle" href="#category-add" class="hide-if-no-js tax-toggle">+ Add New Category</a>
+                                    <a id="category-add-toggle" href="categories.php" class="hide-if-no-js tax-toggle">+ Add New Category</a>
                                 </div>
                             </div>
                         </div>
@@ -334,43 +358,67 @@ $month_names = [
                             <h2 class="hndle ui-sortable-handle"><span>Tags</span></h2>
                             <div class="inside">
                                 <div class="tagsdiv" id="post_tag">
-                                    <div class="jaxtag">
-                                        <div class="ajaxtag">
-                                            <label class="screen-reader-text" for="new-tag-post_tag">Add New Tag</label>
-                                            <input type="text" id="new-tag-post_tag" name="newtag[post_tag]" class="newtag form-input-tip" size="16" autocomplete="off" value="">
-                                            <input type="button" class="button tagadd" value="Add">
-                                        </div>
-                                        <p class="howto">Separate tags with commas</p>
-                                    </div>
-                                    <div class="tagchecklist" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #fdfdfd; margin-top: 10px;">
-                                        <?php
-                                        // Fetch Tags
-                                        $tags_result = $conn->query("SELECT * FROM tags ORDER BY name ASC");
-                                        
-                                        // Fetch selected tags for this post
-                                        $selected_tags = [];
-                                        if ($post_id > 0) {
-                                            $st_result = $conn->query("SELECT tag_id FROM post_tags WHERE post_id = $post_id");
-                                            while($st = $st_result->fetch_assoc()) {
-                                                $selected_tags[] = $st['tag_id'];
-                                            }
-                                        }
 
-                                        if ($tags_result->num_rows > 0) {
-                                            while($tag = $tags_result->fetch_assoc()) {
-                                                 $checked = in_array($tag['id'], $selected_tags) ? 'checked' : '';
-                                                
-                                                echo '<div style="margin-bottom: 5px;">';
-                                                echo '<label class="selectit"><input value="' . $tag['id'] . '" type="checkbox" name="tax_input[post_tag][]" id="in-tag-' . $tag['id'] . '" ' . $checked . '> ' . htmlspecialchars($tag['name']) . '</label>';
-                                                echo '</div>';
+                                    
+                                    <ul id="tag-tabs" class="category-tabs">
+                                        <li class="tabs"><a href="#tag-all" onclick="return false;">All Tags</a></li>
+                                        <li class="hide-if-no-js"><a href="#tag-pop" onclick="return false;">Most Used</a></li>
+                                    </ul>
+
+                                    <!-- All Tags Tab -->
+                                    <div id="tag-all" class="tabs-panel">
+                                        <ul id="tagchecklist" data-wp-lists="list:tag" class="categorychecklist form-no-clear">
+                                            <?php
+                                            // Fetch Tags
+                                            $tags_result = $conn->query("SELECT * FROM tags ORDER BY name ASC");
+                                            
+                                            // Fetch selected tags for this post
+                                            $selected_tags = [];
+                                            if ($post_id > 0) {
+                                                $st_result = $conn->query("SELECT tag_id FROM post_tags WHERE post_id = $post_id");
+                                                while($st = $st_result->fetch_assoc()) {
+                                                    $selected_tags[] = $st['tag_id'];
+                                                }
                                             }
-                                        } else {
-                                            echo 'No tags found.';
-                                        }
-                                        ?>
+
+                                            if ($tags_result->num_rows > 0) {
+                                                while($tag = $tags_result->fetch_assoc()) {
+                                                     $checked = in_array($tag['id'], $selected_tags) ? 'checked' : '';
+                                                    echo '<li id="tag-' . $tag['id'] . '">';
+                                                    echo '<label class="selectit"><input value="' . $tag['id'] . '" type="checkbox" name="tax_input[post_tag][]" id="in-tag-' . $tag['id'] . '" ' . $checked . '> ' . htmlspecialchars($tag['name']) . '</label>';
+                                                    echo '</li>';
+                                                }
+                                            } else {
+                                                echo '<li>No tags found.</li>';
+                                            }
+                                            ?>
+                                        </ul>
                                     </div>
+
+                                    <!-- Most Used Tab -->
+                                    <div id="tag-pop" class="tabs-panel" style="display: none;">
+                                        <ul id="tagchecklist-pop" class="categorychecklist form-no-clear">
+                                            <?php
+                                            $most_used_tags = $conn->query("SELECT t.id, t.name, COUNT(pt.post_id) as count FROM tags t JOIN post_tags pt ON t.id = pt.tag_id GROUP BY t.id ORDER BY count DESC LIMIT 5");
+                                            
+                                            if ($most_used_tags && $most_used_tags->num_rows > 0) {
+                                                while($tag = $most_used_tags->fetch_assoc()) {
+                                                    $checked = in_array($tag['id'], $selected_tags) ? 'checked' : '';
+                                                    echo '<li id="popular-tag-' . $tag['id'] . '">';
+                                                    echo '<label class="selectit"><input value="' . $tag['id'] . '" type="checkbox" name="tax_input[post_tag][]" id="in-popular-tag-' . $tag['id'] . '" ' . $checked . '> ' . htmlspecialchars($tag['name']) . '</label>';
+                                                    echo '</li>';
+                                                }
+                                            } else {
+                                                echo '<li>No popular tags yet.</li>';
+                                            }
+                                            ?>
+                                        </ul>
+                                    </div>
+
                                 </div>
-                                <p class="hide-if-no-js"><a href="#titlediv" class="tagcloud-link" id="link-post_tag">Choose from the most used tags</a></p>
+                                <div class="wp-hidden-children">
+                                    <a href="tags.php" class="hide-if-no-js tax-toggle">+ Add New Tag</a>
+                                </div>
                             </div>
                         </div>
 
@@ -422,8 +470,45 @@ $month_names = [
         lang: SUNEDITOR_LANG['en'],
         height: '400px',
         placeholder: 'Start writing your post...',
-        resizingBar: true
+        resizingBar: true,
+        callBackSave: function (contents, isChanged) {
+             // console.log(contents);
+        }
     });
+
+    // Word Count Logic
+    function updateWordCount() {
+        var text = editor.getText();
+        var wordCount = 0;
+        if (text && text.trim().length > 0) {
+            wordCount = text.trim().split(/\s+/).length;
+        }
+        document.getElementById('word-count').innerText = 'Word count: ' + wordCount;
+    }
+
+    editor.onInput = function (e, core) {
+        updateWordCount();
+    };
+
+    // Initial count and move to footer
+    editor.onload = function (core, isUpdate) {
+        updateWordCount();
+        
+        // Move word count to editor footer (resizing bar)
+        var resizingBar = document.querySelector('.se-resizing-bar');
+        var wordCountEl = document.getElementById('word-count');
+        if (resizingBar && wordCountEl) {
+            // Style for footer integration
+            wordCountEl.style.marginTop = '0';
+            wordCountEl.style.float = 'left';
+            wordCountEl.style.marginLeft = '10px';
+            wordCountEl.style.lineHeight = '1'; // Adjust to fit bar
+            wordCountEl.style.fontSize = '11px';
+            
+            // Insert as first child or append
+            resizingBar.insertBefore(wordCountEl, resizingBar.firstChild);
+        }
+    };
     
     // Auto sync content to textarea on submit
     document.querySelector('form').addEventListener('submit', function() {
@@ -485,6 +570,38 @@ $month_names = [
         
         cancelSlug(); // Revert UI
     }
+
+    // Category Tabs Logic
+    document.addEventListener('DOMContentLoaded', function() {
+        function setupTabs(tabId, allId, popId) {
+            var tabsUl = document.getElementById(tabId);
+            if (tabsUl) {
+                tabsUl.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'A') {
+                        e.preventDefault();
+                        var targetId = e.target.getAttribute('href').substring(1);
+                        
+                        // Toggle Tabs
+                        var tabs = tabsUl.getElementsByTagName('li');
+                        for (var i = 0; i < tabs.length; i++) {
+                            tabs[i].classList.remove('tabs');
+                            tabs[i].classList.add('hide-if-no-js');
+                        }
+                        e.target.parentElement.classList.remove('hide-if-no-js');
+                        e.target.parentElement.classList.add('tabs');
+                        
+                        // Toggle Panels
+                        document.getElementById(allId).style.display = 'none';
+                        document.getElementById(popId).style.display = 'none';
+                        document.getElementById(targetId).style.display = 'block';
+                    }
+                });
+            }
+        }
+
+        setupTabs('category-tabs', 'category-all', 'category-pop');
+        setupTabs('tag-tabs', 'tag-all', 'tag-pop');
+    });
 </script>
 
 

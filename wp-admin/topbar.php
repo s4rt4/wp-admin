@@ -31,7 +31,18 @@ if (isset($_SESSION['user_id'])) {
         <ul class="ab-top-menu">
             <li id="wp-admin-bar-site-name"><a class="ab-item" href="../index.php"><span class="ab-icon dashicons-admin-home"></span>My Site</a></li>
             <li id="wp-admin-bar-comments"><a class="ab-item" href="#"><span class="ab-icon dashicons-admin-comments"></span><span class="ab-label">0</span></a></li>
-            <li id="wp-admin-bar-new-content"><a class="ab-item" href="post-new.php"><span class="ab-icon dashicons-plus"></span><span class="ab-label">New</span></a></li>
+            <li id="wp-admin-bar-new-content" class="menupop">
+                <a class="ab-item" href="post-new.php">
+                    <span class="ab-icon dashicons-plus"></span>
+                    <span class="ab-label">New</span>
+                </a>
+                <ul class="ab-submenu">
+                    <li id="wp-admin-bar-new-post"><a class="ab-item" href="post-new.php">Post</a></li>
+                    <li id="wp-admin-bar-new-media"><a class="ab-item" href="media.php">Media</a></li>
+                    <li id="wp-admin-bar-new-page"><a class="ab-item" href="builder.php">Page</a></li>
+                    <li id="wp-admin-bar-new-user"><a class="ab-item" href="user-new.php">User</a></li>
+                </ul>
+            </li>
         </ul>
         <ul class="ab-top-secondary">
             <li id="wp-admin-bar-my-account">

@@ -100,14 +100,15 @@
                 <li><a href="#">Export</a></li>
             </ul>
         </li>
-        <li class="wp-has-submenu">
-            <a href="#"><div class="wp-menu-image dashicons-admin-settings"></div><div class="wp-menu-name">Settings</div></a>
+        <li class="wp-has-submenu <?php echo (isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+            <a href="settings-general.php"><div class="wp-menu-image dashicons-admin-settings"></div><div class="wp-menu-name">Settings</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
-                <li class="wp-first-item"><a href="#">General</a></li>
-                <li><a href="#">Writing</a></li>
-                <li><a href="#">Reading</a></li>
-                <li><a href="#">Permalinks</a></li>
+                <li class="wp-first-item <?php echo (isset($page_title) && $page_title === 'General Settings') ? 'current' : ''; ?>"><a href="settings-general.php">General</a></li>
+                <li class="<?php echo (isset($page_title) && $page_title === 'Writing Settings') ? 'current' : ''; ?>"><a href="settings-writing.php">Writing</a></li>
+                <li class="<?php echo (isset($page_title) && $page_title === 'Reading Settings') ? 'current' : ''; ?>"><a href="settings-reading.php">Reading</a></li>
+                <li class="<?php echo (isset($page_title) && $page_title === 'Media Settings') ? 'current' : ''; ?>"><a href="settings-media.php">Media</a></li>
+                <li class="<?php echo (isset($page_title) && $page_title === 'Permalink Settings') ? 'current' : ''; ?>"><a href="settings-permalinks.php">Permalinks</a></li>
             </ul>
         </li>
 

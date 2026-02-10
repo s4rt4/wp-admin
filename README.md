@@ -62,3 +62,7 @@ Use the following credentials to access the admin panel:
 - **Frontend:** HTML5, CSS3, JavaScript.
 - **Database:** MySQL.
 - **Libraries:** GrapesJS, Editor.js, SunEditor, Chart.js, DataTables.
+
+## Disclaimer
+
+This project is a hobby and not for commercial use. Any resemblance to WordPress is intentional as a tribute from a fan, and is not intended to be a copy or a competitor.
