@@ -43,17 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch Options
-$options = [];
-$result = $conn->query("SELECT option_name, option_value FROM options");
-while ($row = $result->fetch_assoc()) {
-    $options[$row['option_name']] = $row['option_value'];
-}
+// Options are now fetched via get_option() in functions.php
 
-// Helpers
-function get_option($name, $default = '') {
-    global $options;
-    return isset($options[$name]) ? $options[$name] : $default;
-}
+require_once '../wp-includes/functions.php';
 
 $permalink_structure = get_option('permalink_structure');
 $category_base = get_option('category_base');

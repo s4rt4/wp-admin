@@ -219,8 +219,7 @@ a {
     background: transparent;
 }
 
-#adminmenu>li>a:hover,
-#adminmenu {
+#adminmenu>li>a:hover {
     background: var(--wp-admin-bg-hover);
     color: var(--wp-menu-text-active);
     cursor: pointer;
@@ -795,6 +794,62 @@ ul.category-tabs {
     padding: 0;
     list-style: none;
     border-bottom: 1px solid #ddd;
+}
+
+/* Admin Color Scheme Picker */
+.color-option {
+    display: inline-block;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    vertical-align: top;
+    width: 250px;
+    /* Force width to prevent cramping */
+    position: relative;
+}
+
+.color-option input[type="radio"] {
+    margin: 0 5px 0 0;
+    vertical-align: text-top;
+}
+
+.color-palette {
+    display: table;
+    /* Ensure proper table layout */
+    width: 100%;
+    /* Fill the container */
+    height: 30px;
+    vertical-align: middle;
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: pointer;
+    border-spacing: 0;
+    /* Remove gaps */
+    margin-top: 5px;
+    /* Space between label and palette */
+}
+
+/* Ensure clicks on palette trigger the radio if wrapped or handled via JS (but here just visual) */
+
+.color-palette td {
+    width: 25%;
+    height: 30px;
+    padding: 0;
+    border: none;
+    display: table-cell;
+    /* Explicitly set */
+}
+
+.color-option.selected .color-palette {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0073aa;
+}
+
+.color-option label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #3c434a;
+    cursor: pointer;
 }
 
 ul.category-tabs li {

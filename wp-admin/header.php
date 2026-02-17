@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<?php require_once __DIR__ . '/../wp-includes/functions.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard UI - V6 (Dynamic Highlight)</title>
+    <title><?php echo isset($page_title) ? $page_title . ' &lsaquo; ' . get_option('blogname') : 'Admin Dashboard'; ?></title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="colors.css">
 </head>
-<body class="wp-admin">
+<?php
+// Get User Color Scheme, default to 'fresh'
+$admin_color = get_option('admin_color_scheme', 'fresh');
+?>
+<body class="wp-admin admin-color-<?php echo htmlspecialchars($admin_color); ?>">
     <!-- Top Admin Bar (Simplified) -->
     <?php require_once 'topbar.php'; ?>
 

@@ -1,0 +1,151 @@
+/* Default (Fresh) - Uses default variables in style.css or explicit overrides */
+body.admin-color-fresh {
+    --wp-admin-bg: #23282d;
+    --wp-admin-bg-hover: #191e23;
+    --wp-menu-text: #a0a5aa;
+    --wp-menu-text-active: #fff;
+    --wp-menu-highlight: #0073aa;
+    --wp-submenu-bg: #32373c;
+
+    --wp-button: #0073aa;
+    --wp-button-hover: #005177;
+}
+
+/* Light */
+body.admin-color-light {
+    --wp-admin-bg: #e5e5e5;
+    --wp-admin-bg-hover: #888;
+    --wp-menu-text: #333;
+    --wp-menu-text-active: #fff;
+    /* Active text on highlight */
+    --wp-menu-highlight: #888;
+    /* Background when active/hover */
+    --wp-submenu-bg: #ccc;
+
+    --wp-button: #04a4cc;
+    --wp-button-hover: #038db0;
+}
+
+/* Tweaks for Light Scheme legibility */
+body.admin-color-light #adminmenu>li>a {
+    color: #333;
+}
+
+body.admin-color-light #adminmenu>li>a:hover,
+body.admin-color-light #adminmenu>li.menu-top:hover,
+body.admin-color-light #adminmenu>li.opensub>a.menu-top,
+body.admin-color-light #adminmenu>li>a.menu-top:focus {
+    background-color: #888;
+    color: #fff;
+}
+
+body.admin-color-light .wp-menu-image {
+    background-color: #333;
+}
+
+body.admin-color-light #adminmenu a:hover .wp-menu-image {
+    background-color: #fff;
+}
+
+/* Modern */
+body.admin-color-modern {
+    --wp-admin-bg: #1e1e1e;
+    --wp-admin-bg-hover: #333;
+    --wp-menu-text: #fff;
+    --wp-menu-text-active: #fff;
+    --wp-menu-highlight: #3858e9;
+    --wp-submenu-bg: #1e1e1e;
+
+    --wp-button: #3858e9;
+    --wp-button-hover: #213cc1;
+}
+
+/* Blue */
+body.admin-color-blue {
+    --wp-admin-bg: #096484;
+    /* Dark Blue */
+    --wp-admin-bg-hover: #064d66;
+    --wp-menu-text: #e2ecf1;
+    --wp-menu-text-active: #fff;
+    --wp-menu-highlight: #4796b3;
+    /* Lighter Blue */
+    --wp-submenu-bg: #074a60;
+
+    --wp-button: #096484;
+    --wp-button-hover: #064d66;
+}
+
+/* Coffee */
+body.admin-color-coffee {
+    --wp-admin-bg: #46403c;
+    --wp-admin-bg-hover: #363b3f;
+    --wp-menu-text: #cdcbc9;
+    --wp-menu-text-active: #fff;
+    --wp-menu-highlight: #c7a589;
+    --wp-submenu-bg: #3a3532;
+
+    --wp-button: #c7a589;
+    --wp-button-hover: #aa866a;
+}
+
+/* Ectoplasm */
+body.admin-color-ectoplasm {
+    --wp-admin-bg: #413256;
+    --wp-admin-bg-hover: #2e223d;
+    --wp-menu-text: #a3b745;
+    --wp-menu-text-active: #fff;
+    --wp-menu-highlight: #a3b745;
+    --wp-submenu-bg: #523f6d;
+
+    --wp-button: #a3b745;
+    --wp-button-hover: #889938;
+}
+
+/* Midnight */
+body.admin-color-midnight {
+    --wp-admin-bg: #222;
+    --wp-admin-bg-hover: #262626;
+    /* Dark Grey or specific Red */
+    --wp-menu-text: #666;
+    /* Actually, midnight uses red highlighting usually */
+    --wp-menu-text-active: #fff;
+    --wp-menu-highlight: #e14d43;
+    /* Red */
+    --wp-submenu-bg: #222;
+
+    --wp-button: #e14d43;
+    --wp-button-hover: #c43c33;
+}
+
+/* Midnight specific overrides for text color readability against dark */
+body.admin-color-midnight #adminmenu>li>a {
+    color: #999;
+}
+
+/* Ocean */
+body.admin-color-ocean {
+    --wp-admin-bg: #627c83;
+    --wp-admin-bg-hover: #52696f;
+    --wp-menu-text: #d5dde0;
+    --wp-menu-text-active: #fff;
+    --wp-menu-highlight: #9ebaa0;
+    --wp-submenu-bg: #738e96;
+
+    --wp-button: #9ebaa0;
+    --wp-button-hover: #7b997d;
+}
+
+/* Sunrise */
+body.admin-color-sunrise {
+    --wp-admin-bg: #cf4944;
+    /* Red/Orange */
+    --wp-admin-bg-hover: #b43c38;
+    --wp-menu-text: #f3f1f1;
+    --wp-menu-text-active: #fff;
+    --wp-menu-highlight: #dd823b;
+    /* Orange */
+    --wp-submenu-bg: #be3631;
+
+    --wp-button: #dd823b;
+    --wp-button-hover: #be6d2d;
+}

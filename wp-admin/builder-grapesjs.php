@@ -111,6 +111,91 @@ if ($pageId > 0) {
         body.dark-mode .gjs-four-color-h:hover {
             color: #72aee6;
         }
+        
+        /* Dynamic Navbar Styles */
+        .dynamic-navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            position: relative;
+        }
+        .navbar-menu {
+            list-style: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .navbar-item {
+            margin: 0 !important;
+            padding: 0 !important;
+            list-style: none !important;
+        }
+        .navbar-item::before {
+            content: none !important;
+        }
+        .navbar-link {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 0.5rem 1rem;
+            display: block;
+        }
+        .navbar-link:hover {
+            color: #3498db;
+        }
+        .navbar-loading {
+            color: #ecf0f1;
+            padding: 1rem;
+            font-style: italic;
+        }
+        
+        /* Hamburger Menu */
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .navbar-toggle span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: #ecf0f1;
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .navbar-toggle {
+                display: block;
+            }
+            .navbar-menu {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                gap: 0;
+                padding-top: 3rem;
+            }
+            .navbar-menu.active {
+                display: flex;
+            }
+            .navbar-item {
+                width: 100%;
+            }
+            .navbar-link {
+                padding: 1rem;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+        }
     </style>
 </head>
 <body>

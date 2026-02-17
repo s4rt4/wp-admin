@@ -1,7 +1,8 @@
 <?php
 require_once 'auth_check.php';
-require_once 'db_config.php';
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+require_once 'auth_check.php';
+require_once '../wp-includes/functions.php';
+$conn = get_db_connection();
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -310,6 +311,12 @@ $month_names = [
                                             $sc_result = $conn->query("SELECT category_id FROM post_categories WHERE post_id = $post_id");
                                             while($sc = $sc_result->fetch_assoc()) {
                                                 $selected_cats[] = $sc['category_id'];
+                                            }
+                                        } elseif ($post_id == 0) {
+                                            // Default Category for new posts
+                                            $default_cat = get_option('default_category');
+                                            if ($default_cat) {
+                                                $selected_cats[] = $default_cat;
                                             }
                                         }
 

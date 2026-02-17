@@ -138,7 +138,7 @@ $result = $conn->query("SELECT * FROM posts $sql_where ORDER BY created_at DESC"
                         </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
-                    <tr class="no-items"><td class="colspanchange" colspan="6">No posts found.</td></tr>
+                    <tr class="no-items"><td class="colspanchange" colspan="7">No posts found.</td></tr>
                 <?php endif; ?>
             </tbody>
 

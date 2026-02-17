@@ -1,22 +1,26 @@
 <?php
 // Blog Index (Public)
 
-// Include config (adjust path if needed)
-// Include db_config (adjust path if needed)
-if (file_exists(__DIR__ . '/wp-admin/db_config.php')) {
-    require_once __DIR__ . '/wp-admin/db_config.php';
+// Include functions (which includes db_config)
+if (file_exists('wp-includes/functions.php')) {
+    require_once 'wp-includes/functions.php';
+} elseif (file_exists(__DIR__ . '/wp-includes/functions.php')) {
+    require_once __DIR__ . '/wp-includes/functions.php';
 } else {
-    // Fallback if moved
-    require_once 'db_config.php'; 
+    // Fallback
+    require_once 'wp-admin/db_config.php';
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 }
 
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Ensure DB connection
+$conn = get_db_connection();
+if (!$conn) {
+    die("Database connection failed.");
 }
 
 // Fetch Published Posts
-$sql = "SELECT * FROM posts WHERE status = 'publish' ORDER BY created_at DESC";
+$limit = get_option('posts_per_page', 10);
+$sql = "SELECT * FROM posts WHERE status = 'publish' ORDER BY created_at DESC LIMIT " . (int)$limit;
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -24,7 +28,10 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog</title>
+    <?php if (get_option('blog_public') === '0'): ?>
+        <meta name="robots" content="noindex,nofollow">
+    <?php endif; ?>
+    <title><?php echo htmlspecialchars(get_option('blogname', 'My Blog')); ?> - <?php echo htmlspecialchars(get_option('blogdescription', 'Just another WordPress site')); ?></title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; line-height: 1.6; background: #f4f6f8; margin: 0; color: #333; }
         .container { max-width: 1200px; margin: 0 auto; display: flex; gap: 30px; }

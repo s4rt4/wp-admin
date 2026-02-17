@@ -1,5 +1,6 @@
 <?php
 require_once 'auth_check.php';
+require_once '../wp-includes/functions.php';
 header('Content-Type: application/json');
 
 // Media upload directory
@@ -90,7 +91,10 @@ $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $safeName = date('Y-m-d_His') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 
 // Organize by year/month subfolders
-$subfolder = date('Y') . '/' . date('m') . '/';
+$subfolder = '';
+if (get_option('uploads_use_yearmonth_folders')) {
+    $subfolder = date('Y') . '/' . date('m') . '/';
+}
 $targetDir = $uploadDir . $subfolder;
 
 if (!is_dir($targetDir)) {

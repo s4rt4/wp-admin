@@ -9,7 +9,6 @@
             <div class="wp-menu-arrow-active"></div> 
             <ul class="wp-submenu">
                 <li class="wp-first-item <?php echo (isset($page_title) && $page_title === 'Dashboard') ? 'current' : ''; ?>"><a href="index.php" class="wp-first-item">Home</a></li>
-                <li><a href="#">Updates</a></li>
             </ul>
         </li>
         <li class="wp-menu-separator"></li>
@@ -64,24 +63,15 @@
 
         <li class="wp-menu-separator"></li>
         
-        <li class="wp-has-submenu">
-            <a href="#"><div class="wp-menu-image dashicons-admin-appearance"></div><div class="wp-menu-name">Appearance</div></a>
+        <li class="wp-has-submenu <?php echo (isset($page_title) && ($page_title === 'Themes')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+            <a href="#" class="<?php echo (isset($page_title) && ($page_title === 'Themes')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-appearance"></div><div class="wp-menu-name">Appearance</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
-                <li class="wp-first-item"><a href="#">Themes</a></li>
-                <li><a href="#">Customize</a></li>
-                <li><a href="#">Widgets</a></li>
-                <li><a href="#">Menus</a></li>
+                <li class="wp-first-item <?php echo (isset($page_title) && $page_title === 'Themes') ? 'current' : ''; ?>"><a href="themes.php">Themes</a></li>
+                <li class="<?php echo (isset($page_title) && $page_title === 'Menus') ? 'current' : ''; ?>"><a href="menus.php">Menus</a></li>
             </ul>
         </li>
-        <li class="wp-has-submenu">
-            <a href="#"><div class="wp-menu-image dashicons-admin-plugins"></div><div class="wp-menu-name">Plugins</div></a>
-            <div class="wp-menu-arrow-active"></div>
-            <ul class="wp-submenu">
-                <li class="wp-first-item"><a href="#">Installed Plugins</a></li>
-                <li><a href="#">Add New</a></li>
-            </ul>
-        </li>
+
         <li class="wp-has-submenu">
             <a href="users.php"><div class="wp-menu-image dashicons-admin-users"></div><div class="wp-menu-name">Users</div></a>
             <div class="wp-menu-arrow-active"></div>
@@ -91,13 +81,13 @@
                 <li><a href="profile.php">Profile</a></li>
             </ul>
         </li>
-        <li class="wp-has-submenu">
-            <a href="#"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
+        <li class="wp-has-submenu <?php echo (isset($page_title) && $page_title === 'Tools') ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+            <a href="tools.php" class="<?php echo (isset($page_title) && $page_title === 'Tools') ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
-                <li class="wp-first-item"><a href="#">Available Tools</a></li>
-                <li><a href="#">Import</a></li>
-                <li><a href="#">Export</a></li>
+                <li class="wp-first-item"><a href="tools.php?tab=database">Database Backup</a></li>
+                <li><a href="tools.php?tab=import-export">Import/Export</a></li>
+                <li><a href="tools.php?tab=health">Site Health</a></li>
             </ul>
         </li>
         <li class="wp-has-submenu <?php echo (isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">

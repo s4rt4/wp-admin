@@ -691,4 +691,172 @@ function addCustomBlocks(editor) {
             </div>
         `
     });
+
+    // 23. Dynamic Navbar (WordPress Menu Integration)
+    bm.add('dynamic-navbar', {
+        label: 'Dynamic Navbar',
+        category: 'Sections',
+        media: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h18v-2H3v2zm0 7h18v-2H3v2zm0-14v2h18V6H3z"/></svg>',
+        content: {
+            type: 'dynamic-navbar'
+        }
+    });
+
+    // Define custom component type for dynamic navbar
+    editor.DomComponents.addType('dynamic-navbar', {
+        model: {
+            defaults: {
+                tagName: 'nav',
+                attributes: {
+                    class: 'dynamic-navbar',
+                    'data-menu-id': ''
+                },
+                components: '<div class="navbar-loading">Select a menu from the Settings panel →</div>',
+                traits: [
+                    {
+                        type: 'select',
+                        label: 'Select Menu',
+                        name: 'menu-id',
+                        options: [
+                            { value: '', name: 'Loading menus...' }
+                        ]
+                    }
+                ],
+                script: function () {
+                    const menuId = this.getAttribute('menu-id');
+                    if (!menuId) return;
+
+                    // Fetch menu items
+                    fetch('/word-press/wp-admin/api/get-menu-items.php?menu_id=' + menuId)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success && data.data && data.data.length > 0) {
+                                // Build navbar HTML with hamburger button
+                                let navHTML = '<button class="navbar-toggle" aria-label="Toggle menu">';
+                                navHTML += '<span></span><span></span><span></span>';
+                                navHTML += '</button>';
+                                navHTML += '<ul class="navbar-menu">';
+                                data.data.forEach(item => {
+                                    const displayText = item.display_text || item.navigation_label || item.title;
+                                    navHTML += `<li class="navbar-item"><a href="${item.url}" class="navbar-link">${displayText}</a></li>`;
+                                });
+                                navHTML += '</ul>';
+                                this.innerHTML = navHTML;
+
+                                // Add toggle functionality
+                                const toggle = this.querySelector('.navbar-toggle');
+                                const menu = this.querySelector('.navbar-menu');
+                                if (toggle && menu) {
+                                    toggle.addEventListener('click', function () {
+                                        menu.classList.toggle('active');
+                                    });
+                                }
+                            } else {
+                                this.innerHTML = '<div class="navbar-loading">No menu items found</div>';
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Failed to load menu:', err);
+                            this.innerHTML = '<div class="navbar-loading">Failed to load menu</div>';
+                        });
+                }
+            },
+            init() {
+                console.log('Dynamic navbar component initialized');
+
+                // Fetch available menus and populate the select trait
+                fetch('/word-press/wp-admin/api/get-menus.php')
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log('Menus loaded:', data);
+                        if (data.success && data.data) {
+                            const options = [
+                                { value: '', name: 'Select a menu...' },
+                                ...data.data.map(menu => ({
+                                    value: menu.id.toString(),
+                                    name: menu.name
+                                }))
+                            ];
+
+                            // Update trait options
+                            const menuTrait = this.getTrait('menu-id');
+                            if (menuTrait) {
+                                menuTrait.set('options', options);
+                                console.log('Trait options updated:', options);
+                            } else {
+                                console.error('menu-id trait not found');
+                            }
+                        }
+                    })
+                    .catch(err => console.error('Failed to load menus:', err));
+
+                // Listen for menu selection changes
+                this.on('change:attributes:menu-id', () => {
+                    console.log('Menu changed to:', this.getAttributes()['menu-id']);
+                    this.updateNavbar();
+                });
+            },
+            updateNavbar() {
+                const menuId = this.getAttributes()['menu-id'];
+
+                if (!menuId) {
+                    this.components('<div class="navbar-loading">Please select a menu</div>');
+                    return;
+                }
+
+                // Show loading state
+                this.components('<div class="navbar-loading">Loading menu items...</div>');
+
+                // Fetch and render menu items
+                fetch('/word-press/wp-admin/api/get-menu-items.php?menu_id=' + menuId)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.data && data.data.length > 0) {
+                            // Build navbar structure
+                            const navItems = data.data.map(item => {
+                                const displayText = item.display_text || item.navigation_label || item.title;
+                                return {
+                                    tagName: 'li',
+                                    attributes: { class: 'navbar-item' },
+                                    components: [{
+                                        tagName: 'a',
+                                        attributes: {
+                                            href: item.url,
+                                            class: 'navbar-link'
+                                        },
+                                        content: displayText
+                                    }]
+                                };
+                            });
+
+                            this.components([
+                                {
+                                    tagName: 'button',
+                                    attributes: {
+                                        class: 'navbar-toggle',
+                                        'aria-label': 'Toggle menu'
+                                    },
+                                    components: [
+                                        { tagName: 'span' },
+                                        { tagName: 'span' },
+                                        { tagName: 'span' }
+                                    ]
+                                },
+                                {
+                                    tagName: 'ul',
+                                    attributes: { class: 'navbar-menu' },
+                                    components: navItems
+                                }
+                            ]);
+                        } else {
+                            this.components('<div class="navbar-loading">No menu items found. Add items to this menu in Appearance → Menu</div>');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to load menu items:', err);
+                        this.components('<div class="navbar-loading">Error loading menu</div>');
+                    });
+            }
+        }
+    });
 }
