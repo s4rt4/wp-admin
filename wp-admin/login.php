@@ -51,16 +51,18 @@ if (empty($_SESSION['login_csrf'])) {
     $_SESSION['login_csrf'] = bin2hex(random_bytes(32));
 }
 
-// ---- Fetch site logo from DB ----
-$site_logo = '';
+// ---- Fetch site logo & favicon from DB ----
+$site_logo  = '';
+$site_fav   = '';
 $site_title = 'Admin Panel';
 try {
     $pdo_login = getDBConnection();
-    $stmt_logo = $pdo_login->prepare("SELECT option_name, option_value FROM options WHERE option_name IN ('site_logo','site_title')");
+    $stmt_logo = $pdo_login->prepare("SELECT option_name, option_value FROM options WHERE option_name IN ('site_logo','site_title','site_favicon')");
     $stmt_logo->execute();
     while ($row = $stmt_logo->fetch()) {
-        if ($row['option_name'] === 'site_logo') $site_logo = $row['option_value'];
-        if ($row['option_name'] === 'site_title') $site_title = $row['option_value'];
+        if ($row['option_name'] === 'site_logo')    $site_logo  = $row['option_value'];
+        if ($row['option_name'] === 'site_title')   $site_title = $row['option_value'];
+        if ($row['option_name'] === 'site_favicon') $site_fav   = $row['option_value'];
     }
 } catch (Exception $e) { /* silently fail */ }
 
@@ -124,11 +126,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-// Build logo URL
-$site_url_base = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
-    . '://' . $_SERVER['HTTP_HOST']
-    . rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/\\');
-$logo_url = $site_logo ? $site_url_base . '/' . ltrim($site_logo, '/') : '';
+// URL dari DB sudah absolute web path (misal /word-press/wp-admin/media/...).
+$logo_url = $site_logo ? $site_logo : '';
+$fav_url  = $site_fav  ? $site_fav  : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -136,6 +136,10 @@ $logo_url = $site_logo ? $site_url_base . '/' . ltrim($site_logo, '/') : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In &lsaquo; <?php echo htmlspecialchars($site_title); ?> &#8212; Admin</title>
+<?php if ($fav_url): ?>
+    <link rel="icon" href="<?php echo htmlspecialchars($fav_url); ?>">
+    <link rel="shortcut icon" href="<?php echo htmlspecialchars($fav_url); ?>">
+<?php endif; ?>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
 
