@@ -1,6 +1,9 @@
 <?php
 $page_title = 'Users';
 require_once 'auth_check.php';
+if (!current_user_can('edit_users')) {
+    die("Access denied");
+}
 require_once 'header.php';
 require_once 'sidebar.php';
 require_once 'db_config.php';
@@ -69,7 +72,7 @@ $result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
                                     <?php endif; ?>
                                 </div>
                             </td>
-                            <td class="role column-role" data-colname="Role">Administrator</td>
+                            <td class="role column-role" data-colname="Role"><?php echo ucfirst(htmlspecialchars($row['role'])); ?></td>
                             <td class="posts column-posts" data-colname="Posts">
                                 <?php echo "-"; ?>
                             </td>

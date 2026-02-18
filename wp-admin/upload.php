@@ -115,18 +115,9 @@ if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
     echo json_encode([
         'data' => [$fileUrl]
     ]);
-} elseif ($source === 'suneditor') {
-    // SunEditor expects: { "errorMessage": "", "result": [ { "url": "...", "name": "...", "size": "..." } ] }
-    echo json_encode([
-        'errorMessage' => null,
-        'result' => [
-            [
-                'url' => $fileUrl,
-                'name' => $safeName,
-                'size' => $file['size']
-            ]
-        ]
-    ]);
+} elseif ($source === 'toastui') {
+    // Toast UI Editor expects: { url: '...' }
+    echo json_encode(['url' => $fileUrl]);
 } else {
     // EditorJS Image Tool expects: { success: 1, file: { url: '...' } }
     echo json_encode([

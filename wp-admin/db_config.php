@@ -20,8 +20,55 @@ function getDBConnection() {
         );
         return $pdo;
     } catch (PDOException $e) {
-        header('Content-Type: application/json');
         die(json_encode(['success' => false, 'error' => 'Database connection failed: ' . $e->getMessage()]));
+    }
+}
+
+// Global MySQLi connection for legacy code & functions
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Include Helper Functions
+// Check if running from admin or root to determine path
+$functions_path = __DIR__ . '/../wp-includes/functions.php';
+if (file_exists($functions_path)) {
+    require_once $functions_path;
+}
+
+// Failsafe Helper Functions (checked, selected, disabled)
+// Added to ensure availability in Admin Pages even if functions.php fails to load cleanly
+
+if (!function_exists('checked')) {
+    function checked( $checked, $current = true, $echo = true ) {
+        return __checked_selected_helper( $checked, $current, $echo, 'checked' );
+    }
+}
+
+if (!function_exists('selected')) {
+    function selected( $selected, $current = true, $echo = true ) {
+        return __checked_selected_helper( $selected, $current, $echo, 'selected' );
+    }
+}
+
+if (!function_exists('disabled')) {
+    function disabled( $disabled, $current = true, $echo = true ) {
+        return __checked_selected_helper( $disabled, $current, $echo, 'disabled' );
+    }
+}
+
+if (!function_exists('__checked_selected_helper')) {
+    function __checked_selected_helper( $helper, $current, $echo, $type ) {
+        if ( (string) $helper === (string) $current )
+            $result = " $type='$type'";
+        else
+            $result = '';
+
+        if ( $echo )
+            echo $result;
+
+        return $result;
     }
 }
 ?>

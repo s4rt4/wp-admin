@@ -1,6 +1,9 @@
 <?php
 $page_title = 'Comments';
 require_once 'auth_check.php';
+if (!current_user_can('edit_others_posts')) {
+    die("Access denied");
+}
 require_once 'db_config.php';
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);

@@ -9,6 +9,11 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Access Check
+if (!current_user_can('edit_posts')) {
+    die("Access denied");
+}
+
 // Handle delete
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
@@ -76,7 +81,13 @@ if ($status_filter != 'all') {
     $sql_where = "WHERE status = '$status_filter'";
 }
 
-$result = $conn->query("SELECT * FROM posts $sql_where ORDER BY created_at DESC");
+// Filter by Author if not Editor/Admin
+if (!current_user_can('edit_others_posts')) {
+    $author_id = $_SESSION['user_id'];
+    $sql_where .= ($sql_where ? " AND " : "WHERE ") . "p.author_id = $author_id";
+}
+
+$result = $conn->query("SELECT p.*, u.username as author_name FROM posts p LEFT JOIN users u ON p.author_id = u.id $sql_where ORDER BY p.created_at DESC");
 ?>
 
 <div id="wpcontent">
@@ -131,7 +142,9 @@ $result = $conn->query("SELECT * FROM posts $sql_where ORDER BY created_at DESC"
                                     echo "<span class='post-state $status_class'>$status_label</span>"; 
                                 ?>
                             </td>
-                            <td class="author column-author" data-colname="Author"><a href="#">admin</a></td>
+                            <td class="author column-author" data-colname="Author">
+                                <a href="posts.php?author=<?php echo $row['author_id']; ?>"><?php echo htmlspecialchars($row['author_name'] ?? 'Unknown'); ?></a>
+                            </td>
                             <td class="categories column-categories" data-colname="Categories">
                                 <?php 
                                 $cat_sql = "SELECT c.name FROM categories c JOIN post_categories pc ON c.id = pc.category_id WHERE pc.post_id = " . $row['id'];

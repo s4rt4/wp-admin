@@ -1,6 +1,9 @@
 <?php
 $page_title = 'Tools';
 require_once 'auth_check.php';
+if (!current_user_can('manage_options')) {
+    die("Access denied");
+}
 require_once 'db_config.php';
 require_once 'header.php';
 require_once 'sidebar.php';

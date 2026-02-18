@@ -118,15 +118,71 @@ while($row = $res_c->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($post['title']); ?></title>
+    <?php
+    // SEO helpers
+    $site_name   = get_option('site_title', 'My WordPress App');
+    $site_desc_def = get_option('site_description', '');
+    $site_logo   = get_option('site_logo', '');
+    $site_fav    = get_option('site_favicon', '');
+    
+    $site_url    = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+    $current_url = $site_url . $_SERVER['REQUEST_URI'];
+
+    $seo_title   = !empty($post['meta_title'])  ? $post['meta_title']  : $post['title'];
+    $seo_desc    = !empty($post['meta_desc'])   ? $post['meta_desc']   : mb_substr(strip_tags($post['content']), 0, 155) . '...';
+    $seo_keyword = !empty($post['focus_keyword']) ? $post['focus_keyword'] : '';
+
+    // Featured image absolute URL
+    $og_image = '';
+    if (!empty($post['featured_image'])) {
+        $og_image = $site_url . '/word-press/' . ltrim($post['featured_image'], '/');
+    }
+
+    $full_title = htmlspecialchars($seo_title) . ' | ' . $site_name;
+    ?>
+
+    <!-- Standard SEO -->
+    <title><?php echo $full_title; ?></title>
+    <meta name="description" content="<?php echo htmlspecialchars($seo_desc); ?>">
+    <?php if ($seo_keyword): ?>
+    <meta name="keywords" content="<?php echo htmlspecialchars($seo_keyword); ?>">
+    <?php endif; ?>
+    <link rel="canonical" href="<?php echo htmlspecialchars($current_url); ?>">
+    <?php if($site_fav): ?>
+    <link rel="icon" href="<?php echo htmlspecialchars($site_url . '/word-press/' . $site_fav); ?>" />
+    <?php endif; ?>
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type"        content="article">
+    <meta property="og:title"       content="<?php echo htmlspecialchars($seo_title); ?>">
+    <meta property="og:description" content="<?php echo htmlspecialchars($seo_desc); ?>">
+    <meta property="og:url"         content="<?php echo htmlspecialchars($current_url); ?>">
+    <meta property="og:site_name"   content="<?php echo $site_name; ?>">
+    <?php if ($og_image): ?>
+    <meta property="og:image"       content="<?php echo htmlspecialchars($og_image); ?>">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+    <?php endif; ?>
+    <meta property="article:published_time" content="<?php echo date('c', strtotime($post['created_at'])); ?>">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="<?php echo htmlspecialchars($seo_title); ?>">
+    <meta name="twitter:description" content="<?php echo htmlspecialchars($seo_desc); ?>">
+    <?php if ($og_image): ?>
+    <meta name="twitter:image"       content="<?php echo htmlspecialchars($og_image); ?>">
+    <?php endif; ?>
+
     <!-- SunEditor CSS for content rendering if needed, generally content styles should be enough -->
-    <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet"> 
+    <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
     <style>
         body { font-family: sans-serif; padding: 20px; line-height: 1.6; max-width: 900px; margin: 0 auto; background: #fff; color: #333; }
         .post-container { margin-top: 30px; }
         h1 { font-size: 2.5em; margin-bottom: 5px; }
         .meta { color: #888; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .content { font-size: 1.1em; margin-bottom: 40px; }
+        /* Allow font-family set in editor (inline styles) to be respected */
+        .content * { font-family: inherit; }
         .back-link { display: inline-block; margin-bottom: 20px; color: #0073aa; text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
 
@@ -180,11 +236,115 @@ while($row = $res_c->fetch_assoc()) {
             font-size: 16px;
         }
         .comment-form button:hover { background: #005177; }
+        
+        /* PrismJS / Code Block Styles */
+        /* Inline code styling (not inside pre) */
+        :not(pre) > code {
+            background: #f0f0f0;
+            color: #111;
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+            font-size: 15px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            white-space: nowrap;
+        }
+
+        pre[class*="language-"] {
+             background: #2d2d2d !important;
+             border-radius: 8px;
+             margin: 20px 0;
+             padding: 1.5em !important;
+             overflow: auto;
+             position: relative; /* For copy button positioning */
+        }
+        code[class*="language-"], pre[class*="language-"] {
+            color: #ccc;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            text-shadow: none !important;
+            direction: ltr;
+            text-align: left;
+            white-space: pre;
+            word-spacing: normal;
+            word-break: normal;
+            line-height: 1.5;
+            -moz-tab-size: 4;
+            -o-tab-size: 4;
+            tab-size: 4;
+            -webkit-hyphens: none;
+            -moz-hyphens: none;
+            -ms-hyphens: none;
+            hyphens: none;
+        }
+
+        /* Copy Button Styles */
+        .prism-copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s, background 0.2s;
+        }
+        
+        pre[class*="language-"]:hover .prism-copy-btn {
+            opacity: 1;
+        }
+
+        .prism-copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Language label badge */
+        .prism-lang-label {
+            position: absolute;
+            top: 10px;
+            left: 14px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #aaa;
+            font-size: 11px;
+            font-family: Consolas, Monaco, monospace;
+            padding: 2px 8px;
+            border-radius: 3px;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
+    <!-- Prism CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <?php
+    // Fetch category IDs for this post (for tag targeting)
+    $post_category_ids = [];
+    $cat_res = $conn->query("SELECT category_id FROM post_categories WHERE post_id = " . intval($post['id']));
+    if ($cat_res) { while($cr = $cat_res->fetch_assoc()) $post_category_ids[] = intval($cr['category_id']); }
+    render_tags('head', ['post_id' => intval($post['id']), 'category_ids' => $post_category_ids]);
+    ?>
 </head>
 <body>
+<?php render_tags('body_open', ['post_id' => intval($post['id']), 'category_ids' => $post_category_ids]); ?>
 
-    <a href="<?php echo str_replace('read.php', 'blog.php', $_SERVER['SCRIPT_NAME']); ?>" class="back-link">&larr; Back to Blog</a>
+    <header style="margin-bottom: 20px; border-bottom:1px solid #eee; padding-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center;">
+            <?php if ($site_logo): ?>
+                <img src="<?php echo htmlspecialchars($site_url . '/word-press/' . $site_logo); ?>" alt="<?php echo htmlspecialchars($site_name); ?>" style="max-height:40px; margin-right:10px;">
+            <?php endif; ?>
+            <div style="line-height:1.2;">
+                <div style="font-size:18px; font-weight:bold; color:#333;"><?php echo htmlspecialchars($site_name); ?></div>
+                <?php if($site_desc_def): ?>
+                <div style="font-size:12px; color:#777;"><?php echo htmlspecialchars($site_desc_def); ?></div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <a href="<?php echo str_replace('read.php', 'blog.php', $_SERVER['SCRIPT_NAME']); ?>" class="back-link" style="margin:0;">&larr; Back to Blog</a>
+    </header>
 
     <div class="post-container">
         <h1><?php echo htmlspecialchars($post['title']); ?></h1>
@@ -261,5 +421,57 @@ while($row = $res_c->fetch_assoc()) {
 
     </div>
 
+<!-- Prism JS core and languages -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+<!-- Custom Script for Highlighting and Copy Button -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const preBlocks = document.querySelectorAll('pre');
+
+        preBlocks.forEach(function(pre) {
+            // 1. Ensure <code> child exists
+            let code = pre.querySelector('code');
+            if (!code) {
+                code = document.createElement('code');
+                code.className = pre.className || 'language-markup';
+                code.innerHTML = pre.innerHTML;
+                pre.innerHTML = '';
+                pre.appendChild(code);
+            }
+
+            // 2. Sync language class from code → pre (needed for Prism theme background)
+            const langMatch = code.className.match(/language-(\S+)/);
+            const lang = langMatch ? langMatch[1] : null;
+            if (lang && !pre.className.includes('language-')) {
+                pre.classList.add('language-' + lang);
+            }
+
+            // 3. Language label badge
+            if (lang && lang !== 'none') {
+                const label = document.createElement('span');
+                label.className = 'prism-lang-label';
+                label.textContent = lang.charAt(0).toUpperCase() + lang.slice(1);
+                pre.appendChild(label);
+            }
+
+            // 4. Copy button (appears on hover)
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'prism-copy-btn';
+            copyBtn.textContent = 'Copy';
+            copyBtn.addEventListener('click', function() {
+                navigator.clipboard.writeText(code.innerText).then(function() {
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
+                }).catch(function() { copyBtn.textContent = 'Error'; });
+            });
+            pre.appendChild(copyBtn);
+
+            // 5. Highlight
+            Prism.highlightElement(code);
+        });
+    });
+</script>
 </body>
 </html>

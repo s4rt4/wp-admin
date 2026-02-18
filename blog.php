@@ -1,20 +1,11 @@
 <?php
 // Blog Index (Public)
 
-// Include functions (which includes db_config)
-if (file_exists('wp-includes/functions.php')) {
-    require_once 'wp-includes/functions.php';
-} elseif (file_exists(__DIR__ . '/wp-includes/functions.php')) {
-    require_once __DIR__ . '/wp-includes/functions.php';
-} else {
-    // Fallback
-    require_once 'wp-admin/db_config.php';
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-}
+// Include config & DB connection
+require_once 'wp-admin/db_config.php';
 
-// Ensure DB connection
-$conn = get_db_connection();
-if (!$conn) {
+// Ensure DB connection (MySQLi)
+if (!isset($conn) || $conn->connect_error) {
     die("Database connection failed.");
 }
 
@@ -51,7 +42,11 @@ $result = $conn->query($sql);
     <?php if (get_option('blog_public') === '0'): ?>
         <meta name="robots" content="noindex,nofollow">
     <?php endif; ?>
-    <title><?php echo htmlspecialchars(get_option('blogname', 'My Blog')); ?> - <?php echo htmlspecialchars(get_option('blogdescription', 'Just another WordPress site')); ?></title>
+    <?php $site_fav = get_option('site_favicon', ''); ?>
+    <?php if($site_fav): ?>
+    <link rel="icon" href="<?php echo htmlspecialchars($site_fav); ?>" />
+    <?php endif; ?>
+    <title><?php echo htmlspecialchars(get_option('site_title', 'My Blog')); ?> - <?php echo htmlspecialchars(get_option('site_description', 'Just another WordPress site')); ?></title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; line-height: 1.6; background: #f4f6f8; margin: 0; color: #333; }
         .container { max-width: 1200px; margin: 0 auto; display: flex; gap: 30px; }
@@ -133,15 +128,32 @@ $result = $conn->query($sql);
         body { opacity: 0; transition: opacity 0.3s ease-in; }
         body.loaded { opacity: 1; }
     </style>
+    <?php
+    // Category filter context (jika sedang filter kategori tertentu)
+    $blog_cat_ids = isset($_GET['category_id']) ? [intval($_GET['category_id'])] : [];
+    render_tags('head', ['category_ids' => $blog_cat_ids]);
+    ?>
 </head>
 <body class="">
+<?php render_tags('body_open', ['category_ids' => $blog_cat_ids]); ?>
 
     <!-- Loader -->
     <div id="page-loader">
         <div class="spinner"></div>
     </div>
 
-    <h1 class="page-title">My Blog</h1>
+    <header style="text-align:center; margin-bottom:40px;">
+        <?php 
+        $site_logo = get_option('site_logo', '');
+        $site_title = get_option('site_title', 'My Blog');
+        $site_desc = get_option('site_description', '');
+        
+        if ($site_logo): ?>
+            <img src="<?php echo htmlspecialchars($site_logo); ?>" alt="<?php echo htmlspecialchars($site_title); ?>" style="max-height:80px; display:block; margin:0 auto 15px;">
+        <?php endif; ?>
+        <h1 class="page-title" style="margin-bottom:5px;"><?php echo htmlspecialchars($site_title); ?></h1>
+        <?php if($site_desc): ?><p style="color:#666; font-size:1.1em; margin:0;"><?php echo htmlspecialchars($site_desc); ?></p><?php endif; ?>
+    </header>
 
     <div class="container">
         

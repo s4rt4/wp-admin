@@ -87,6 +87,7 @@ $publishCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE status='publish'")
 $draftCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE status='draft'")->fetchColumn();
 $grapesCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='grapesjs'")->fetchColumn();
 $editorCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='editorjs'")->fetchColumn();
+$monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monaco'")->fetchColumn();
 ?>
 
 <div id="wpcontent">
@@ -106,7 +107,8 @@ $editorCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='edito
             <li class="publish"><a href="pages.php?status=publish" class="<?php echo $status_filter == 'publish' ? 'current' : ''; ?>">Published <span class="count">(<?php echo $publishCount; ?>)</span></a> |</li>
             <li class="draft"><a href="pages.php?status=draft" class="<?php echo $status_filter == 'draft' ? 'current' : ''; ?>">Draft <span class="count">(<?php echo $draftCount; ?>)</span></a> |</li>
             <li class="grapesjs"><a href="pages.php?builder_type=grapesjs" class="<?php echo $builder_filter == 'grapesjs' ? 'current' : ''; ?>">GrapesJS <span class="count">(<?php echo $grapesCount; ?>)</span></a> |</li>
-            <li class="editorjs"><a href="pages.php?builder_type=editorjs" class="<?php echo $builder_filter == 'editorjs' ? 'current' : ''; ?>">EditorJS <span class="count">(<?php echo $editorCount; ?>)</span></a></li>
+            <li class="editorjs"><a href="pages.php?builder_type=editorjs" class="<?php echo $builder_filter == 'editorjs' ? 'current' : ''; ?>">EditorJS <span class="count">(<?php echo $editorCount; ?>)</span></a> |</li>
+            <li class="monaco"><a href="pages.php?builder_type=monaco" class="<?php echo $builder_filter == 'monaco' ? 'current' : ''; ?>">Monaco <span class="count">(<?php echo $monacoCount; ?>)</span></a></li>
         </ul>
 
         <table class="wp-list-table widefat fixed striped pages">
@@ -161,8 +163,16 @@ $editorCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='edito
                             </td>
                             <td class="builder column-builder" data-colname="Builder">
                                 <?php 
-                                    $builder_label = $page['builder_type'] === 'grapesjs' ? 'GrapesJS' : 'EditorJS';
-                                    $builder_color = $page['builder_type'] === 'grapesjs' ? '#0073aa' : '#9b59b6';
+                                    $builder_label = 'EditorJS';
+                                    $builder_color = '#9b59b6'; // Purple for EditorJS
+
+                                    if ($page['builder_type'] === 'grapesjs') {
+                                        $builder_label = 'GrapesJS';
+                                        $builder_color = '#0073aa'; // Blue for GrapesJS
+                                    } elseif ($page['builder_type'] === 'monaco') {
+                                        $builder_label = 'Monaco';
+                                        $builder_color = '#e67e22'; // Orange for Monaco
+                                    }
                                 ?>
                                 <span style="color:<?php echo $builder_color; ?>; font-weight:500;"><?php echo $builder_label; ?></span>
                             </td>
@@ -300,6 +310,7 @@ $editorCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='edito
                         <select name="builder_type" id="qe-builder_type" class="regular-text">
                             <option value="grapesjs">GrapesJS</option>
                             <option value="editorjs">EditorJS</option>
+                            <option value="monaco">Monaco</option>
                         </select>
                     </div>
                 </div>

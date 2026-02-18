@@ -1,5 +1,8 @@
 <?php
 require_once 'auth_check.php';
+if (!current_user_can('manage_options')) {
+    die("Access denied");
+}
 $page_title = 'Snippets';
 require_once 'header.php';
 require_once 'sidebar.php';

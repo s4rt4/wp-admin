@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<?php require_once __DIR__ . '/../wp-includes/functions.php'; ?>
+<?php require_once __DIR__ . '/db_config.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($page_title) ? $page_title . ' &lsaquo; ' . get_option('blogname') : 'Admin Dashboard'; ?></title>

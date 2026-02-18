@@ -1,255 +1,257 @@
 <?php
-/**
- * Core functions for the WordPress-like system.
- */
-
-// Include DB Config if not already defined
-if (!defined('DB_HOST')) {
-    // Assuming this file is in wp-includes/, and wp-admin is a sibling
-    if (file_exists(__DIR__ . '/../wp-admin/db_config.php')) {
-        require_once __DIR__ . '/../wp-admin/db_config.php';
-    } elseif (file_exists(__DIR__ . '/../../wp-admin/db_config.php')) {
-        // Fallback if structure is different
-         require_once __DIR__ . '/../../wp-admin/db_config.php';
-    }
-}
-
-// Set Timezone
-$timezone = get_option('timezone_string');
-if ($timezone) {
-    date_default_timezone_set($timezone);
-}
+// Core Helper Functions
 
 /**
- * Get simple DB connection (mysqli)
- * Allows reusing global $conn if available
+ * Get option value from database
+ * 
+ * @param string $option_name
+ * @param mixed $default
+ * @return mixed
  */
-function get_db_connection() {
+function get_option($option_name, $default = false) {
     global $conn;
     
-    if (isset($conn) && $conn instanceof mysqli) {
-        if ($conn->ping()) {
-             return $conn;
-        }
-    }
-
-    if (defined('DB_HOST')) {
-        $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-        if ($conn->connect_error) {
-            // Should handled gracefully or die? 
-            // For now, let's just return false and let caller handle or die here.
-            die("Connection failed: " . $conn->connect_error);
-        }
-        return $conn;
+    // Prepare statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT option_value FROM options WHERE option_name = ? LIMIT 1");
+    if (!$stmt) return $default;
+    
+    $stmt->bind_param("s", $option_name);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return $row['option_value'];
     }
     
-    return false;
+    return $default;
 }
 
 /**
- * Get an option from the database.
- * Uses a static cache to prevent multiple DB queries.
+ * Update option value in database
+ * 
+ * @param string $option_name
+ * @param mixed $new_value
+ * @return bool
+ */
+function update_option($option_name, $new_value) {
+    global $conn;
+    
+    // Serialize if array/object (simple storage) - for now assuming text
+    // In real WP, serialization is automatic. Let's keep it simple string for Customizer.
+    $value_to_save = $new_value;
+    
+    // Check if exists
+    $exists = get_option($option_name, null);
+    
+    if ($exists !== null) {
+        // Update
+        $stmt = $conn->prepare("UPDATE options SET option_value = ? WHERE option_name = ?");
+        $stmt->bind_param("ss", $value_to_save, $option_name);
+    } else {
+        // Insert
+        $stmt = $conn->prepare("INSERT INTO options (option_name, option_value) VALUES (?, ?)");
+        $stmt->bind_param("ss", $option_name, $value_to_save);
+    }
+    
+    return $stmt->execute();
+}
+
+/**
+ * Outputs the HTML checked attribute.
  *
- * @param string $name    Option name.
- * @param mixed  $default Default value if option not found.
- * @return mixed Option value.
+ * @param mixed $checked One of the values to compare
+ * @param mixed $current (true) The other value to compare if not just true
+ * @param bool $echo Whether to echo or just return the string
+ * @return string html attribute or empty string
  */
-function get_option($name, $default = '') {
-    static $options_cache = null;
-
-    // Load all options once
-    if ($options_cache === null) {
-        $options_cache = [];
-        $conn = get_db_connection();
-        
-        if ($conn) {
-            $result = $conn->query("SELECT option_name, option_value FROM options");
-            if ($result) {
-                while ($row = $result->fetch_assoc()) {
-                    $options_cache[$row['option_name']] = $row['option_value'];
-                }
-            }
-        }
-    }
-
-    return isset($options_cache[$name]) ? $options_cache[$name] : $default;
+function checked( $checked, $current = true, $echo = true ) {
+    return __checked_selected_helper( $checked, $current, $echo, 'checked' );
 }
 
 /**
- * Update (or insert) an option in the database.
- * 
- * @param string $option Option name.
- * @param string $value  Option value.
- * @return bool True on success, false on failure.
+ * Outputs the HTML selected attribute.
+ *
+ * @param mixed $selected One of the values to compare
+ * @param mixed $current (true) The other value to compare if not just true
+ * @param bool $echo Whether to echo or just return the string
+ * @return string html attribute or empty string
  */
-function update_option($option, $value) {
-    $conn = get_db_connection();
-    if (!$conn) return false;
-
-    $stmt = $conn->prepare("INSERT INTO options (option_name, option_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)");
-    if ($stmt) {
-        $stmt->bind_param("ss", $option, $value);
-        return $stmt->execute();
-    }
-    return false;
+function selected( $selected, $current = true, $echo = true ) {
+    return __checked_selected_helper( $selected, $current, $echo, 'selected' );
 }
 
 /**
- * Helper to output checked="checked"
- * 
- * @param mixed $val Current value
- * @param mixed $current Target value
- * @param bool $echo Whether to echo or return
- * @return string
+ * Outputs the HTML disabled attribute.
+ *
+ * @param mixed $disabled One of the values to compare
+ * @param mixed $current (true) The other value to compare if not just true
+ * @param bool $echo Whether to echo or just return the string
+ * @return string html attribute or empty string
  */
-function checked($val, $current, $echo = true) {
-    $result = ((string)$val === (string)$current) ? 'checked="checked"' : '';
-    if ($echo) {
+function disabled( $disabled, $current = true, $echo = true ) {
+    return __checked_selected_helper( $disabled, $current, $echo, 'disabled' );
+}
+
+/**
+ * Private helper for checked, selected, and disabled.
+ *
+ * @param mixed $helper One of the values to compare
+ * @param mixed $current (true) The other value to compare if not just true
+ * @param bool $echo Whether to echo or just return the string
+ * @param string $type The type of attribute. checked, selected, or disabled.
+ * @return string html attribute or empty string
+ */
+function __checked_selected_helper( $helper, $current, $echo, $type ) {
+    if ( (string) $helper === (string) $current )
+        $result = " $type='$type'";
+    else
+        $result = '';
+
+    if ( $echo )
         echo $result;
-    }
+
     return $result;
 }
 
 /**
- * Get all items for a specific menu
- * @param int|string|object $menu Menu ID, slug, or name
- * @return array List of menu items
+ * Render active site tags for a given placement hook.
+ * Call this in frontend templates, passing context about current page/post.
+ *
+ * @param string $placement  'head' | 'body_open' | 'body_close'
+ * @param array  $context    ['page_id' => int, 'post_id' => int, 'category_ids' => int[]]
  */
-function wp_get_nav_menu_items($menu) {
-    $conn = get_db_connection();
-    if (!$conn) return [];
+function render_tags($placement, $context = []) {
+    global $conn;
 
-    $menu_id = 0;
-    
-    // If integer, assume ID
-    if (is_numeric($menu)) {
-        $menu_id = intval($menu);
-    } else {
-        // Fetch ID by slug or name
-        $stmt = $conn->prepare("SELECT id FROM menus WHERE slug = ? OR name = ? LIMIT 1");
-        $stmt->bind_param("ss", $menu, $menu);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if ($row = $res->fetch_assoc()) {
-            $menu_id = $row['id'];
+    // Check if site_tags table exists
+    $check = $conn->query("SHOW TABLES LIKE 'site_tags'");
+    if (!$check || $check->num_rows === 0) return;
+
+    $placement = $conn->real_escape_string($placement);
+    $result = $conn->query(
+        "SELECT * FROM site_tags WHERE status = 'active' AND placement = '$placement' ORDER BY priority ASC, id ASC"
+    );
+    if (!$result) return;
+
+    $page_id       = isset($context['page_id'])       ? intval($context['page_id'])       : 0;
+    $post_id       = isset($context['post_id'])       ? intval($context['post_id'])       : 0;
+    $category_ids  = isset($context['category_ids'])  ? (array)$context['category_ids']   : [];
+
+    while ($tag = $result->fetch_assoc()) {
+        $lc   = $tag['load_condition'];   // all | include | exclude
+        $ct   = $tag['condition_type'];   // page | post | category
+        $cids = $tag['condition_ids'] ? json_decode($tag['condition_ids'], true) : [];
+        if (!is_array($cids)) $cids = [];
+
+        $should_render = true;
+
+        if ($lc !== 'all' && !empty($cids)) {
+            $match = false;
+            if ($ct === 'page')     $match = ($page_id > 0 && in_array($page_id, $cids));
+            if ($ct === 'post')     $match = ($post_id > 0 && in_array($post_id, $cids));
+            if ($ct === 'category') $match = !empty(array_intersect($category_ids, $cids));
+
+            if ($lc === 'include') $should_render = $match;
+            if ($lc === 'exclude') $should_render = !$match;
+        }
+
+        if ($should_render) {
+            echo "\n" . $tag['content'] . "\n";
         }
     }
-
-    if ($menu_id > 0) {
-        $stmt = $conn->prepare("SELECT * FROM menu_items WHERE menu_id = ? ORDER BY position ASC");
-        $stmt->bind_param("i", $menu_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $items = [];
-        while ($row = $result->fetch_assoc()) {
-            // Process URL for dynamic types
-            if ($row['type'] == 'page') {
-                // Fetch valid page slug
-                $p_stmt = $conn->prepare("SELECT slug FROM pages WHERE id = ?");
-                $p_stmt->bind_param("i", $row['object_id']);
-                $p_stmt->execute();
-                $p_res = $p_stmt->get_result();
-                if ($p_row = $p_res->fetch_assoc()) {
-                    $row['url'] = 'page/' . $p_row['slug'];
-                } else {
-                     $row['url'] = '#'; // Fallback
-                }
-            } elseif ($row['type'] == 'post') {
-                 $p_stmt = $conn->prepare("SELECT slug FROM posts WHERE id = ?");
-                 $p_stmt->bind_param("i", $row['object_id']);
-                 $p_stmt->execute();
-                 $p_res = $p_stmt->get_result();
-                 if ($p_row = $p_res->fetch_assoc()) {
-                    $row['url'] = 'post/' . $p_row['slug'];
-                } else {
-                     $row['url'] = '#';
-                }
-            }
-            // Ensure URL is absolute or relative as needed. For now relative is fine.
-            $items[] = $row;
-        }
-        return $items;
-    }
-    
-    return [];
 }
 
 /**
- * Displays a navigation menu.
- * 
- * @param array $args Arguments for displaying the menu
- *                    'menu' => Menu ID/Slug (required if no theme_location)
- *                    'container' => 'nav', 'div', or false
- *                    'container_class' => class for container
- *                    'menu_class' => class for ul
- *                    'echo' => boolean (default true)
+ * Render a navigation menu as nested HTML <ul><li> structure.
+ * Supports unlimited depth via recursive walker.
+ *
+ * @param int    $menu_id   ID of the menu to render
+ * @param string $ul_class  CSS class for the root <ul>
+ * @return string           HTML output
  */
-function wp_nav_menu($args = []) {
-    $defaults = [
-        'menu' => '',
-        'container' => 'div',
-        'container_class' => '',
-        'menu_class' => 'menu',
-        'echo' => true,
-        'before' => '',
-        'after' => '',
-        'link_before' => '',
-        'link_after' => '',
-        'items_wrap' => '<ul id="%1$s" class="%2$s">%3$s</ul>',
-    ];
-    
-    $args = array_merge($defaults, $args);
-    
-    // TODO: support theme_location via options
-    
-    $items = [];
-    if (!empty($args['menu'])) {
-        $items = wp_get_nav_menu_items($args['menu']);
-    } elseif ($all_menus = get_db_connection()->query("SELECT id FROM menus LIMIT 1")) {
-         // Fallback to first menu
-         if ($row = $all_menus->fetch_assoc()) {
-             $items = wp_get_nav_menu_items($row['id']);
-         }
-    }
-    
-    if (empty($items)) return false;
-    
-    // Build Output
-    $nav_menu = '';
-    
-    // Filter top level items (TODO: Implement Walker Class for proper recursion)
-    // For now, flat list or simple hierarchy
-    
-    foreach ($items as $item) {
-        $url = $item['url'];
-        // Prepend site home if needed, or keeping relative
-        // For this simple routing:
-        $final_url = (strpos($url, 'http') === 0) ? $url : get_option('home') . '/' . ltrim($url, '/');
-        
-        $nav_menu .= '<li class="menu-item menu-item-' . $item['id'] . '">';
-        $nav_menu .= $args['before'];
-        $nav_menu .= '<a href="' . htmlspecialchars($final_url) . '" target="' . htmlspecialchars($item['target']) . '">';
-        $nav_menu .= $args['link_before'] . htmlspecialchars($item['title']) . $args['link_after'];
-        $nav_menu .= '</a>';
-        $nav_menu .= $args['after'];
-        $nav_menu .= '</li>';
-    }
-    
-    $html = sprintf(
-        $args['items_wrap'],
-        '', // %1$s ID
-        $args['menu_class'], // %2$s Class
-        $nav_menu // %3$s Content
+function render_menu($menu_id, $ul_class = 'nav-menu') {
+    global $conn;
+
+    $menu_id = intval($menu_id);
+    if (!$menu_id) return '';
+
+    // Check if parent_id column exists
+    $col_check = $conn->query("SHOW COLUMNS FROM menu_items LIKE 'parent_id'");
+    $has_parent = ($col_check && $col_check->num_rows > 0);
+
+    $order_by = $has_parent ? 'parent_id ASC, position ASC' : 'position ASC';
+    $result = $conn->query(
+        "SELECT * FROM menu_items WHERE menu_id = $menu_id ORDER BY $order_by"
     );
-    
-    if ($args['container']) {
-        $html = '<' . $args['container'] . ' class="' . $args['container_class'] . '">' . $html . '</' . $args['container'] . '>';
+    if (!$result) return '';
+
+    $items = [];
+    while ($row = $result->fetch_assoc()) {
+        $items[] = $row;
     }
-    
-    if ($args['echo']) {
-        echo $html;
+    if (empty($items)) return '';
+
+    // Determine URL for each item
+    $site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+              . '://' . $_SERVER['HTTP_HOST'];
+
+    foreach ($items as &$item) {
+        if (!isset($item['parent_id'])) $item['parent_id'] = 0;
+        $label = !empty($item['navigation_label']) ? $item['navigation_label'] : $item['title'];
+        $item['_label'] = htmlspecialchars($label);
+
+        if ($item['type'] === 'custom' && !empty($item['url'])) {
+            $item['_url'] = htmlspecialchars($item['url']);
+        } elseif ($item['type'] === 'page' && !empty($item['object_id'])) {
+            $pid = intval($item['object_id']);
+            $pr = $conn->query("SELECT slug FROM pages WHERE id = $pid LIMIT 1");
+            $pg = $pr ? $pr->fetch_assoc() : null;
+            $item['_url'] = $pg ? $site_url . '/word-press/view.php?slug=' . urlencode($pg['slug']) : '#';
+        } elseif ($item['type'] === 'post' && !empty($item['object_id'])) {
+            $pid = intval($item['object_id']);
+            $pr = $conn->query("SELECT slug FROM posts WHERE id = $pid LIMIT 1");
+            $pg = $pr ? $pr->fetch_assoc() : null;
+            $item['_url'] = $pg ? $site_url . '/word-press/read.php?slug=' . urlencode($pg['slug']) : '#';
+        } else {
+            $item['_url'] = !empty($item['url']) ? htmlspecialchars($item['url']) : '#';
+        }
     }
-    
+    unset($item);
+
+    // Build tree
+    $tree = _build_menu_tree($items, 0);
+    return _render_menu_tree($tree, $ul_class, 0);
+}
+
+function _build_menu_tree($items, $parent_id) {
+    $branch = [];
+    foreach ($items as $item) {
+        $pid = isset($item['parent_id']) ? intval($item['parent_id']) : 0;
+        if ($pid === $parent_id) {
+            $children = _build_menu_tree($items, intval($item['id']));
+            if ($children) $item['_children'] = $children;
+            $branch[] = $item;
+        }
+    }
+    return $branch;
+}
+
+function _render_menu_tree($items, $ul_class, $depth) {
+    if (empty($items)) return '';
+    $cls = $depth === 0 ? ' class="' . htmlspecialchars($ul_class) . '"' : ' class="sub-menu"';
+    $html = "<ul$cls>\n";
+    foreach ($items as $item) {
+        $has_children = !empty($item['_children']);
+        $li_class = $has_children ? ' class="menu-item has-children"' : ' class="menu-item"';
+        $html .= "<li$li_class>";
+        $html .= '<a href="' . $item['_url'] . '">' . $item['_label'] . '</a>';
+        if ($has_children) {
+            $html .= "\n" . _render_menu_tree($item['_children'], $ul_class, $depth + 1);
+        }
+        $html .= "</li>\n";
+    }
+    $html .= "</ul>\n";
     return $html;
 }
+?>

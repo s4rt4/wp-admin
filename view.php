@@ -224,7 +224,19 @@ function convertEditorJSToHTML($editorData) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page['title']); ?></title>
+    <title><?php echo htmlspecialchars($page['title']); ?> - <?php echo htmlspecialchars(get_option('site_title', 'My Website')); ?></title>
+    <?php 
+    $site_fav = get_option('site_favicon', '');
+    $site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+    // Fix absolute path for images if stored relatively
+    function get_asset_url($path, $site_url) {
+        if (strpos($path, 'http') === 0) return $path;
+        return $site_url . '/' . ltrim($path, '/');
+    }
+    ?>
+    <?php if($site_fav): ?>
+    <link rel="icon" href="<?php echo htmlspecialchars(get_asset_url($site_fav, $site_url)); ?>" />
+    <?php endif; ?>
     
     <style>
         <?php if ($page['builder_type'] === 'grapesjs'): ?>
@@ -335,8 +347,23 @@ function convertEditorJSToHTML($editorData) {
             }
         <?php endif; ?>
     </style>
+    <?php render_tags('head', ['page_id' => intval($page['id'])]); ?>
 </head>
 <body>
+<?php render_tags('body_open', ['page_id' => intval($page['id'])]); ?>
+    <header style="margin-bottom: 20px; border-bottom:1px solid #eee; padding:15px 20px; display:flex; align-items:center; justify-content:space-between; background:#fff;">
+        <div style="display:flex; align-items:center;">
+            <?php 
+            $site_logo = get_option('site_logo', '');
+            $site_title = get_option('site_title', 'My Website');
+            if ($site_logo): ?>
+                <img src="<?php echo htmlspecialchars(get_asset_url($site_logo, $site_url)); ?>" alt="<?php echo htmlspecialchars($site_title); ?>" style="max-height:40px; margin-right:10px;">
+            <?php endif; ?>
+            <div style="font-size:18px; font-weight:bold; color:#333;"><?php echo htmlspecialchars($site_title); ?></div>
+        </div>
+        <a href="<?php echo $site_url; ?>" class="back-link" style="text-decoration:none; color:#0073aa; font-weight:500;">Home</a>
+    </header>
     <?php echo process_shortcodes($html, $pdo); ?>
+<?php render_tags('body_close', ['page_id' => intval($page['id'])]); ?>
 </body>
 </html>

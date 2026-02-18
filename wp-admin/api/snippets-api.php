@@ -2,6 +2,12 @@
 require_once '../auth_check.php';
 require_once '../db_config.php';
 
+if (!current_user_can('manage_options')) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'Access denied']);
+    exit;
+}
+
 header('Content-Type: application/json');
 
 $action = $_GET['action'] ?? '';

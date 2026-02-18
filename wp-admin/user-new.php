@@ -30,6 +30,7 @@ if ($id > 0) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
+    $role = $_POST['role'] ?? 'subscriber'; // Default to subscriber
     $password = $_POST['password'];
     $is_edit = ($id > 0);
     $profile_picture = $user['profile_picture'] ?? null;
@@ -74,6 +75,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $params[] = password_hash($password, PASSWORD_DEFAULT);
                 }
                 
+                // Only admin can change role
+                if (current_user_can('promote_users')) {
+                     $sql .= ", role = ?";
+                     $types .= "s";
+                     $params[] = $role;
+                }
+                
                 $sql .= " WHERE id = ?";
                 $types .= "i";
                 $params[] = $id;
@@ -104,8 +112,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $error = "Username already exists.";
                     } else {
                         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                        $stmt = $conn->prepare("INSERT INTO users (username, password, profile_picture) VALUES (?, ?, ?)");
-                        $stmt->bind_param("sss", $username, $hashed_password, $profile_picture);
+                        $stmt = $conn->prepare("INSERT INTO users (username, password, profile_picture, role) VALUES (?, ?, ?, ?)");
+                        $stmt->bind_param("ssss", $username, $hashed_password, $profile_picture, $role);
                         if ($stmt->execute()) {
                              echo "<script>window.location.href='users.php';</script>";
                              exit;
@@ -162,6 +170,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <p class="description">Upload a new profile picture (JPG, PNG, GIF).</p>
                         </td>
                     </tr>
+                    
+                    <?php if (current_user_can('promote_users')): ?>
+                    <tr class="form-field">
+                        <th scope="row"><label for="role">Role</label></th>
+                        <td>
+                            <select name="role" id="role">
+                                <?php 
+                                $roles = ['admin', 'editor', 'author', 'contributor', 'subscriber'];
+                                $current_role = $user['role'] ?? 'subscriber';
+                                foreach ($roles as $r) {
+                                    echo '<option value="' . $r . '" ' . ($current_role == $r ? 'selected' : '') . '>' . ucfirst($r) . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
             

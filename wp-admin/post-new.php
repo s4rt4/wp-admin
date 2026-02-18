@@ -1,10 +1,12 @@
 <?php
 require_once 'auth_check.php';
 require_once 'auth_check.php';
-require_once '../wp-includes/functions.php';
-$conn = get_db_connection();
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+require_once 'db_config.php';
+// Global $conn is initialized in db_config.php
+
+// Access Check
+if (!current_user_can('edit_posts')) {
+    die("Access denied");
 }
 
 $post_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -42,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $visibility = $_POST['visibility'];
     $created_at = $_POST['aa'] . '-' . $_POST['mm'] . '-' . $_POST['jj'] . ' ' . $_POST['hh'] . ':' . $_POST['mn'] . ':00'; // Simplified date assembly
+    $author_id = $_SESSION['user_id'];
 
     // Generate Slug
     $slug = trim($_POST['post_name']);
@@ -75,16 +78,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // SEO Fields
+    $meta_title    = trim($_POST['meta_title'] ?? '');
+    $meta_desc     = trim($_POST['meta_desc'] ?? '');
+    $focus_keyword = trim($_POST['focus_keyword'] ?? '');
+
     if ($post_id > 0) {
-        // Update
-        $stmt = $conn->prepare("UPDATE posts SET title=?, slug=?, content=?, status=?, visibility=?, created_at=?, updated_at=NOW(), featured_image=? WHERE id=?");
-        $stmt->bind_param("sssssssi", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $post_id);
+        $stmt = $conn->prepare("UPDATE posts SET title=?, slug=?, content=?, status=?, visibility=?, created_at=?, updated_at=NOW(), featured_image=?, meta_title=?, meta_desc=?, focus_keyword=? WHERE id=?");
+        $stmt->bind_param("ssssssssssi", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $meta_title, $meta_desc, $focus_keyword, $post_id);
     } else {
-        // Insert
-        // If "Save Draft" clicked, status is draft regardless of dropdown? Usually handled by JS or button value. 
-        // For now trusting the form input.
-        $stmt = $conn->prepare("INSERT INTO posts (title, slug, content, status, visibility, created_at, updated_at, featured_image) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)");
-        $stmt->bind_param("sssssss", $title, $slug, $content, $status, $visibility, $created_at, $featured_image);
+        $stmt = $conn->prepare("INSERT INTO posts (title, slug, content, status, visibility, created_at, updated_at, featured_image, author_id, meta_title, meta_desc, focus_keyword) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssssisss", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $author_id, $meta_title, $meta_desc, $focus_keyword);
     }
 
     if ($stmt->execute()) {
@@ -139,6 +143,11 @@ if ($post_id > 0) {
         if (!isset($post['slug'])) {
             $post['slug'] = '';
         }
+        
+        // Ownership Check
+        if ($post['author_id'] != $_SESSION['user_id'] && !current_user_can('edit_others_posts')) {
+             die("Access denied. You cannot edit this post.");
+        }
     }
 }
 
@@ -171,7 +180,39 @@ $month_names = [
         <h1 class="wp-heading-inline"><?php echo $page_title; ?></h1>
         
         <?php if (isset($_GET['message']) && $_GET['message'] == 'saved'): ?>
-            <div id="message" class="updated notice is-dismissible"><p>Post updated.</p></div>
+        <div id="post-save-toast" style="
+            position: fixed;
+            top: 52px;
+            right: 24px;
+            z-index: 99999;
+            background: #1d2327;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toastSlideIn 0.3s ease;
+        ">
+            <span style="color:#00c853;font-size:16px;">✓</span>
+            Post updated successfully.
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:16px;line-height:1;margin-left:8px;padding:0;">&times;</button>
+        </div>
+        <style>
+        @keyframes toastSlideIn {
+            from { opacity:0; transform: translateY(-12px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+        </style>
+        <script>
+        setTimeout(function() {
+            var t = document.getElementById('post-save-toast');
+            if (t) { t.style.transition = 'opacity 0.4s'; t.style.opacity = '0'; setTimeout(function(){ t && t.remove(); }, 400); }
+        }, 3000);
+        </script>
         <?php endif; ?>
 
         <form method="post" action="" enctype="multipart/form-data">
@@ -206,9 +247,62 @@ $month_names = [
                         </div>
 
                         <div id="postdivrich" class="postarea edit-form-section" style="margin-top: 20px;">
-                            <textarea id="content" name="content" style="display:none;"><?php echo htmlspecialchars($post['content']); ?></textarea>
+                            <div id="editor"></div>
+                            <textarea id="content" name="content" style="display:none;"><?php echo $post['content']; ?></textarea>
                         </div>
                         <div id="word-count" style="margin-top: 5px; color: #666; font-size: 13px;">Word count: 0</div>
+                        
+                        <!-- SEO Meta Box (Moved below editor) -->
+                        <div id="seo-metabox" class="postbox" style="margin-top: 20px; background:#fff; border:1px solid #ccd0d4; box-shadow:0 1px 1px rgba(0,0,0,.04);">
+                            <div class="hndle" style="cursor:pointer; padding:10px 15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                                <h2 style="margin:0; font-size:14px; font-weight:600;"><span>🔍 SEO Settings</span></h2>
+                                <span class="toggle-indicator" style="color:#72777c;">▼</span>
+                            </div>
+                            <div class="inside" style="padding:15px;">
+                                <!-- Google Preview -->
+                                <div id="seo-preview" style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:12px 14px;margin-bottom:20px;font-family:arial,sans-serif;max-width:600px;">
+                                    <div style="font-size:20px;color:#1a0dab;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;" id="seo-prev-title"><?php echo htmlspecialchars($post['meta_title'] ?: $post['title']); ?></div>
+                                    <div style="font-size:14px;color:#006621;margin-bottom:2px;line-height:1.3;">localhost/word-press/read.php?slug=<?php echo htmlspecialchars($post['slug'] ?? '...'); ?></div>
+                                    <div style="font-size:13px;color:#545454;line-height:1.4;" id="seo-prev-desc"><?php echo htmlspecialchars($post['meta_desc'] ?: 'No meta description set.'); ?></div>
+                                </div>
+
+                                <!-- SEO Title -->
+                                <div style="margin-bottom:15px;">
+                                    <label for="meta_title" style="display:block;font-size:13px;font-weight:600;margin-bottom:5px;">
+                                        SEO Title
+                                        <span id="meta_title_count" style="font-weight:normal;color:#888;margin-left:6px;">0/60</span>
+                                    </label>
+                                    <input type="text" id="meta_title" name="meta_title" maxlength="80"
+                                        value="<?php echo htmlspecialchars($post['meta_title'] ?? ''); ?>"
+                                        placeholder="Leave blank to use post title"
+                                        style="width:100%;padding:8px 10px;border:1px solid #8c8f94;border-radius:4px;font-size:14px;box-sizing:border-box;">
+                                    <div id="meta_title_bar" style="height:3px;border-radius:2px;margin-top:4px;background:#ddd;transition:all .2s;"></div>
+                                </div>
+
+                                <!-- Meta Description -->
+                                <div style="margin-bottom:15px;">
+                                    <label for="meta_desc" style="display:block;font-size:13px;font-weight:600;margin-bottom:4px;">
+                                        Meta Description
+                                        <span id="meta_desc_count" style="font-weight:normal;color:#888;margin-left:6px;">0/160</span>
+                                    </label>
+                                    <textarea id="meta_desc" name="meta_desc" maxlength="200" rows="3"
+                                        placeholder="Brief description for search engines..."
+                                        style="width:100%;padding:8px 10px;border:1px solid #8c8f94;border-radius:4px;font-size:14px;box-sizing:border-box;resize:vertical;"><?php echo htmlspecialchars($post['meta_desc'] ?? ''); ?></textarea>
+                                    <div id="meta_desc_bar" style="height:3px;border-radius:2px;margin-top:4px;background:#ddd;transition:all .2s;"></div>
+                                </div>
+
+                                <!-- Focus Keyword -->
+                                <div style="margin-bottom:5px;">
+                                    <label for="focus_keyword" style="display:block;font-size:13px;font-weight:600;margin-bottom:4px;">Focus Keyword</label>
+                                    <input type="text" id="focus_keyword" name="focus_keyword"
+                                        value="<?php echo htmlspecialchars($post['focus_keyword'] ?? ''); ?>"
+                                        placeholder="e.g. react hooks tutorial"
+                                        style="width:100%;padding:8px 10px;border:1px solid #8c8f94;border-radius:4px;font-size:14px;box-sizing:border-box;">
+                                    <p style="font-size:12px;color:#646970;margin:4px 0 0;">Used to analyze keyword usage in your content.</p>
+                                </div>
+
+                            </div>
+                        </div>
                     </div><!-- /post-body-content -->
 
                     <!-- Sidebar Column -->
@@ -291,11 +385,16 @@ $month_names = [
                                             <?php endif; ?>
                                         </div>
                                         <div id="publishing-action">
-                                            <span class="spinner"></span>
+                                        <span class="spinner"></span>
+                                        <?php if (current_user_can('publish_posts')): ?>
                                             <input type="submit" name="publish" id="publish" class="button button-primary button-large" value="<?php echo $post_id > 0 ? 'Update' : 'Publish'; ?>">
-                                        </div>
-                                        <div class="clear"></div>
+                                        <?php else: ?>
+                                            <input type="submit" name="save" id="save-post" value="Save Draft" class="button button-primary button-large">
+                                            <p class="description" style="margin-top:5px;">You can only save as Draft.</p>
+                                        <?php endif; ?>
                                     </div>
+                                    <div class="clear"></div>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -455,6 +554,10 @@ $month_names = [
                             </div>
                         </div>
 
+                        </div>
+
+
+
                     </div><!-- /postbox-container -->
 
                 </div><!-- /columns-2 -->
@@ -463,213 +566,271 @@ $month_names = [
     </div>
 </div>
 
-<!-- SunEditor JS -->
-<script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/suneditor@latest/src/lang/en.js"></script>
+<!-- Toast UI Editor CSS -->
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+<link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-color-syntax/latest/toastui-editor-plugin-color-syntax.min.css">
+<link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 
-<!-- CodeMirror JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
-
-<!-- Prism.js for Inline Code Block Syntax Highlighting -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+<!-- Toast UI Editor JS -->
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-color-syntax/latest/toastui-editor-plugin-color-syntax.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-chart/latest/toastui-editor-plugin-chart.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-uml/latest/toastui-editor-plugin-uml.min.js"></script>
 
 <script>
-    const editor = SUNEDITOR.create((document.getElementById('content') || 'content'),{
-        // All of the plugins are loaded in the "window.SUNEDITOR" object in dist/suneditor.min.js file
-        // Insert options
-        // Language : 'en',
-        buttonList: [
-            ['undo', 'redo'],
-            ['formatBlock', 'font', 'fontSize'],
-            ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
-            ['removeFormat'],
-            ['fontColor', 'hiliteColor'],
-            ['outdent', 'indent'],
-            ['align', 'horizontalRule', 'list', 'lineHeight'],
-            ['table', 'link', 'image', 'video', 'audio'], // You can add 'imageGallery'
-            ['fullScreen', 'showBlocks', 'codeView'],
-            ['preview', 'print'],
-            // ['save', 'template']
-        ],
-        lang: SUNEDITOR_LANG['en'],
-        height: '400px',
+document.addEventListener('DOMContentLoaded', function() {
+    const Editor = toastui.Editor;
+
+    // Each plugin CDN script exposes its own global variable
+    var plugins = [];
+    if (typeof toastuiEditorPluginColorSyntax !== 'undefined')        plugins.push(toastuiEditorPluginColorSyntax);
+    if (typeof toastuiEditorPluginCodeSyntaxHighlight !== 'undefined') plugins.push(toastuiEditorPluginCodeSyntaxHighlight);
+    if (typeof toastuiEditorPluginChart !== 'undefined')              plugins.push(toastuiEditorPluginChart);
+    if (typeof toastuiEditorPluginTableMergedCell !== 'undefined')    plugins.push(toastuiEditorPluginTableMergedCell);
+    if (typeof toastuiEditorPluginUML !== 'undefined')                plugins.push(toastuiEditorPluginUML);
+
+    const editor = new Editor({
+        el: document.getElementById('editor'),
+        height: '500px',
+        initialEditType: 'wysiwyg',
+        previewStyle: 'vertical',
+        initialValue: '',
         placeholder: 'Start writing your post...',
-        resizingBar: true,
-        // Image Upload Configuration
-        imageUploadUrl: 'upload.php?source=suneditor',
-        imageUploadHeader: null,
-        imageUrlInput: false,
-        // CodeMirror Configuration for Syntax Highlighting
-        codeMirror: {
-            src: CodeMirror,
-            options: {
-                mode: 'htmlmixed',
-                htmlMode: true,
-                lineNumbers: true,
-                lineWrapping: true,
-                theme: 'monokai',
-                indentUnit: 4,
-                indentWithTabs: true,
-                matchBrackets: true,
-                autoCloseBrackets: true,
-                autoCloseTags: true,
-                extraKeys: {
-                    "Ctrl-Space": "autocomplete",
-                    "F11": function(cm) {
-                        cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-                    },
-                    "Esc": function(cm) {
-                        if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+        plugins: plugins,
+        toolbarItems: [
+            ['heading', 'bold', 'italic', 'strike'],
+            ['ul', 'ol', 'task'],
+            ['table', 'image', 'link'],
+            ['code', 'codeblock'],
+            [{
+                el: (function() {
+                    var wrapper = document.createElement('div');
+                    wrapper.style.cssText = 'display:inline-flex;align-items:center;gap:2px;cursor:pointer;padding:0 4px;';
+
+                    var btn = document.createElement('button');
+                    btn.className = 'toastui-editor-toolbar-icons';
+                    btn.style.cssText = 'background-position:-309px 3px;position:relative;top:-2px;flex-shrink:0;';
+                    btn.title = 'Insert from Media Library';
+                    btn.setAttribute('aria-label', 'Insert from Media Library');
+
+                    var label = document.createElement('span');
+                    label.textContent = 'Media';
+                    label.style.cssText = 'font-size:12px;color:#555;font-family:inherit;line-height:1;user-select:none;';
+
+                    wrapper.appendChild(btn);
+                    wrapper.appendChild(label);
+
+                    wrapper.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openMediaPicker();
+                    });
+                    return wrapper;
+                })()
+            }]
+        ],
+        hooks: {
+            addImageBlobHook: function(blob, callback) {
+                var formData = new FormData();
+                formData.append('file', blob);
+                fetch('upload.php?source=toastui', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.url) {
+                        callback(data.url, blob.name);
+                    } else {
+                        callback('', 'Upload failed');
                     }
-                }
+                })
+                .catch(function() { callback('', 'Upload error'); });
             }
-        },
-        callBackSave: function (contents, isChanged) {
-             // console.log(contents);
         }
     });
 
-    // Word Count Logic and Syntax Highlighting
+    // Load existing content (HTML from database)
+    var existingContent = document.getElementById('content').value;
+    if (existingContent && existingContent.trim() !== '') {
+        editor.setHTML(existingContent);
+    }
+
+    // Word Count
     function updateWordCount() {
-        var text = editor.getText();
-        var wordCount = 0;
-        if (text && text.trim().length > 0) {
-            wordCount = text.trim().split(/\s+/).length;
-        }
+        var text = editor.getMarkdown().replace(/[#*`_~\[\]()>-]/g, ' ');
+        var wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
         document.getElementById('word-count').innerText = 'Word count: ' + wordCount;
     }
-    
-    function highlightCodeBlocks() {
-        // Apply Prism.js syntax highlighting to code blocks
-        setTimeout(function() {
-            var editorElement = document.querySelector('.sun-editor-editable');
-            if (!editorElement) return;
-            
-            // Handle both <pre> and <pre><code> structures
-            var preBlocks = editorElement.querySelectorAll('pre');
-            preBlocks.forEach(function(pre) {
-                // Skip if already processed
-                if (pre.classList.contains('prism-processed')) return;
-                
-                var codeElement;
-                
-                // Check if pre already has a code child
-                var existingCode = pre.querySelector('code');
-                if (existingCode) {
-                    codeElement = existingCode;
-                } else {
-                    // SunEditor creates <pre> without <code>, so wrap content
-                    codeElement = document.createElement('code');
-                    codeElement.className = 'language-markup';
-                    codeElement.textContent = pre.textContent;
-                    pre.textContent = '';
-                    pre.appendChild(codeElement);
-                }
-                
-                // Ensure language class exists
-                if (!codeElement.className || codeElement.className.indexOf('language-') === -1) {
-                    codeElement.className = 'language-markup';
-                }
-                
-                // Wrap in code-toolbar div for copy button
-                var wrapper;
-                if (!pre.parentElement.classList.contains('code-toolbar')) {
-                    wrapper = document.createElement('div');
-                    wrapper.className = 'code-toolbar';
-                    pre.parentNode.insertBefore(wrapper, pre);
-                    wrapper.appendChild(pre);
-                } else {
-                    wrapper = pre.parentElement;
-                }
-                
-                // Mark as processed
-                pre.classList.add('prism-processed');
-                
-                // Apply Prism highlighting
-                try {
-                    Prism.highlightElement(codeElement);
-                } catch (e) {
-                    console.log('Prism highlighting error:', e);
-                }
-                
-                // Add copy button manually
-                if (!wrapper.querySelector('.toolbar')) {
-                    var toolbar = document.createElement('div');
-                    toolbar.className = 'toolbar';
-                    
-                    var copyButton = document.createElement('button');
-                    copyButton.className = 'copy-to-clipboard-button';
-                    copyButton.textContent = 'Copy';
-                    copyButton.type = 'button';
-                    
-                    copyButton.addEventListener('click', function() {
-                        var code = codeElement.textContent;
-                        navigator.clipboard.writeText(code).then(function() {
-                            copyButton.textContent = 'Copied!';
-                            setTimeout(function() {
-                                copyButton.textContent = 'Copy';
-                            }, 2000);
-                        }).catch(function(err) {
-                            console.error('Failed to copy:', err);
-                        });
-                    });
-                    
-                    toolbar.appendChild(copyButton);
-                    wrapper.appendChild(toolbar);
-                }
-            });
-        }, 100);
-    }
+    editor.on('change', updateWordCount);
+    updateWordCount();
 
-    editor.onChange = function(contents, core) {
-        updateWordCount();
-        highlightCodeBlocks();
-    };
-
-    editor.onInput = function (e, core) {
-        updateWordCount();
-        highlightCodeBlocks();
-    };
-
-    // Initial count and move to footer
-    editor.onload = function (core, isUpdate) {
-        updateWordCount();
-        highlightCodeBlocks(); // Apply syntax highlighting on load
-        
-        // Move word count to editor footer (resizing bar)
-        var resizingBar = document.querySelector('.se-resizing-bar');
-        var wordCountEl = document.getElementById('word-count');
-        if (resizingBar && wordCountEl) {
-            // Style for footer integration
-            wordCountEl.style.marginTop = '0';
-            wordCountEl.style.float = 'left';
-            wordCountEl.style.marginLeft = '10px';
-            wordCountEl.style.lineHeight = '1'; // Adjust to fit bar
-            wordCountEl.style.fontSize = '11px';
-            
-            // Insert as first child or append
-            resizingBar.insertBefore(wordCountEl, resizingBar.firstChild);
-        }
-    };
-    
     // Auto sync content to textarea on submit
     document.querySelector('form').addEventListener('submit', function() {
-        document.getElementById('content').value = editor.getContents();
+        document.getElementById('content').value = editor.getHTML();
     });
 
+    // Expose editor globally for media picker
+    window._toastEditor = editor;
+
+}); // end DOMContentLoaded
+</script>
+
+<!-- Media Picker Modal -->
+<div id="media-picker-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:999999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:8px; width:860px; max-width:96vw; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.35); overflow:hidden;">
+        <!-- Header -->
+        <div style="padding:16px 20px; border-bottom:1px solid #e5e5e5; display:flex; align-items:center; justify-content:space-between;">
+            <h3 style="margin:0; font-size:16px; font-weight:600;">🖼️ Insert Image</h3>
+            <button onclick="closeMediaPicker()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#666; line-height:1;">&times;</button>
+        </div>
+        <!-- Tabs -->
+        <div style="display:flex; border-bottom:1px solid #e5e5e5; padding:0 20px;">
+            <button id="mp-tab-library" onclick="mpSwitchTab('library')" style="padding:10px 16px; border:none; border-bottom:2px solid #0073aa; background:none; font-size:13px; font-weight:600; color:#0073aa; cursor:pointer; margin-bottom:-1px;">Media Library</button>
+            <button id="mp-tab-url" onclick="mpSwitchTab('url')" style="padding:10px 16px; border:none; border-bottom:2px solid transparent; background:none; font-size:13px; color:#666; cursor:pointer; margin-bottom:-1px;">From URL</button>
+        </div>
+        <!-- Library Tab -->
+        <div id="mp-panel-library" style="flex:1; overflow-y:auto; padding:16px 20px;">
+            <div style="margin-bottom:12px; display:flex; gap:10px; align-items:center;">
+                <input id="mp-search" type="text" placeholder="Search images..." oninput="mpFilterImages()" style="flex:1; padding:7px 10px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                <span id="mp-count" style="font-size:12px; color:#888;"></span>
+            </div>
+            <div id="mp-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px;">
+                <div style="text-align:center; color:#999; padding:40px; grid-column:1/-1;">Loading...</div>
+            </div>
+        </div>
+        <!-- URL Tab -->
+        <div id="mp-panel-url" style="display:none; padding:20px;">
+            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Image URL</label>
+            <input id="mp-url-input" type="url" placeholder="https://example.com/image.jpg" style="width:100%; padding:9px 10px; border:1px solid #ddd; border-radius:4px; font-size:14px; box-sizing:border-box; margin-bottom:12px;">
+            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Alt Text</label>
+            <input id="mp-url-alt" type="text" placeholder="Image description" style="width:100%; padding:9px 10px; border:1px solid #ddd; border-radius:4px; font-size:14px; box-sizing:border-box;">
+        </div>
+        <!-- Footer -->
+        <div style="padding:12px 20px; border-top:1px solid #e5e5e5; display:flex; justify-content:space-between; align-items:center;">
+            <span id="mp-selected-name" style="font-size:12px; color:#666; font-style:italic;"></span>
+            <div style="display:flex; gap:10px;">
+                <button onclick="closeMediaPicker()" style="padding:8px 18px; border:1px solid #ddd; border-radius:4px; background:#f5f5f5; cursor:pointer; font-size:14px;">Cancel</button>
+                <button onclick="mpInsertSelected()" style="padding:8px 18px; border:none; border-radius:4px; background:#0073aa; color:#fff; cursor:pointer; font-size:14px; font-weight:600;">Insert Image</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.mp-img-item { border:2px solid transparent; border-radius:6px; cursor:pointer; overflow:hidden; aspect-ratio:1; background:#f5f5f5; display:flex; align-items:center; justify-content:center; transition:border-color .15s; position:relative; }
+.mp-img-item:hover { border-color:#0073aa; }
+.mp-img-item.selected { border-color:#0073aa; box-shadow:0 0 0 2px #0073aa40; }
+.mp-img-item img { width:100%; height:100%; object-fit:cover; display:block; }
+.mp-img-item .mp-name { position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.55); color:#fff; font-size:10px; padding:3px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+</style>
+
+<script>
+var _mpImages = [];
+var _mpSelected = null;
+var _mpCurrentTab = 'library';
+
+function openMediaPicker() {
+    document.getElementById('media-picker-modal').style.display = 'flex';
+    _mpSelected = null;
+    document.getElementById('mp-selected-name').textContent = '';
+    mpLoadImages();
+}
+
+function closeMediaPicker() {
+    document.getElementById('media-picker-modal').style.display = 'none';
+}
+
+function mpSwitchTab(tab) {
+    _mpCurrentTab = tab;
+    document.getElementById('mp-panel-library').style.display = tab === 'library' ? 'block' : 'none';
+    document.getElementById('mp-panel-url').style.display = tab === 'url' ? 'block' : 'none';
+    document.getElementById('mp-tab-library').style.borderBottomColor = tab === 'library' ? '#0073aa' : 'transparent';
+    document.getElementById('mp-tab-library').style.color = tab === 'library' ? '#0073aa' : '#666';
+    document.getElementById('mp-tab-url').style.borderBottomColor = tab === 'url' ? '#0073aa' : 'transparent';
+    document.getElementById('mp-tab-url').style.color = tab === 'url' ? '#0073aa' : '#666';
+}
+
+function mpLoadImages() {
+    if (_mpImages.length > 0) { mpRenderGrid(_mpImages); return; }
+    fetch('media-json.php')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            _mpImages = data.images || [];
+            document.getElementById('mp-count').textContent = _mpImages.length + ' images';
+            mpRenderGrid(_mpImages);
+        })
+        .catch(function() {
+            document.getElementById('mp-grid').innerHTML = '<div style="color:#c00;padding:20px;grid-column:1/-1;">Failed to load media library.</div>';
+        });
+}
+
+function mpRenderGrid(images) {
+    var grid = document.getElementById('mp-grid');
+    if (!images.length) {
+        grid.innerHTML = '<div style="text-align:center;color:#999;padding:40px;grid-column:1/-1;">No images found in media library.</div>';
+        return;
+    }
+    grid.innerHTML = images.map(function(img) {
+        return '<div class="mp-img-item" onclick="mpSelectImage(this, \'' + img.url.replace(/'/g, "\\'") + '\', \'' + img.name.replace(/'/g, "\\'") + '\')" title="' + img.name + '">'
+            + '<img src="' + img.url + '" loading="lazy" alt="' + img.name + '">'
+            + '<span class="mp-name">' + img.name + '</span>'
+            + '</div>';
+    }).join('');
+}
+
+function mpFilterImages() {
+    var q = document.getElementById('mp-search').value.toLowerCase();
+    var filtered = q ? _mpImages.filter(function(i) { return i.name.toLowerCase().includes(q); }) : _mpImages;
+    document.getElementById('mp-count').textContent = filtered.length + ' images';
+    mpRenderGrid(filtered);
+}
+
+function mpSelectImage(el, url, name) {
+    document.querySelectorAll('.mp-img-item').forEach(function(i) { i.classList.remove('selected'); });
+    el.classList.add('selected');
+    _mpSelected = { url: url, name: name };
+    document.getElementById('mp-selected-name').textContent = name;
+}
+
+function mpInsertSelected() {
+    var url, alt;
+    if (_mpCurrentTab === 'library') {
+        if (!_mpSelected) { alert('Please select an image first.'); return; }
+        url = _mpSelected.url;
+        alt = _mpSelected.name.replace(/\.[^.]+$/, '');
+    } else {
+        url = document.getElementById('mp-url-input').value.trim();
+        alt = document.getElementById('mp-url-alt').value.trim() || 'image';
+        if (!url) { alert('Please enter an image URL.'); return; }
+    }
+    closeMediaPicker();
+    // Insert via Toast UI Editor API
+    if (window._toastEditor) {
+        try {
+            // exec('addImage') works in both WYSIWYG and Markdown mode
+            window._toastEditor.exec('addImage', { imageUrl: url, altText: alt });
+        } catch(e) {
+            // Fallback: insert markdown syntax
+            window._toastEditor.insertText('![' + alt + '](' + url + ')');
+        }
+    }
+}
+
+// Close on backdrop click
+document.getElementById('media-picker-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeMediaPicker();
+});
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('media-picker-modal').style.display === 'flex') closeMediaPicker();
+});
+</script>
+
+<script>
     // --- UI Interactions ---
     
     function toggleEdit(id) {
@@ -756,6 +917,77 @@ $month_names = [
 
         setupTabs('category-tabs', 'category-all', 'category-pop');
         setupTabs('tag-tabs', 'tag-all', 'tag-pop');
+
+        // --- SEO Live Counter & Preview ---
+        function seoCounter(inputId, countId, barId, max, goodMax) {
+            var input = document.getElementById(inputId);
+            var count = document.getElementById(countId);
+            var bar   = document.getElementById(barId);
+            if (!input || !count || !bar) return;
+
+            function update() {
+                var len = input.value.length;
+                count.textContent = len + '/' + max;
+                var pct = Math.min((len / max) * 100, 100);
+                bar.style.width = pct + '%';
+                if (len === 0) {
+                    bar.style.background = '#ddd';
+                    count.style.color = '#888';
+                } else if (len <= goodMax) {
+                    bar.style.background = '#00c853';
+                    count.style.color = '#00c853';
+                } else {
+                    bar.style.background = '#ff6d00';
+                    count.style.color = '#ff6d00';
+                }
+            }
+            input.addEventListener('input', update);
+            update(); // init
+        }
+
+        seoCounter('meta_title', 'meta_title_count', 'meta_title_bar', 60, 60);
+        seoCounter('meta_desc',  'meta_desc_count',  'meta_desc_bar',  160, 155);
+
+        // Live Google preview
+        var metaTitleInput = document.getElementById('meta_title');
+        var metaDescInput  = document.getElementById('meta_desc');
+        var postTitleInput = document.getElementById('title');
+        var prevTitle = document.getElementById('seo-prev-title');
+        var prevDesc  = document.getElementById('seo-prev-desc');
+
+        function updatePreview() {
+            if (prevTitle) {
+                var t = (metaTitleInput && metaTitleInput.value.trim()) ||
+                        (postTitleInput && postTitleInput.value.trim()) || '(No title)';
+                prevTitle.textContent = t;
+            }
+            if (prevDesc) {
+                var d = (metaDescInput && metaDescInput.value.trim()) || 'No meta description set.';
+                prevDesc.textContent = d;
+            }
+        }
+
+        if (metaTitleInput) metaTitleInput.addEventListener('input', updatePreview);
+        if (metaDescInput)  metaDescInput.addEventListener('input', updatePreview);
+        if (postTitleInput) postTitleInput.addEventListener('input', updatePreview);
+        updatePreview();
+
+        // Toggle Postboxes
+        document.querySelectorAll('.postbox .hndle').forEach(function(h) {
+            h.addEventListener('click', function() {
+                var box = this.closest('.postbox');
+                var inside = box.querySelector('.inside');
+                var indicator = this.querySelector('.toggle-indicator');
+                
+                if (inside.style.display === 'none') {
+                    inside.style.display = 'block';
+                    if(indicator) indicator.textContent = '▼';
+                } else {
+                    inside.style.display = 'none';
+                    if(indicator) indicator.textContent = '▲';
+                }
+            });
+        });
     });
 </script>
 

@@ -1,6 +1,9 @@
 <?php
 $page_title = 'Menus';
 require_once 'auth_check.php';
+if (!current_user_can('manage_options')) {
+    die("Access denied");
+}
 require_once 'db_config.php';
 // Include functions.php manually if needed for logic before header, 
 // but header.php includes it. However, we need DB and functions for logic.
@@ -18,22 +21,24 @@ if (!function_exists('selected')) {
 
 $pdo = getDBConnection();
 
-// Database Migration: Add navigation_label and custom_url columns if they don't exist
+// Database Migration: Add navigation_label, custom_url, and parent_id columns if they don't exist
 try {
     // Check if columns exist
     $stmt = $pdo->query("SHOW COLUMNS FROM menu_items LIKE 'navigation_label'");
     if ($stmt->rowCount() == 0) {
-        // Add navigation_label column
         $pdo->exec("ALTER TABLE menu_items ADD COLUMN navigation_label VARCHAR(255) DEFAULT NULL AFTER title");
-        
-        // Set default navigation_label = title for existing items
         $pdo->exec("UPDATE menu_items SET navigation_label = title WHERE navigation_label IS NULL");
     }
     
     $stmt = $pdo->query("SHOW COLUMNS FROM menu_items LIKE 'custom_url'");
     if ($stmt->rowCount() == 0) {
-        // Add custom_url column
         $pdo->exec("ALTER TABLE menu_items ADD COLUMN custom_url VARCHAR(500) DEFAULT NULL AFTER url");
+    }
+
+    // NEW: parent_id for nested menus
+    $stmt = $pdo->query("SHOW COLUMNS FROM menu_items LIKE 'parent_id'");
+    if ($stmt->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE menu_items ADD COLUMN parent_id INT NOT NULL DEFAULT 0 AFTER menu_id");
     }
 } catch (PDOException $e) {
     // Migration failed, but continue - columns might already exist
@@ -126,6 +131,11 @@ if ($action == 'update' && $current_menu_id > 0 && isset($_POST['menu-item-db-id
         if (isset($_POST['menu-item-url'][$id])) {
             $updates['url'] = trim($_POST['menu-item-url'][$id]);
         }
+
+        // Update parent_id for nested menus
+        if (isset($_POST['menu-item-parent-id'][$id])) {
+            $updates['parent_id'] = intval($_POST['menu-item-parent-id'][$id]);
+        }
         
         // Build UPDATE query
         $setParts = [];
@@ -157,7 +167,7 @@ if ($current_menu_id == 0 && count($all_menus) > 0) {
 // Fetch Items for Current Menu
 $menu_items = [];
 if ($current_menu_id > 0) {
-    $stmt = $pdo->prepare("SELECT * FROM menu_items WHERE menu_id = ? ORDER BY position ASC");
+    $stmt = $pdo->prepare("SELECT * FROM menu_items WHERE menu_id = ? ORDER BY parent_id ASC, position ASC");
     $stmt->execute([$current_menu_id]);
     $menu_items = $stmt->fetchAll();
 }
@@ -384,14 +394,39 @@ require_once 'sidebar.php';
                                             <p class="description">Drag each item into the order you prefer.</p>
                                             
                                             <ul id="menu-to-edit" class="menu ui-sortable">
-                                                <?php foreach ($menu_items as $item): ?>
-                                                    <li id="menu-item-<?php echo $item['id']; ?>" class="menu-item menu-item-depth-0">
+                                                <?php 
+                                                // Build a map for parent dropdown
+                                                $item_map = [];
+                                                foreach ($menu_items as $mi) {
+                                                    $item_map[$mi['id']] = $mi['navigation_label'] ?: $mi['title'];
+                                                }
+                                                foreach ($menu_items as $item): 
+                                                    $depth = 0;
+                                                    $pid = isset($item['parent_id']) ? intval($item['parent_id']) : 0;
+                                                    $visited = [];
+                                                    while ($pid > 0 && !in_array($pid, $visited)) {
+                                                        $visited[] = $pid;
+                                                        $depth++;
+                                                        $found = false;
+                                                        foreach ($menu_items as $mi) {
+                                                            if (intval($mi['id']) === $pid) {
+                                                                $pid = isset($mi['parent_id']) ? intval($mi['parent_id']) : 0;
+                                                                $found = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                        if (!$found) break;
+                                                    }
+                                                    $indent_px = $depth * 30;
+                                                ?>
+                                                    <li id="menu-item-<?php echo $item['id']; ?>" class="menu-item menu-item-depth-<?php echo $depth; ?>" style="margin-left:<?php echo $indent_px; ?>px;">
                                                         <div class="menu-item-bar">
                                                             <div class="menu-item-handle">
                                                                 <button type="button" class="menu-item-toggle" aria-expanded="false">
                                                                     <span class="toggle-indicator" aria-hidden="true">▶</span>
                                                                 </button>
-                                                                <span class="item-title"><?php echo htmlspecialchars($item['title']); ?></span>
+                                                                <?php if ($depth > 0): ?><span style="font-size:11px;color:#aaa;margin-right:4px;">↳</span><?php endif; ?>
+                                                                <span class="item-title"><?php echo htmlspecialchars($item['navigation_label'] ?: $item['title']); ?></span>
                                                                 <span class="item-type"><?php echo ucfirst($item['type']); ?></span>
                                                                 <span class="item-controls">
                                                                     <span class="item-order hide-if-js">
@@ -422,6 +457,25 @@ require_once 'sidebar.php';
                                                                            name="menu-item-label[<?php echo $item['id']; ?>]" 
                                                                            value="<?php echo htmlspecialchars($item['navigation_label'] ?: $item['title']); ?>" 
                                                                            placeholder="<?php echo htmlspecialchars($item['title']); ?>">
+                                                                </label>
+                                                            </p>
+
+                                                            <!-- Parent Item Dropdown -->
+                                                            <p class="description description-wide">
+                                                                <label for="edit-menu-item-parent-<?php echo $item['id']; ?>">
+                                                                    Parent Item<br>
+                                                                    <select id="edit-menu-item-parent-<?php echo $item['id']; ?>"
+                                                                            name="menu-item-parent-id[<?php echo $item['id']; ?>]"
+                                                                            class="widefat">
+                                                                        <option value="0">— None (top level) —</option>
+                                                                        <?php foreach ($menu_items as $mi): ?>
+                                                                            <?php if ($mi['id'] == $item['id']) continue; ?>
+                                                                            <option value="<?php echo $mi['id']; ?>" 
+                                                                                <?php echo (isset($item['parent_id']) && intval($item['parent_id']) == $mi['id']) ? 'selected' : ''; ?>>
+                                                                                <?php echo htmlspecialchars($mi['navigation_label'] ?: $mi['title']); ?>
+                                                                            </option>
+                                                                        <?php endforeach; ?>
+                                                                    </select>
                                                                 </label>
                                                             </p>
                                                             

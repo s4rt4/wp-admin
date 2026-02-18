@@ -3,7 +3,7 @@
  * Front Controller & Router
  */
 
-require_once 'wp-includes/functions.php';
+require_once 'wp-admin/db_config.php';
 
 // Parse Request
 $request_uri = $_SERVER['REQUEST_URI'];
@@ -27,7 +27,8 @@ if ($path === '' || $path === 'index.php') {
         $page_id = get_option('page_on_front');
         if ($page_id) {
             // Fetch slug for the page
-            $conn = get_db_connection();
+            // Fetch slug for the page
+            // Use global $conn (mysqli) from db_config.php
             $stmt = $conn->prepare("SELECT slug FROM pages WHERE id = ?");
             if ($stmt) {
                 $stmt->bind_param("i", $page_id);
