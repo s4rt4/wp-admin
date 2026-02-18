@@ -261,24 +261,99 @@ require_once 'sidebar.php'; // Restore Sidebar
     </form>
 </div>
 
-<!-- Simple Media Picker Modal (Reuse from post-new.php simplified) -->
-<div id="media-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:100000;">
-    <div style="background:#fff; width:80%; height:80%; margin:5% auto; position:relative; display:flex; flex-direction:column;">
-        <div style="padding:15px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0;">Select Image</h3>
-            <button type="button" onclick="closeMediaPicker()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+<!-- Media Picker Modal -->
+<style>
+#media-modal-box { background:#fff; width:82%; max-width:900px; height:82vh; margin:4vh auto; display:flex; flex-direction:column; border-radius:4px; overflow:hidden; box-shadow:0 4px 30px rgba(0,0,0,.35); }
+.mm-tabs { display:flex; border-bottom:1px solid #ddd; background:#f6f7f7; }
+.mm-tab { padding:10px 20px; font-size:13px; font-weight:600; cursor:pointer; border:none; background:none; color:#50575e; border-bottom:2px solid transparent; transition:all .15s; }
+.mm-tab.active { color:#2271b1; border-bottom-color:#2271b1; background:#fff; }
+.mm-tab:hover:not(.active) { color:#2271b1; }
+.mm-panel { display:none; flex:1; overflow:hidden; flex-direction:column; }
+.mm-panel.active { display:flex; }
+/* Library panel */
+#mm-library-grid { flex:1; overflow-y:auto; padding:12px; display:flex; flex-wrap:wrap; align-content:flex-start; gap:8px; }
+.mm-thumb { width:100px; height:100px; border:2px solid transparent; border-radius:3px; overflow:hidden; cursor:pointer; position:relative; flex-shrink:0; }
+.mm-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.mm-thumb:hover { border-color:#2271b1; }
+/* Upload panel */
+#mm-upload-panel { padding:20px; flex:1; overflow-y:auto; }
+#mm-dropzone { border:2px dashed #8c8f94; border-radius:6px; padding:40px 20px; text-align:center; cursor:pointer; transition:all .2s; background:#fafafa; }
+#mm-dropzone.drag-over { border-color:#2271b1; background:#f0f6fc; }
+#mm-dropzone svg { width:48px; height:48px; fill:#8c8f94; margin-bottom:10px; }
+#mm-dropzone p { margin:6px 0; color:#50575e; font-size:13px; }
+#mm-dropzone strong { color:#2271b1; }
+#mm-file-input { display:none; }
+#mm-upload-progress { margin-top:16px; display:none; }
+#mm-progress-bar-wrap { height:6px; background:#e0e0e0; border-radius:3px; overflow:hidden; margin-bottom:8px; }
+#mm-progress-bar { height:100%; background:#2271b1; width:0; transition:width .2s; border-radius:3px; }
+#mm-upload-status { font-size:13px; color:#50575e; }
+#mm-upload-preview { margin-top:16px; display:none; }
+#mm-upload-preview img { max-width:200px; max-height:200px; border:1px solid #ddd; border-radius:3px; }
+#mm-upload-use-btn { margin-top:10px; }
+</style>
+<div id="media-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:100000; overflow-y:auto;">
+    <div id="media-modal-box">
+        <!-- Header -->
+        <div style="padding:12px 16px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+            <h3 style="margin:0; font-size:16px;">Select or Upload Image</h3>
+            <button type="button" onclick="closeMediaPicker()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#888; line-height:1;">&times;</button>
         </div>
-        <div style="flex:1; padding:15px; overflow-y:auto;" id="media-grid">
-            Loading...
+        <!-- Tabs -->
+        <div class="mm-tabs">
+            <button type="button" class="mm-tab active" onclick="switchMMTab('library', this)">📁 Media Library</button>
+            <button type="button" class="mm-tab" onclick="switchMMTab('upload', this)">⬆️ Upload New</button>
+        </div>
+        <!-- Library Panel -->
+        <div id="mm-panel-library" class="mm-panel active">
+            <div id="mm-library-grid"><p style="color:#888;padding:20px;">Loading...</p></div>
+        </div>
+        <!-- Upload Panel -->
+        <div id="mm-panel-upload" class="mm-panel">
+            <div id="mm-upload-panel">
+                <div id="mm-dropzone" onclick="document.getElementById('mm-file-input').click()">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                    <p><strong>Click to browse</strong> or drag & drop here</p>
+                    <p style="color:#888; font-size:12px;">JPG, PNG, GIF, WebP, SVG &mdash; max 10MB</p>
+                </div>
+                <input type="file" id="mm-file-input" accept="image/*" multiple>
+                <div id="mm-upload-progress">
+                    <div id="mm-progress-bar-wrap"><div id="mm-progress-bar"></div></div>
+                    <div id="mm-upload-status">Uploading...</div>
+                </div>
+                <div id="mm-upload-preview">
+                    <img id="mm-upload-preview-img" src="" alt="">
+                    <br>
+                    <button type="button" class="button button-primary" id="mm-upload-use-btn">Use This Image</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
 let currentTargetInput = '';
+let mmLastUploadedUrl = '';
+
+function switchMMTab(tab, btn) {
+    document.querySelectorAll('.mm-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.mm-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('mm-panel-' + tab).classList.add('active');
+    if (tab === 'library') loadMedia();
+}
 
 function openMediaPicker(targetId) {
     currentTargetInput = targetId;
+    mmLastUploadedUrl = '';
+    // Reset upload panel
+    document.getElementById('mm-upload-progress').style.display = 'none';
+    document.getElementById('mm-upload-preview').style.display = 'none';
+    document.getElementById('mm-file-input').value = '';
+    // Switch to library tab
+    document.querySelectorAll('.mm-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.mm-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.mm-tab')[0].classList.add('active');
+    document.getElementById('mm-panel-library').classList.add('active');
     document.getElementById('media-modal').style.display = 'block';
     loadMedia();
 }
@@ -288,27 +363,29 @@ function closeMediaPicker() {
 }
 
 function loadMedia() {
+    const grid = document.getElementById('mm-library-grid');
+    grid.innerHTML = '<p style="color:#888;padding:20px;">Loading...</p>';
+
     fetch('media-json.php')
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
-            const grid = document.getElementById('media-grid');
             grid.innerHTML = '';
-            
-            // Add custom URL option? Maybe later. Just list images for now.
-            if (data.length === 0) {
-                grid.innerHTML = '<p>No media files found.</p>';
+            const files = data.images || [];
+            if (files.length === 0) {
+                grid.innerHTML = '<p style="color:#888;padding:20px;">No images found. Use the <strong>Upload New</strong> tab to add images.</p>';
                 return;
             }
-            
-            data.forEach(file => {
+            files.forEach(file => {
                 const item = document.createElement('div');
-                item.style.cssText = 'display:inline-block; margin:5px; border:2px solid transparent; cursor:pointer; width:100px; height:100px; overflow:hidden; position:relative;';
-                item.innerHTML = '<img src="../' + file.url + '" style="width:100%; height:100%; object-fit:cover;">';
-                item.onclick = function() {
-                    selectImage(file.url);
-                };
+                item.className = 'mm-thumb';
+                item.title = file.name;
+                item.innerHTML = '<img src="' + file.url + '" alt="' + file.name + '" loading="lazy">';
+                item.onclick = () => selectImage(file.url);
                 grid.appendChild(item);
             });
+        })
+        .catch(() => {
+            grid.innerHTML = '<p style="color:#d63638;padding:20px;">Failed to load media. Please try again.</p>';
         });
 }
 
@@ -322,7 +399,8 @@ function selectImage(url) {
 
     if (previewId) {
         let wrapper = document.getElementById(previewId + '-wrapper');
-        wrapper.innerHTML = '<img id="' + previewId + '" src="../' + url + '" style="max-width:100%; max-height:100%;">';
+        // url is already an absolute web path — no '../' needed
+        wrapper.innerHTML = '<img id="' + previewId + '" src="' + url + '" style="max-width:100%; max-height:100%;">';
     }
     
     closeMediaPicker();
@@ -340,6 +418,87 @@ function removeImage(targetId) {
          wrapper.innerHTML = '<span id="' + previewId.replace('preview', 'placeholder') + '" style="color:#ccc; font-size:12px; text-align:center; width:100%;">' + placeholderText + '</span>';
     }
 }
+
+// ---- Upload logic ----
+function mmDoUpload(file) {
+    const progress = document.getElementById('mm-upload-progress');
+    const bar = document.getElementById('mm-progress-bar');
+    const status = document.getElementById('mm-upload-status');
+    const preview = document.getElementById('mm-upload-preview');
+    const previewImg = document.getElementById('mm-upload-preview-img');
+
+    progress.style.display = 'block';
+    preview.style.display = 'none';
+    bar.style.width = '0';
+    status.textContent = 'Uploading ' + file.name + '...';
+    status.style.color = '#50575e';
+
+    const fd = new FormData();
+    fd.append('image', file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'upload.php?source=media', true);
+
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            bar.style.width = Math.round(e.loaded / e.total * 100) + '%';
+        }
+    };
+
+    xhr.onload = function() {
+        try {
+            const res = JSON.parse(xhr.responseText);
+            if (res.success === 1 && res.file && res.file.url) {
+                bar.style.width = '100%';
+                status.textContent = '✅ Upload successful! Click "Use This Image" to apply.';
+                status.style.color = '#00a32a';
+                mmLastUploadedUrl = res.file.url;
+                previewImg.src = res.file.url;
+                preview.style.display = 'block';
+            } else {
+                status.textContent = '❌ ' + (res.error || 'Upload failed.');
+                status.style.color = '#d63638';
+            }
+        } catch(e) {
+            status.textContent = '❌ Server error. Please try again.';
+            status.style.color = '#d63638';
+        }
+    };
+
+    xhr.onerror = function() {
+        status.textContent = '❌ Network error. Please try again.';
+        status.style.color = '#d63638';
+    };
+
+    xhr.send(fd);
+}
+
+// File input change
+document.getElementById('mm-file-input').addEventListener('change', function() {
+    if (this.files.length > 0) mmDoUpload(this.files[0]);
+});
+
+// Drag & drop
+(function() {
+    const dz = document.getElementById('mm-dropzone');
+    dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', function() { dz.classList.remove('drag-over'); });
+    dz.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dz.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) mmDoUpload(files[0]);
+    });
+})();
+
+// "Use This Image" button
+document.getElementById('mm-upload-use-btn').addEventListener('click', function() {
+    if (mmLastUploadedUrl) {
+        selectImage(mmLastUploadedUrl);
+        // Reload library in background
+        loadMedia();
+    }
+});
 </script>
 
 </div>
