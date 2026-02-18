@@ -20,7 +20,8 @@ function getDBConnection() {
         );
         return $pdo;
     } catch (PDOException $e) {
-        die(json_encode(['success' => false, 'error' => 'Database connection failed: ' . $e->getMessage()]));
+        error_log('DB connection failed: ' . $e->getMessage());
+        die(json_encode(['success' => false, 'error' => 'Database connection failed. Please contact the administrator.']));
     }
 }
 
