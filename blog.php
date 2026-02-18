@@ -3,6 +3,7 @@
 
 // Include config & DB connection
 require_once 'wp-admin/db_config.php';
+require_once 'wp-includes/functions.php';
 
 // Ensure DB connection (MySQLi)
 if (!isset($conn) || $conn->connect_error) {
@@ -12,6 +13,9 @@ if (!isset($conn) || $conn->connect_error) {
 // Fetch Published Posts
 // Filtering
 $limit = get_option('posts_per_page', 10);
+if (empty($limit) || (int)$limit < 1) {
+    $limit = 10;
+}
 $where_clauses = ["p.status = 'publish'"];
 $join_clauses = [];
 $params = [];
