@@ -22,6 +22,9 @@ if ($pageId > 0) {
     } elseif ($pageData['builder_type'] === 'editorjs') {
         header("Location: builder-editorjs.php?id=" . $pageId);
         exit;
+    } elseif ($pageData['builder_type'] === 'monaco') {
+        header("Location: builder-code.php?id=" . $pageId);
+        exit;
     }
 }
 ?>
@@ -159,7 +162,9 @@ if ($pageId > 0) {
         /* Builder Selection Cards */
         .builder-options {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -301,6 +306,10 @@ if ($pageId > 0) {
                                 <h3>EditorJS</h3>
                                 <p>Block-style content editor</p>
                             </div>
+                            <div class="builder-option" data-builder="monaco">
+                                <h3>Code Editor</h3>
+                                <p>Raw HTML/PHP editor with syntax highlighting</p>
+                            </div>
                         </div>
                         <input type="hidden" id="builder-type" name="builder_type" value="grapesjs">
                     </div>
@@ -309,7 +318,7 @@ if ($pageId > 0) {
                         <label for="page-status">Status</label>
                         <select id="page-status" name="status">
                             <option value="draft">Draft</option>
-                            <option value="published">Published</option>
+                            <option value="publish">Published</option>
                         </select>
                     </div>
                     
@@ -414,6 +423,8 @@ if ($pageId > 0) {
                         window.location.href = 'builder-grapesjs.php?id=' + builderId;
                     } else if (formData.builder_type === 'editorjs') {
                         window.location.href = 'builder-editorjs.php?id=' + builderId;
+                    } else if (formData.builder_type === 'monaco') {
+                        window.location.href = 'builder-code.php?id=' + builderId;
                     }
                 } else {
                     errorContainer.innerHTML = '<div class="error-message">' + (result.error || 'Failed to create page') + '</div>';

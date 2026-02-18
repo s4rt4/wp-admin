@@ -19,8 +19,28 @@ if (!$conn) {
 }
 
 // Fetch Published Posts
+// Filtering
 $limit = get_option('posts_per_page', 10);
-$sql = "SELECT * FROM posts WHERE status = 'publish' ORDER BY created_at DESC LIMIT " . (int)$limit;
+$where_clauses = ["p.status = 'publish'"];
+$join_clauses = [];
+$params = [];
+$types = "";
+
+if (isset($_GET['category_id']) && is_numeric($_GET['category_id'])) {
+    $cat_id = (int)$_GET['category_id'];
+    $join_clauses[] = "JOIN post_categories pc ON p.id = pc.post_id";
+    $where_clauses[] = "pc.category_id = $cat_id";
+}
+
+if (isset($_GET['tag_id']) && is_numeric($_GET['tag_id'])) {
+    $tag_id = (int)$_GET['tag_id'];
+    // Avoid double join if category join exists (though variable names differ, keep logic simple)
+    // Actually using separate aliases is safer if multiple joins needed, but here simple.
+    $join_clauses[] = "JOIN post_tags pt ON p.id = pt.post_id";
+    $where_clauses[] = "pt.tag_id = $tag_id";
+}
+
+$sql = "SELECT DISTINCT p.* FROM posts p " . implode(" ", $join_clauses) . " WHERE " . implode(" AND ", $where_clauses) . " ORDER BY p.created_at DESC LIMIT " . (int)$limit;
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -48,6 +68,7 @@ $result = $conn->query($sql);
         .widget li:last-child { border-bottom: none; }
         .widget a { text-decoration: none; color: #0073aa; }
         .widget a:hover { color: #005f8a; }
+        .widget a.active { font-weight: bold; color: #333; cursor: default; }
         .count { float: right; background: #f0f0f1; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; color: #666; }
 
         /* Post Card */
@@ -71,9 +92,54 @@ $result = $conn->query($sql);
             .container { flex-direction: column; }
             .sidebar { width: 100%; }
         }
+
+        /* Loading Screen */
+        #page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f4f6f8;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #page-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #ddd;
+            border-top: 5px solid #0073aa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Fade Content */
+        body { opacity: 0; transition: opacity 0.3s ease-in; }
+        body.loaded { opacity: 1; }
     </style>
 </head>
-<body>
+<body class="">
+
+    <!-- Loader -->
+    <div id="page-loader">
+        <div class="spinner"></div>
+    </div>
 
     <h1 class="page-title">My Blog</h1>
 
@@ -118,6 +184,7 @@ $result = $conn->query($sql);
             <div class="widget">
                 <h3>Categories</h3>
                 <ul>
+                    <li><a href="blog.php" class="<?php echo !isset($_GET['category_id']) ? 'active' : ''; ?>">All Categories</a></li>
                     <?php
                     // Fetch categories with published post count
                     $cat_sql = "SELECT c.*, COUNT(p.id) as count 
@@ -132,10 +199,11 @@ $result = $conn->query($sql);
                     
                     if ($cat_result && $cat_result->num_rows > 0) {
                         while($cat = $cat_result->fetch_assoc()) {
-                            echo '<li><a href="#">' . htmlspecialchars($cat['name']) . '</a> <span class="count">' . $cat['count'] . '</span></li>';
+                            $active = (isset($_GET['category_id']) && $_GET['category_id'] == $cat['id']) ? 'active' : '';
+                            echo '<li><a href="?category_id=' . $cat['id'] . '" class="' . $active . '">' . htmlspecialchars($cat['name']) . '</a> <span class="count">' . $cat['count'] . '</span></li>';
                         }
                     } else {
-                        echo '<li>No categories.</li>';
+                        // echo '<li>No categories.</li>'; // Optional: hide if empty or keep consistent
                     }
                     ?>
                 </ul>
@@ -145,6 +213,7 @@ $result = $conn->query($sql);
             <div class="widget">
                 <h3>Tags</h3>
                 <ul>
+                    <li><a href="blog.php" class="<?php echo !isset($_GET['tag_id']) ? 'active' : ''; ?>">All Tags</a></li>
                     <?php
                     // Fetch tags with published post count
                     $tag_sql = "SELECT t.*, COUNT(p.id) as count 
@@ -159,10 +228,11 @@ $result = $conn->query($sql);
                     
                     if ($tag_result && $tag_result->num_rows > 0) {
                         while($tag = $tag_result->fetch_assoc()) {
-                            echo '<li><a href="#">' . htmlspecialchars($tag['name']) . '</a> <span class="count">' . $tag['count'] . '</span></li>';
+                            $active = (isset($_GET['tag_id']) && $_GET['tag_id'] == $tag['id']) ? 'active' : '';
+                            echo '<li><a href="?tag_id=' . $tag['id'] . '" class="' . $active . '">' . htmlspecialchars($tag['name']) . '</a> <span class="count">' . $tag['count'] . '</span></li>';
                         }
                     } else {
-                        echo '<li>No tags.</li>';
+                        // echo '<li>No tags.</li>';
                     }
                     ?>
                 </ul>
@@ -171,6 +241,34 @@ $result = $conn->query($sql);
         </div>
 
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Show content and hide loader
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+                document.getElementById('page-loader').classList.add('hidden');
+            }, 100); // Small delay to ensure render
+
+            // Re-show loader on navigation
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    const target = this.getAttribute('target');
+                    
+                    // Only for internal navigation links (not # or external)
+                    if (href && href !== '#' && !href.startsWith('javascript') && target !== '_blank') {
+                        // Don't wait for fade out, just show loader immediately gives "snappier" feel?
+                        // Or reverse: fade out body? 
+                        
+                        // Let's just show loader
+                        document.getElementById('page-loader').classList.remove('hidden');
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>

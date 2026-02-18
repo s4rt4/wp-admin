@@ -9,9 +9,13 @@ if (session_status() === PHP_SESSION_NONE) {
 if (file_exists(__DIR__ . '/wp-admin/db_config.php')) {
     require_once __DIR__ . '/wp-admin/db_config.php';
 } else {
-    // Fallback if moved
     require_once 'db_config.php'; 
 }
+
+// Shortcode processor (needs PDO)
+require_once __DIR__ . '/wp-admin/shortcodes.php';
+$pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4', DB_USER, DB_PASS);
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if ($conn->connect_error) {
@@ -125,7 +129,7 @@ while($row = $res_c->fetch_assoc()) {
         .content { font-size: 1.1em; margin-bottom: 40px; }
         .back-link { display: inline-block; margin-bottom: 20px; color: #0073aa; text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
-        
+
         /* Basic SunEditor Content Styles override if necessary */
         .se-wrapper-inner { min-height: auto !important; height: auto !important; }
 
@@ -145,7 +149,6 @@ while($row = $res_c->fetch_assoc()) {
             transition: opacity 0.2s;
         }
         .share-btn:hover { opacity: 0.9; }
-        
         .btn-facebook { background-color: #1877f2; }
         .btn-twitter { background-color: #1da1f2; }
         .btn-linkedin { background-color: #0077b5; }
@@ -159,7 +162,6 @@ while($row = $res_c->fetch_assoc()) {
         .comment-author { font-weight: bold; margin-bottom: 5px; display: block; }
         .comment-date { font-size: 0.8em; color: #999; margin-left: 10px; font-weight: normal; }
         .comment-body { color: #444; }
-
         .comment-form input, .comment-form textarea {
             width: 100%;
             padding: 10px;
@@ -193,8 +195,9 @@ while($row = $res_c->fetch_assoc()) {
         </div>
 
         <div class="content sun-editor-editable">
-            <?php echo $post['content']; ?>
+            <?php echo process_shortcodes($post['content'], $pdo); ?>
         </div>
+
 
         <!-- Social Share -->
         <div class="share-section">

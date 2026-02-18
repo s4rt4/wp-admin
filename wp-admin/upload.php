@@ -110,10 +110,22 @@ if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
 }
 
 // Return response based on source
-if ($source === 'grapesjs') {
+    if ($source === 'grapesjs') {
     // GrapesJS expects: { data: ['url1', 'url2'] }
     echo json_encode([
         'data' => [$fileUrl]
+    ]);
+} elseif ($source === 'suneditor') {
+    // SunEditor expects: { "errorMessage": "", "result": [ { "url": "...", "name": "...", "size": "..." } ] }
+    echo json_encode([
+        'errorMessage' => null,
+        'result' => [
+            [
+                'url' => $fileUrl,
+                'name' => $safeName,
+                'size' => $file['size']
+            ]
+        ]
     ]);
 } else {
     // EditorJS Image Tool expects: { success: 1, file: { url: '...' } }

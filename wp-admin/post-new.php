@@ -57,16 +57,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle Featured Image Upload
     $featured_image = $post_id > 0 ? ($post['featured_image'] ?? '') : '';
     if (!empty($_FILES['featured_image']['name'])) {
-        $upload_dir = '../uploads/';
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
+        // Use media/ directory so it appears in Media Library
+        $upload_dir = 'media/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
         }
-        $file_name = time() . '_' . basename($_FILES['featured_image']['name']);
+        
+        // Generate unique filename
+        $ext = strtolower(pathinfo($_FILES['featured_image']['name'], PATHINFO_EXTENSION));
+        $file_name = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
         $target_file = $upload_dir . $file_name;
         
         // Proper validation should be here (file type, size, etc.)
         if (move_uploaded_file($_FILES['featured_image']['tmp_name'], $target_file)) {
-            $featured_image = 'uploads/' . $file_name;
+            // Save path relative to site root so blog.php (in root) works: wp-admin/media/filename
+            $featured_image = 'wp-admin/media/' . $file_name;
         }
     }
 
@@ -90,8 +95,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->query("DELETE FROM post_categories WHERE post_id = $post_id");
         // 2. Insert new
         if (isset($_POST['post_category']) && is_array($_POST['post_category'])) {
+            $unique_categories = array_unique($_POST['post_category']);
             $stmt_cat = $conn->prepare("INSERT INTO post_categories (post_id, category_id) VALUES (?, ?)");
-            foreach ($_POST['post_category'] as $cat_id) {
+            foreach ($unique_categories as $cat_id) {
                 $cat_id = intval($cat_id);
                 $stmt_cat->bind_param("ii", $post_id, $cat_id);
                 $stmt_cat->execute();
@@ -104,8 +110,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 2. Insert new
         // Note: The UI might send 'tax_input[post_tag]' as array of IDs
         if (isset($_POST['tax_input']['post_tag']) && is_array($_POST['tax_input']['post_tag'])) {
+            $unique_tags = array_unique($_POST['tax_input']['post_tag']);
             $stmt_tag = $conn->prepare("INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)");
-            foreach ($_POST['tax_input']['post_tag'] as $tag_id) {
+            foreach ($unique_tags as $tag_id) {
                 $tag_id = intval($tag_id);
                 $stmt_tag->bind_param("ii", $post_id, $tag_id);
                 $stmt_tag->execute();
@@ -155,12 +162,16 @@ $month_names = [
 <!-- SunEditor CSS -->
 <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
 
+<!-- CodeMirror CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
+
 <div id="wpcontent">
     <div class="wrap">
         <h1 class="wp-heading-inline"><?php echo $page_title; ?></h1>
         
         <?php if (isset($_GET['message']) && $_GET['message'] == 'saved'): ?>
-            <div id="message" class="updated notice is-dismissible"><p>Post updated. <a href="#">View Post</a></p></div>
+            <div id="message" class="updated notice is-dismissible"><p>Post updated.</p></div>
         <?php endif; ?>
 
         <form method="post" action="" enctype="multipart/form-data">
@@ -189,7 +200,7 @@ $month_names = [
                                     <a href="#" class="cancel-slug-edit" onclick="cancelSlug()">Cancel</a>
                                 </span>
                                 <?php if($post_id > 0): ?>
-                                    <span id="view-post-btn"><a href="#" class="button button-small">View Post</a></span>
+                                    <!-- View Post Removed as per request -->
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -456,6 +467,25 @@ $month_names = [
 <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/src/lang/en.js"></script>
 
+<!-- CodeMirror JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+
+<!-- Prism.js for Inline Code Block Syntax Highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+
 <script>
     const editor = SUNEDITOR.create((document.getElementById('content') || 'content'),{
         // All of the plugins are loaded in the "window.SUNEDITOR" object in dist/suneditor.min.js file
@@ -478,12 +508,41 @@ $month_names = [
         height: '400px',
         placeholder: 'Start writing your post...',
         resizingBar: true,
+        // Image Upload Configuration
+        imageUploadUrl: 'upload.php?source=suneditor',
+        imageUploadHeader: null,
+        imageUrlInput: false,
+        // CodeMirror Configuration for Syntax Highlighting
+        codeMirror: {
+            src: CodeMirror,
+            options: {
+                mode: 'htmlmixed',
+                htmlMode: true,
+                lineNumbers: true,
+                lineWrapping: true,
+                theme: 'monokai',
+                indentUnit: 4,
+                indentWithTabs: true,
+                matchBrackets: true,
+                autoCloseBrackets: true,
+                autoCloseTags: true,
+                extraKeys: {
+                    "Ctrl-Space": "autocomplete",
+                    "F11": function(cm) {
+                        cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                    },
+                    "Esc": function(cm) {
+                        if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                    }
+                }
+            }
+        },
         callBackSave: function (contents, isChanged) {
              // console.log(contents);
         }
     });
 
-    // Word Count Logic
+    // Word Count Logic and Syntax Highlighting
     function updateWordCount() {
         var text = editor.getText();
         var wordCount = 0;
@@ -492,14 +551,103 @@ $month_names = [
         }
         document.getElementById('word-count').innerText = 'Word count: ' + wordCount;
     }
+    
+    function highlightCodeBlocks() {
+        // Apply Prism.js syntax highlighting to code blocks
+        setTimeout(function() {
+            var editorElement = document.querySelector('.sun-editor-editable');
+            if (!editorElement) return;
+            
+            // Handle both <pre> and <pre><code> structures
+            var preBlocks = editorElement.querySelectorAll('pre');
+            preBlocks.forEach(function(pre) {
+                // Skip if already processed
+                if (pre.classList.contains('prism-processed')) return;
+                
+                var codeElement;
+                
+                // Check if pre already has a code child
+                var existingCode = pre.querySelector('code');
+                if (existingCode) {
+                    codeElement = existingCode;
+                } else {
+                    // SunEditor creates <pre> without <code>, so wrap content
+                    codeElement = document.createElement('code');
+                    codeElement.className = 'language-markup';
+                    codeElement.textContent = pre.textContent;
+                    pre.textContent = '';
+                    pre.appendChild(codeElement);
+                }
+                
+                // Ensure language class exists
+                if (!codeElement.className || codeElement.className.indexOf('language-') === -1) {
+                    codeElement.className = 'language-markup';
+                }
+                
+                // Wrap in code-toolbar div for copy button
+                var wrapper;
+                if (!pre.parentElement.classList.contains('code-toolbar')) {
+                    wrapper = document.createElement('div');
+                    wrapper.className = 'code-toolbar';
+                    pre.parentNode.insertBefore(wrapper, pre);
+                    wrapper.appendChild(pre);
+                } else {
+                    wrapper = pre.parentElement;
+                }
+                
+                // Mark as processed
+                pre.classList.add('prism-processed');
+                
+                // Apply Prism highlighting
+                try {
+                    Prism.highlightElement(codeElement);
+                } catch (e) {
+                    console.log('Prism highlighting error:', e);
+                }
+                
+                // Add copy button manually
+                if (!wrapper.querySelector('.toolbar')) {
+                    var toolbar = document.createElement('div');
+                    toolbar.className = 'toolbar';
+                    
+                    var copyButton = document.createElement('button');
+                    copyButton.className = 'copy-to-clipboard-button';
+                    copyButton.textContent = 'Copy';
+                    copyButton.type = 'button';
+                    
+                    copyButton.addEventListener('click', function() {
+                        var code = codeElement.textContent;
+                        navigator.clipboard.writeText(code).then(function() {
+                            copyButton.textContent = 'Copied!';
+                            setTimeout(function() {
+                                copyButton.textContent = 'Copy';
+                            }, 2000);
+                        }).catch(function(err) {
+                            console.error('Failed to copy:', err);
+                        });
+                    });
+                    
+                    toolbar.appendChild(copyButton);
+                    wrapper.appendChild(toolbar);
+                }
+            });
+        }, 100);
+    }
+
+    editor.onChange = function(contents, core) {
+        updateWordCount();
+        highlightCodeBlocks();
+    };
 
     editor.onInput = function (e, core) {
         updateWordCount();
+        highlightCodeBlocks();
     };
 
     // Initial count and move to footer
     editor.onload = function (core, isUpdate) {
         updateWordCount();
+        highlightCodeBlocks(); // Apply syntax highlighting on load
         
         // Move word count to editor footer (resizing bar)
         var resizingBar = document.querySelector('.se-resizing-bar');
@@ -613,6 +761,86 @@ $month_names = [
 
 
 <style>
+    /* Fix Full Screen Z-Index Conflict */
+    #wpcontent { z-index: auto; }
+    .sun-editor-editable { background-color: #fff; } /* Ensure white bg */
+    .sun-editor.se-full-screen { z-index: 100005 !important; }
+
+    /* Enhanced Code Block Styling */
+    .sun-editor-editable pre {
+        background: #2d2d2d !important;
+        border-radius: 8px;
+        padding: 20px !important;
+        margin: 20px 0 !important;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        overflow-x: auto;
+    }
+
+    .sun-editor-editable pre code {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+        color: #f8f8f2 !important;
+        background: transparent !important;
+        padding: 0 !important;
+    }
+
+    /* Prism Toolbar Styling */
+    .sun-editor-editable div.code-toolbar {
+        position: relative;
+        margin: 20px 0;
+    }
+
+    .sun-editor-editable div.code-toolbar > .toolbar {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+        z-index: 10;
+    }
+
+    .sun-editor-editable div.code-toolbar:hover > .toolbar {
+        opacity: 1;
+    }
+
+    .sun-editor-editable div.code-toolbar > .toolbar button,
+    .sun-editor-editable div.code-toolbar > .toolbar span {
+        background: #4CAF50 !important;
+        color: white !important;
+        border: none !important;
+        padding: 6px 12px !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        transition: background 0.2s !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+    }
+
+    .sun-editor-editable div.code-toolbar > .toolbar button:hover,
+    .sun-editor-editable div.code-toolbar > .toolbar span:hover {
+        background: #45a049 !important;
+    }
+
+    /* Prism Token Colors Override for Better Visibility */
+    .sun-editor-editable pre code.language-markup .token.tag {
+        color: #f92672 !important;
+    }
+
+    .sun-editor-editable pre code.language-markup .token.attr-name {
+        color: #a6e22e !important;
+    }
+
+    .sun-editor-editable pre code.language-markup .token.attr-value {
+        color: #e6db74 !important;
+    }
+
+    .sun-editor-editable pre code .token.punctuation {
+        color: #f8f8f2 !important;
+    }
+
     /* Custom Scrollbar for Categories */
     #category-all { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #fdfdfd; }
     #categorychecklist { margin: 0; padding: 0; list-style: none; }

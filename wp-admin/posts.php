@@ -132,13 +132,37 @@ $result = $conn->query("SELECT * FROM posts $sql_where ORDER BY created_at DESC"
                                 ?>
                             </td>
                             <td class="author column-author" data-colname="Author"><a href="#">admin</a></td>
-                            <td class="categories column-categories" data-colname="Categories"><a href="#">Uncategorized</a></td>
-                            <td class="tags column-tags" data-colname="Tags"><span aria-hidden="true">—</span></td>
+                            <td class="categories column-categories" data-colname="Categories">
+                                <?php 
+                                $cat_sql = "SELECT c.name FROM categories c JOIN post_categories pc ON c.id = pc.category_id WHERE pc.post_id = " . $row['id'];
+                                $cat_res = $conn->query($cat_sql);
+                                $cats = [];
+                                if ($cat_res) {
+                                    while($c = $cat_res->fetch_assoc()) {
+                                        $cats[] = htmlspecialchars($c['name']);
+                                    }
+                                }
+                                echo !empty($cats) ? implode(', ', $cats) : 'Uncategorized';
+                                ?>
+                            </td>
+                            <td class="tags column-tags" data-colname="Tags">
+                                <?php 
+                                $tag_sql = "SELECT t.name FROM tags t JOIN post_tags pt ON t.id = pt.tag_id WHERE pt.post_id = " . $row['id'];
+                                $tag_res = $conn->query($tag_sql);
+                                $tags = [];
+                                if ($tag_res) {
+                                    while($t = $tag_res->fetch_assoc()) {
+                                        $tags[] = htmlspecialchars($t['name']);
+                                    }
+                                }
+                                echo !empty($tags) ? implode(', ', $tags) : '<span aria-hidden="true">—</span>';
+                                ?>
+                            </td>
                             <td class="date column-date" data-colname="Date"><?php echo $row['status'] == 'publish' ? 'Published' : 'Last Modified'; ?><br><abbr title="<?php echo $row['created_at']; ?>"><?php echo date('Y/m/d h:i a', strtotime($row['created_at'])); ?></abbr></td>
                         </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
-                    <tr class="no-items"><td class="colspanchange" colspan="7">No posts found.</td></tr>
+                    <!-- No posts found (handled by DataTables) -->
                 <?php endif; ?>
             </tbody>
 

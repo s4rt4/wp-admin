@@ -13,13 +13,30 @@ if (empty($slug)) {
     die("Page not found");
 }
 
+// Preview Mode: Allow drafts if preview parameter is set and user is logged in
+$preview = isset($_GET['preview']) && $_GET['preview'] === 'true';
+$statusCondition = "AND status = 'publish'";
+
+// Check session for admin authentication
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if ($preview && isset($_SESSION['user_id'])) {
+    $statusCondition = ""; // Remove status check for authenticated preview
+}
+
 // Get page data
 $pdo = getDBConnection();
-$stmt = $pdo->prepare("SELECT * FROM pages WHERE slug = ? AND status = 'publish'");
+$sql = "SELECT * FROM pages WHERE slug = ? $statusCondition";
+$stmt = $pdo->prepare($sql);
 $stmt->execute([$slug]);
 $page = $stmt->fetch();
 
 if (!$page) {
+    if ($preview && !isset($_SESSION['user_id'])) {
+        die("Page not found or requires login to preview");
+    }
     die("Page not found or not published");
 }
 
@@ -49,6 +66,9 @@ if (!isset($_SESSION['visited_today'])) {
     $pdo->prepare("UPDATE daily_visitors SET visitor_count = visitor_count + 1 WHERE visit_date = ?")->execute([$today]);
 }
 
+// Include shortcode processor
+require_once __DIR__ . '/wp-admin/shortcodes.php';
+
 // Parse content
 $content = json_decode($page['content'], true);
 $html = '';
@@ -67,6 +87,25 @@ if ($page['builder_type'] === 'grapesjs' && isset($content['pages'])) {
 } elseif ($page['builder_type'] === 'editorjs' && isset($content['editorjs'])) {
     // EditorJS content - convert to HTML
     $html = convertEditorJSToHTML($content['editorjs']);
+} elseif ($page['builder_type'] === 'monaco') {
+    // Monaco Editor (Raw HTML/PHP)
+    // Note: Assuming stored content is the raw string from editor
+    // If it was json_encoded (e.g. "{\"content\":\"...\"}"), we need the value
+    // But builder-code.php sends { content: "..." } to API, and API saves content column directly.
+    // Wait, API.php: $content = $data['content'].
+    // If content is just a string, it's saved as string.
+    // json_decode at line 53 might return null for raw string if not JSON format.
+    // Let's re-fetch content if json_decode failed or check type.
+    
+    if (is_array($content) && isset($content['content'])) {
+         // Maybe API wraps it? No, API saves direct value.
+         // Actually, if it's raw HTML string in DB, json_decode will return NULL (unless it's a valid JSON string like "true").
+         // So $content might be null.
+         // Let's use $page['content'] directly for monaco.
+         $html = $page['content'];
+    } else {
+         $html = $page['content'];
+    }
 }
 
 function convertEditorJSToHTML($editorData) {
@@ -196,8 +235,7 @@ function convertEditorJSToHTML($editorData) {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
                 line-height: 1.6;
                 color: #333;
-                max-width: 800px;
-                margin: 0 auto;
+                margin: 0;
                 padding: 40px 20px;
             }
             
@@ -299,6 +337,6 @@ function convertEditorJSToHTML($editorData) {
     </style>
 </head>
 <body>
-    <?php echo $html; ?>
+    <?php echo process_shortcodes($html, $pdo); ?>
 </body>
 </html>

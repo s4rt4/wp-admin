@@ -42,6 +42,7 @@ try {
 // Initial Setup: Create Default Menu if none exists (Optional)
 // Handle Actions
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+$tab    = isset($_GET['tab']) ? $_GET['tab'] : 'edit-menus';
 $current_menu_id = isset($_REQUEST['menu']) ? intval($_REQUEST['menu']) : 0;
 
 // Handle Create Menu
@@ -175,9 +176,62 @@ require_once 'sidebar.php';
         <hr class="wp-header-end">
         
         <div class="nav-tab-wrapper">
-             <a href="menus.php" class="nav-tab nav-tab-active">Edit Menus</a>
-             <a href="#" class="nav-tab">Manage Locations (Coming Soon)</a>
+             <a href="menus.php?tab=edit-menus" class="nav-tab <?php echo $tab == 'edit-menus' ? 'nav-tab-active' : ''; ?>">Edit Menus</a>
+             <a href="menus.php?tab=shortcodes" class="nav-tab <?php echo $tab == 'shortcodes' ? 'nav-tab-active' : ''; ?>">Menu Shortcodes</a>
         </div>
+        
+        <?php if ($tab == 'shortcodes'): ?>
+            <div class="card" style="max-width: 800px; margin-top: 20px;">
+                <h3>Available Menu Shortcodes</h3>
+                <p>Use these shortcodes to embed menus in your posts, pages, or snippets.</p>
+                
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th>Menu Name</th>
+                            <th>ID</th>
+                            <th>Shortcode</th>
+                            <th>Items</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (count($all_menus) > 0): ?>
+                            <?php foreach ($all_menus as $m): 
+                                // Count items
+                                $stmt = $pdo->prepare("SELECT COUNT(*) FROM menu_items WHERE menu_id = ?");
+                                $stmt->execute([$m['id']]);
+                                $count = $stmt->fetchColumn();
+                            ?>
+                                <tr>
+                                    <td><strong><?php echo htmlspecialchars($m['name']); ?></strong></td>
+                                    <td><?php echo $m['id']; ?></td>
+                                    <td>
+                                        <code style="font-size: 1.1em;">[menu id="<?php echo $m['id']; ?>"]</code>
+                                        <button class="button button-small copy-btn" type="button" data-clipboard-text='[menu id="<?php echo $m['id']; ?>"]' style="margin-left: 10px;">Copy</button>
+                                    </td>
+                                    <td><?php echo $count; ?> items</td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="4">No menus found. Create one first!</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+                
+                <script>
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        var text = this.getAttribute('data-clipboard-text');
+                        navigator.clipboard.writeText(text).then(() => {
+                            var original = this.innerText;
+                            this.innerText = 'Copied!';
+                            setTimeout(() => this.innerText = original, 2000);
+                        });
+                    });
+                });
+                </script>
+            </div>
+        <?php else: ?>
         
         <div class="menu-management">
             <!-- Menu Selector -->
@@ -418,6 +472,7 @@ require_once 'sidebar.php';
                 
             </div>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 

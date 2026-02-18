@@ -88,6 +88,9 @@
                 <li class="wp-first-item"><a href="tools.php?tab=database">Database Backup</a></li>
                 <li><a href="tools.php?tab=import-export">Import/Export</a></li>
                 <li><a href="tools.php?tab=health">Site Health</a></li>
+                <li class="<?php echo (isset($page_title) && $page_title === 'Snippets') ? 'current' : ''; ?>">
+                    <a href="snippets.php">Snippets</a>
+                </li>
             </ul>
         </li>
         <li class="wp-has-submenu <?php echo (isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
