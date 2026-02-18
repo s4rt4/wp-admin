@@ -1,6 +1,6 @@
 <?php
 require_once 'auth_check.php';
-require_once '../wp-includes/functions.php';
+require_once 'db_config.php';
 header('Content-Type: application/json');
 
 // Media upload directory
@@ -92,8 +92,16 @@ $safeName = date('Y-m-d_His') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 
 // Organize by year/month subfolders
 $subfolder = '';
-if (get_option('uploads_use_yearmonth_folders')) {
-    $subfolder = date('Y') . '/' . date('m') . '/';
+try {
+    $pdo_up = getDBConnection();
+    $stmt_opt = $pdo_up->prepare("SELECT option_value FROM options WHERE option_name = 'uploads_use_yearmonth_folders' LIMIT 1");
+    $stmt_opt->execute();
+    $opt_val = $stmt_opt->fetchColumn();
+    if ($opt_val) {
+        $subfolder = date('Y') . '/' . date('m') . '/';
+    }
+} catch (Exception $e) {
+    // silently ignore — use flat structure
 }
 $targetDir = $uploadDir . $subfolder;
 
