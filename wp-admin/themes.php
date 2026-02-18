@@ -78,7 +78,7 @@ require_once 'sidebar.php'; // Restore Sidebar
                                 <div style="display:flex; align-items:flex-start; gap:15px;">
                                     <div id="logo-preview-wrapper" style="width:100px; height:100px; background:#f0f0f1; border:1px dashed #ccc; display:flex; align-items:center; justify-center; overflow:hidden; position:relative;">
                                         <?php if($opt_logo): ?>
-                                            <img id="logo-preview" src="../<?php echo htmlspecialchars($opt_logo); ?>" style="max-width:100%; max-height:100%;">
+                                            <img id="logo-preview" src="<?php echo htmlspecialchars($opt_logo); ?>" style="max-width:100%; max-height:100%;">
                                         <?php else: ?>
                                             <span id="logo-placeholder" style="color:#ccc; font-size:12px; text-align:center; width:100%;">No Logo</span>
                                         <?php endif; ?>
@@ -98,7 +98,7 @@ require_once 'sidebar.php'; // Restore Sidebar
                                 <div style="display:flex; align-items:flex-start; gap:15px;">
                                     <div id="favicon-preview-wrapper" style="width:64px; height:64px; background:#f0f0f1; border:1px dashed #ccc; display:flex; align-items:center; justify-center; overflow:hidden; position:relative;">
                                         <?php if($opt_fav): ?>
-                                            <img id="favicon-preview" src="../<?php echo htmlspecialchars($opt_fav); ?>" style="max-width:100%; max-height:100%;">
+                                            <img id="favicon-preview" src="<?php echo htmlspecialchars($opt_fav); ?>" style="max-width:100%; max-height:100%;">
                                         <?php else: ?>
                                             <span id="favicon-placeholder" style="color:#ccc; font-size:12px; text-align:center; width:100%;">No Icon</span>
                                         <?php endif; ?>
