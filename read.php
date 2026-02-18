@@ -149,7 +149,7 @@ while($row = $res_c->fetch_assoc()) {
     <?php endif; ?>
     <link rel="canonical" href="<?php echo htmlspecialchars($current_url); ?>">
     <?php if($site_fav): ?>
-    <link rel="icon" href="<?php echo htmlspecialchars($site_url . '/word-press/' . $site_fav); ?>" />
+    <link rel="icon" href="<?php echo htmlspecialchars($site_fav); ?>" />
     <?php endif; ?>
 
     <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
