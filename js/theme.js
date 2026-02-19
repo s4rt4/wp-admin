@@ -45,10 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.classList.add('active');
             // Prevent body scroll
             document.body.style.overflow = 'hidden';
-
-            // Force inline styles to bypass potential CSS conflicts in read.php
-            navRight.style.display = 'flex';
-            setTimeout(() => { navRight.style.right = '0'; }, 10);
         }
 
         function closeMenu() {
@@ -57,7 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Restore body scroll
             document.body.style.overflow = '';
 
-            navRight.style.right = '-100%';
+            // Clear any lingering inline styles
+            navRight.style.right = '';
+            navRight.style.display = '';
         }
 
         // Open Click

@@ -362,25 +362,26 @@ while($row = $res_c->fetch_assoc()) {
             <!-- Mobile Toggle (Hamburger) -->
             <button id="mobile-menu-toggle" class="theme-toggle-btn mobile-menu-toggle" style="display:none; margin-left:auto;"><i class="fa fa-bars"></i></button>
 
-            <!-- Mobile Overlay -->
-            <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
-
-            <!-- Off-canvas Menu Content -->
-            <div class="navbar-right" id="navbar-right" style="z-index: 9999 !important;">
-                <button class="close-menu theme-toggle-btn" id="closeMenuBtn" style="display:none;"><i class="fa fa-times"></i></button>
-                
-                <!-- Blog Link (Home Icon) -->
-                <a href="/word-press/blog.php" class="theme-toggle-btn" title="Back to Blog" style="text-decoration: none;">
-                    <i class="fas fa-home"></i>
-                </a>
-                
-                <!-- Dark Mode Toggle Inside Navbar -->
-                <button id="theme-toggle-nav" class="theme-toggle-btn" title="Toggle Dark/Light Mode">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
         </div>
     </nav>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- Off-canvas Menu Content -->
+    <div class="navbar-right" id="navbar-right">
+        <button class="close-menu theme-toggle-btn" id="closeMenuBtn" style="display:none;"><i class="fa fa-times"></i></button>
+        
+        <!-- Blog Link (Home Icon) -->
+        <a href="/word-press/blog.php" class="theme-toggle-btn" title="Back to Blog" style="text-decoration: none;">
+            <i class="fas fa-home"></i>
+        </a>
+        
+        <!-- Dark Mode Toggle Inside Navbar -->
+        <button id="theme-toggle-nav" class="theme-toggle-btn" title="Toggle Dark/Light Mode">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
 
     <div class="post-container">
         <h1><?php echo htmlspecialchars($post['title']); ?></h1>
