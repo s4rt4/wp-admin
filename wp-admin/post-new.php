@@ -544,12 +544,29 @@ $month_names = [
                             <h2 class="hndle ui-sortable-handle"><span>Featured image</span></h2>
                             <div class="inside">
                                 <p class="hide-if-no-js">
-                                    <?php if (!empty($post['featured_image'])): ?>
-                                        <img src="../<?php echo htmlspecialchars($post['featured_image']); ?>" style="max-width:100%; height:auto; display:block; margin-bottom:10px;">
-                                    <?php endif; ?>
-                                    <input type="file" name="featured_image" id="featured_image" accept="image/*">
+                                    <?php 
+                                    $has_img = !empty($post['featured_image']);
+                                    $img_src = $has_img ? '../' . htmlspecialchars($post['featured_image']) : '';
+                                    ?>
+                                    <img id="featured-image-preview" src="<?php echo $img_src; ?>" style="max-width:100%; height:auto; display:<?php echo $has_img ? 'block' : 'none'; ?>; margin-bottom:10px; border-radius:4px; border:1px solid #ddd; padding:4px;">
+                                    
+                                    <input type="file" name="featured_image" id="featured_image" accept="image/*" onchange="previewFeaturedImage(this)">
                                     <br>
                                     <label for="featured_image">Set featured image</label>
+
+                                    <script>
+                                    function previewFeaturedImage(input) {
+                                        if (input.files && input.files[0]) {
+                                            var reader = new FileReader();
+                                            reader.onload = function(e) {
+                                                var preview = document.getElementById('featured-image-preview');
+                                                preview.src = e.target.result;
+                                                preview.style.display = 'block';
+                                            }
+                                            reader.readAsDataURL(input.files[0]);
+                                        }
+                                    }
+                                    </script>
                                 </p>
                             </div>
                         </div>

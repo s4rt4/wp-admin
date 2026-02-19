@@ -20,7 +20,8 @@
                 <div class="wp-menu-name">Posts</div>
             </a>
             <div class="wp-menu-arrow-active"></div> <ul class="wp-submenu">
-                <li class="wp-first-item"><a href="posts.php">All Posts</a></li>
+                <li class="wp-first-item"><a href="featured-posts.php" style="color: #f0ad4e;">Featured Posts</a></li>
+                <li><a href="posts.php">All Posts</a></li>
                 <li><a href="post-new.php">Add New</a></li>
                 <li><a href="posts.php?status=publish">Published</a></li>
                 <li><a href="posts.php?status=draft">Drafts</a></li>

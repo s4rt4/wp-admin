@@ -526,6 +526,14 @@ body.is-collapsed #adminmenu>li:hover {
     mask-image: url('dashicons-svg-min/admin-home.svg');
 }
 
+.dashicons-star-filled {
+    mask-image: url('dashicons-svg-min/star-filled.svg');
+}
+
+.dashicons-star-empty {
+    mask-image: url('dashicons-svg-min/star-empty.svg');
+}
+
 /* ==========================================================================
    5. List Tables (WP Standard)
    ========================================================================== */

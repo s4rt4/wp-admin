@@ -112,6 +112,7 @@ $result = $conn->query("SELECT p.*, u.username as author_name FROM posts p LEFT 
             <thead>
                 <tr>
                     <td id="cb" class="manage-column column-cb check-column"><input id="cb-select-all-1" type="checkbox"></td>
+                    <th scope="col" id="thumb" class="manage-column column-thumb" style="width: 60px;"><span>Image</span></th>
                     <th scope="col" id="title" class="manage-column column-title column-primary sortable desc"><span>Title</span></th>
                     <th scope="col" id="status" class="manage-column column-status">Status</th>
                     <th scope="col" id="author" class="manage-column column-author">Author</th>
@@ -125,6 +126,19 @@ $result = $conn->query("SELECT p.*, u.username as author_name FROM posts p LEFT 
                     <?php while($row = $result->fetch_assoc()): ?>
                         <tr class="iedit author-self level-0 post-<?php echo $row['id']; ?> type-post status-publish format-standard hentry category-uncategorized">
                             <th scope="row" class="check-column"><input id="cb-select-<?php echo $row['id']; ?>" type="checkbox" name="post[]" value="<?php echo $row['id']; ?>"></th>
+                            <td class="thumb column-thumb" data-colname="Image">
+                                <?php if (!empty($row['featured_image'])): 
+                                    $img_url = $row['featured_image'];
+                                    // Handle relative paths from wp-admin context
+                                    if (strpos($img_url, 'http') !== 0 && strpos($img_url, '../') !== 0) {
+                                        $img_url = '../' . $img_url;
+                                    }
+                                ?>
+                                    <img src="<?php echo htmlspecialchars($img_url); ?>" width="50" height="50" style="object-fit:cover; border-radius:3px; display:block;" alt="">
+                                <?php else: ?>
+                                    <div style="width:50px; height:50px; background:#f0f0f1; border-radius:3px;"></div>
+                                <?php endif; ?>
+                            </td>
                             <td class="title column-title has-row-actions column-primary page-title" data-colname="Title">
                                 <strong><a class="row-title" href="post-new.php?id=<?php echo $row['id']; ?>" aria-label="Edit “<?php echo htmlspecialchars($row['title']); ?>”"><?php echo htmlspecialchars($row['title']); ?></a></strong>
                                 <div class="row-actions">
@@ -234,7 +248,7 @@ $result = $conn->query("SELECT p.*, u.username as author_name FROM posts p LEFT 
             "autoWidth": false,
             "pageLength": 20,
             "columnDefs": [
-                { "orderable": false, "targets": 0 } // Disable sort on checkbox column
+                { "orderable": false, "targets": [0, 1] } // Disable sort on checkbox and thumbnail columns
             ],
             "language": {
                 "search": "Search Posts:",

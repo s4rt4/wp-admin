@@ -25,7 +25,7 @@ if ($conn->connect_error) {
 $post = null;
 if (isset($_GET['slug'])) {
     $slug = $_GET['slug'];
-    $stmt = $conn->prepare("SELECT * FROM posts WHERE slug = ?");
+    $stmt = $conn->prepare("SELECT p.*, u.username as author_name FROM posts p LEFT JOIN users u ON p.author_id = u.id WHERE p.slug = ?");
     $stmt->bind_param("s", $slug);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -34,7 +34,7 @@ if (isset($_GET['slug'])) {
     }
 } elseif (isset($_GET['id'])) {
     $id = intval($_GET['id']);
-    $stmt = $conn->prepare("SELECT * FROM posts WHERE id = ?");
+    $stmt = $conn->prepare("SELECT p.*, u.username as author_name FROM posts p LEFT JOIN users u ON p.author_id = u.id WHERE p.id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -141,6 +141,11 @@ while($row = $res_c->fetch_assoc()) {
     $full_title = htmlspecialchars($seo_title) . ' | ' . $site_name;
     ?>
 
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/word-press/css/theme.css">
+    <script src="/word-press/js/theme.js?v=<?php echo time(); ?>" defer></script>
+    
     <!-- Standard SEO -->
     <title><?php echo $full_title; ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($seo_desc); ?>">
@@ -176,8 +181,8 @@ while($row = $res_c->fetch_assoc()) {
     <!-- SunEditor CSS for content rendering if needed, generally content styles should be enough -->
     <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; padding: 20px; line-height: 1.6; max-width: 900px; margin: 0 auto; background: #fff; color: #333; }
-        .post-container { margin-top: 30px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 0; line-height: 1.6; max-width: 100%; margin: 0; }
+        .post-container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
         h1 { font-size: 2.5em; margin-bottom: 5px; }
         .meta { color: #888; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .content { font-size: 1.1em; margin-bottom: 40px; }
@@ -185,6 +190,17 @@ while($row = $res_c->fetch_assoc()) {
         .content * { font-family: inherit; }
         .back-link { display: inline-block; margin-bottom: 20px; color: #0073aa; text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
+
+        /* Dark Mode Overrides for Content */
+        [data-theme="dark"] .content,
+        [data-theme="dark"] .sun-editor-editable {
+            background-color: transparent !important;
+            color: #e0e0e0 !important;
+        }
+        [data-theme="dark"] .sun-editor-editable * {
+            color: #e0e0e0 !important;
+            background-color: transparent !important;
+        }
 
         /* Basic SunEditor Content Styles override if necessary */
         .se-wrapper-inner { min-height: auto !important; height: auto !important; }
@@ -328,30 +344,48 @@ while($row = $res_c->fetch_assoc()) {
     render_tags('head', ['post_id' => intval($post['id']), 'category_ids' => $post_category_ids]);
     ?>
 </head>
+</head>
+</head>
 <body>
 <?php render_tags('body_open', ['post_id' => intval($post['id']), 'category_ids' => $post_category_ids]); ?>
 
-    <header style="margin-bottom: 20px; border-bottom:1px solid #eee; padding-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
-        <div style="display:flex; align-items:center;">
-            <?php if ($site_logo): ?>
-                <img src="<?php echo htmlspecialchars($site_url . '/word-press/' . $site_logo); ?>" alt="<?php echo htmlspecialchars($site_name); ?>" style="max-height:40px; margin-right:10px;">
-            <?php endif; ?>
-            <div style="line-height:1.2;">
-                <div style="font-size:18px; font-weight:bold; color:#333;"><?php echo htmlspecialchars($site_name); ?></div>
-                <?php if($site_desc_def): ?>
-                <div style="font-size:12px; color:#777;"><?php echo htmlspecialchars($site_desc_def); ?></div>
+    <!-- Navbar (Blue) -->
+    <nav class="navbar-custom">
+        <div class="navbar-inner">
+            <div class="navbar-left">
+                <?php if ($site_logo): ?>
+                    <img src="<?php echo htmlspecialchars($site_logo); ?>" alt="Logo" class="site-logo-circle">
                 <?php endif; ?>
+                <a href="/word-press/blog.php" class="site-title"><?php echo htmlspecialchars($site_name); ?></a>
+            </div>
+
+            <!-- Mobile Toggle -->
+            <button id="mobile-menu-toggle" class="theme-toggle-btn mobile-menu-toggle" style="display:none; margin-left:auto;"><i class="fa fa-bars"></i></button>
+
+            <div class="navbar-right" id="navbar-right">
+                <!-- Blog Link -->
+                <!-- Blog Link (Home Icon) -->
+                <a href="/word-press/blog.php" class="theme-toggle-btn" title="Back to Blog" style="text-decoration: none;">
+                    <i class="fas fa-home"></i>
+                </a>
+                
+                <!-- Dark Mode Toggle Inside Navbar -->
+                <button id="theme-toggle-nav" class="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
             </div>
         </div>
-        <a href="<?php echo str_replace('read.php', 'blog.php', $_SERVER['SCRIPT_NAME']); ?>" class="back-link" style="margin:0;">&larr; Back to Blog</a>
-    </header>
+    </nav>
 
     <div class="post-container">
         <h1><?php echo htmlspecialchars($post['title']); ?></h1>
-        <div class="meta">
-            Published on <?php echo date('F j, Y', strtotime($post['created_at'])); ?>
-            <?php if($post['status'] != 'publish') echo ' <span style="color:orange;">(' . ucfirst($post['status']) . ')</span>'; ?>
-            &bull; <?php echo $post['views']; ?> views
+        <div class="badge-container" style="margin-bottom:20px;">
+            <span class="badge badge-date"><i class="fa fa-calendar-alt"></i> <?php echo date('M j, Y', strtotime($post['created_at'])); ?></span>
+            <?php if($post['status'] != 'publish') echo ' <span class="badge" style="background:orange;">' . ucfirst($post['status']) . '</span>'; ?>
+            <span class="badge badge-author"><i class="fa fa-user"></i> <?php echo htmlspecialchars($post['author_name'] ?? 'Admin'); ?></span>
+            <span class="badge badge-words"><i class="fa fa-file-alt"></i> <?php echo get_word_count($post['content']); ?> Words</span>
+            <span class="badge badge-time"><i class="fa fa-clock"></i> <?php echo get_read_time($post['content']); ?> Min Read</span>
+            <span class="badge" style="background:#555;"><i class="fa fa-eye"></i> <?php echo $post['views']; ?> Views</span>
         </div>
 
         <div class="content sun-editor-editable">
@@ -471,6 +505,40 @@ while($row = $res_c->fetch_assoc()) {
             // 5. Highlight
             Prism.highlightElement(code);
         });
+    });
+</script>
+
+<!-- Reading Progress Bar -->
+<div id="read-progress" style="position:fixed; top:0; left:0; height:4px; background:#0073aa; width:0%; z-index:9999; transition: width 0.1s;"></div>
+
+<!-- Back to Top Button (Square) -->
+<button id="back-to-top" class="back-to-top-square" title="Back to Top"><i class="fa fa-chevron-up"></i></button>
+
+<script>
+    // Reading Progress & Back to Top
+    const progressBar = document.getElementById("read-progress");
+    const backToTop = document.getElementById("back-to-top");
+
+    // Theme Toggle Logic
+    // Now handled by js/theme.js
+
+    window.addEventListener('scroll', () => {
+        // Progress
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        if (progressBar) progressBar.style.width = scrolled + "%";
+
+        // Back to Top
+        if (winScroll > 300) {
+            backToTop.classList.add('visible');
+        } else {
+            backToTop.classList.remove('visible');
+        }
+    });
+
+    backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 </script>
 </body>

@@ -27,6 +27,11 @@ if (isset($_GET['category_id']) && is_numeric($_GET['category_id'])) {
     $where_clauses[] = "pc.category_id = $cat_id";
 }
 
+if (isset($_GET['search']) && !empty($_GET['search'])) {
+    $search_term = $conn->real_escape_string($_GET['search']);
+    $where_clauses[] = "(p.title LIKE '%$search_term%' OR p.content LIKE '%$search_term%')";
+}
+
 if (isset($_GET['tag_id']) && is_numeric($_GET['tag_id'])) {
     $tag_id = (int)$_GET['tag_id'];
     // Avoid double join if category join exists (though variable names differ, keep logic simple)
@@ -35,13 +40,16 @@ if (isset($_GET['tag_id']) && is_numeric($_GET['tag_id'])) {
     $where_clauses[] = "pt.tag_id = $tag_id";
 }
 
-$sql = "SELECT DISTINCT p.* FROM posts p " . implode(" ", $join_clauses) . " WHERE " . implode(" AND ", $where_clauses) . " ORDER BY p.created_at DESC LIMIT " . (int)$limit;
+$sql = "SELECT DISTINCT p.*, u.username as author_name FROM posts p LEFT JOIN users u ON p.author_id = u.id " . implode(" ", $join_clauses) . " WHERE " . implode(" AND ", $where_clauses) . " ORDER BY p.created_at DESC LIMIT " . (int)$limit;
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <script src="js/theme.js?v=<?php echo time(); ?>" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php if (get_option('blog_public') === '0'): ?>
         <meta name="robots" content="noindex,nofollow">
@@ -52,8 +60,8 @@ $result = $conn->query($sql);
     <?php endif; ?>
     <title><?php echo htmlspecialchars(get_option('site_title', 'My Blog')); ?> - <?php echo htmlspecialchars(get_option('site_description', 'Just another WordPress site')); ?></title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; line-height: 1.6; background: #f4f6f8; margin: 0; color: #333; }
-        .container { max-width: 1200px; margin: 0 auto; display: flex; gap: 30px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 0; line-height: 1.6; background: #f4f6f8; margin: 0; color: #333; }
+        .container { max-width: 1200px; margin: 30px auto; display: flex; gap: 30px; padding: 0 20px; }
         
         /* Main Content using Grid for 2 columns of posts */
         .main-content { flex: 2; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-content: start; }
@@ -82,8 +90,8 @@ $result = $conn->query($sql);
         .post-title a:hover { color: #0073aa; }
         .post-meta { font-size: 0.85em; color: #777; margin-bottom: 15px; }
         .post-excerpt { font-size: 0.95em; color: #555; margin-bottom: 20px; flex-grow: 1; }
-        .read-more-btn { align-self: flex-start; background: #0073aa; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-size: 0.9em; transition: background 0.2s; }
-        .read-more-btn:hover { background: #005f8a; }
+        .read-more-btn { align-self: flex-start; background: #0073aa; color: #fff !important; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-size: 0.9em; transition: background 0.2s; }
+        .read-more-btn:hover { background: #005f8a; color: #fff !important; }
 
         h1.page-title { text-align: center; margin-bottom: 40px; color: #2c3e50; }
         
@@ -128,9 +136,8 @@ $result = $conn->query($sql);
             100% { transform: rotate(360deg); }
         }
 
-        /* Fade Content */
-        body { opacity: 0; transition: opacity 0.3s ease-in; }
-        body.loaded { opacity: 1; }
+        /* Fade Content Removed - showing immediately */
+        body { opacity: 1; }
     </style>
     <?php
     // Category filter context (jika sedang filter kategori tertentu)
@@ -138,26 +145,88 @@ $result = $conn->query($sql);
     render_tags('head', ['category_ids' => $blog_cat_ids]);
     ?>
 </head>
-<body class="">
+<body>
+<?php render_tags('body_open', ['category_ids' => $blog_cat_ids]); ?>
 <?php render_tags('body_open', ['category_ids' => $blog_cat_ids]); ?>
 
-    <!-- Loader -->
-    <div id="page-loader">
-        <div class="spinner"></div>
-    </div>
+    <!-- Navbar (Blue) -->
+    <!-- Navbar (Blue) -->
+    <nav class="navbar-custom">
+        <div class="navbar-inner">
+            <div class="navbar-left">
+                <?php 
+                $site_logo = get_option('site_logo', '');
+                $site_title = get_option('site_title', 'My Blog');
+                if ($site_logo): ?>
+                    <img src="<?php echo htmlspecialchars($site_logo); ?>" alt="Logo" class="site-logo-circle">
+                <?php endif; ?>
+                <a href="blog.php" class="site-title"><?php echo htmlspecialchars($site_title); ?></a>
+            </div>
+            
+            <!-- Mobile Toggle -->
+            <button id="mobile-menu-toggle" class="theme-toggle-btn mobile-menu-toggle" style="display:none; margin-left:auto;"><i class="fa fa-bars"></i></button>
 
-    <header style="text-align:center; margin-bottom:40px;">
-        <?php 
-        $site_logo = get_option('site_logo', '');
-        $site_title = get_option('site_title', 'My Blog');
-        $site_desc = get_option('site_description', '');
+            <div class="navbar-right" id="navbar-right">
+                <form action="blog.php" method="GET" class="navbar-search">
+                    <input type="text" name="search" placeholder="Search articles..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
+                <!-- Dark Mode Toggle Inside Navbar -->
+                <button id="theme-toggle-nav" class="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <?php
+    // Fetch Featured Posts
+    $feat_sql = "SELECT p.*, u.username as author_name FROM posts p LEFT JOIN users u ON p.author_id = u.id WHERE p.is_featured = 1 AND p.status = 'publish' ORDER BY p.updated_at DESC LIMIT 5";
+    $feat_res = $conn->query($feat_sql);
+    $featured_posts = [];
+    if ($feat_res && $feat_res->num_rows > 0) {
+        while ($row = $feat_res->fetch_assoc()) {
+            $featured_posts[] = $row;
+        }
+    }
+    ?>
+
+    <?php if (!empty($featured_posts)): ?>
+    <!-- Hero Slider -->
+    <div class="hero-slider-container">
+        <?php foreach ($featured_posts as $index => $post): ?>
+            <div class="hero-slide <?php echo $index === 0 ? 'active' : ''; ?>">
+                <div class="hero-content">
+                    <h2 class="hero-title"><?php echo htmlspecialchars($post['title']); ?></h2>
+                    <div class="badge-container">
+                        <span class="badge badge-date"><i class="fa fa-calendar-alt"></i> <?php echo date('M d, Y', strtotime($post['created_at'])); ?></span>
+                        <span class="badge badge-time"><i class="fa fa-clock"></i> <?php echo get_read_time($post['content']); ?> min read</span>
+                    </div>
+                    <div class="hero-excerpt">
+                        <?php 
+                        $excerpt = strip_tags($post['content']);
+                        echo strlen($excerpt) > 150 ? substr($excerpt, 0, 150) . '...' : $excerpt;
+                        ?>
+                    </div>
+                    <a href="read.php?id=<?php echo $post['id']; ?>" class="bg-btn-more">Read More</a>
+                </div>
+                <?php if (!empty($post['featured_image'])): ?>
+                <div class="hero-image">
+                    <img src="<?php echo htmlspecialchars($post['featured_image']); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>">
+                </div>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
         
-        if ($site_logo): ?>
-            <img src="<?php echo htmlspecialchars($site_logo); ?>" alt="<?php echo htmlspecialchars($site_title); ?>" style="max-height:80px; display:block; margin:0 auto 15px;">
-        <?php endif; ?>
-        <h1 class="page-title" style="margin-bottom:5px;"><?php echo htmlspecialchars($site_title); ?></h1>
-        <?php if($site_desc): ?><p style="color:#666; font-size:1.1em; margin:0;"><?php echo htmlspecialchars($site_desc); ?></p><?php endif; ?>
-    </header>
+        <!-- Navigation Arrows -->
+        <div class="slider-nav">
+            <button class="slider-btn" id="prevSlide"><i class="fa fa-chevron-left"></i></button>
+            <button class="slider-btn" id="nextSlide"><i class="fa fa-chevron-right"></i></button>
+        </div>
+    </div>
+    <?php endif; ?>
+
+
 
     <div class="container">
         
@@ -175,8 +244,10 @@ $result = $conn->query($sql);
                         <?php endif; ?>
                         <div class="post-content">
                             <h2 class="post-title"><a href="post/<?php echo htmlspecialchars($row['slug']); ?>"><?php echo htmlspecialchars($row['title']); ?></a></h2>
-                            <div class="post-meta">
-                                <?php echo date('M j, Y', strtotime($row['created_at'])); ?>
+                            <div class="badge-container">
+                                <span class="badge badge-date"><i class="fa fa-calendar-alt"></i> <?php echo date('M j, Y', strtotime($row['created_at'])); ?></span>
+                                <span class="badge badge-author"><i class="fa fa-user"></i> <?php echo htmlspecialchars($row['author_name'] ?? 'Admin'); ?></span>
+                                <span class="badge badge-time"><i class="fa fa-clock"></i> <?php echo get_read_time($row['content']); ?> min</span>
                             </div>
                             <div class="post-excerpt">
                                 <?php 
@@ -260,28 +331,64 @@ $result = $conn->query($sql);
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Show content and hide loader
-            setTimeout(function() {
-                document.body.classList.add('loaded');
-                document.getElementById('page-loader').classList.add('hidden');
-            }, 100); // Small delay to ensure render
+            // Mobile Menu Logic & Theme Toggle Logic
+            // Handled by js/theme.js
 
-            // Re-show loader on navigation
-            const links = document.querySelectorAll('a');
-            links.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    const href = this.getAttribute('href');
-                    const target = this.getAttribute('target');
-                    
-                    // Only for internal navigation links (not # or external)
-                    if (href && href !== '#' && !href.startsWith('javascript') && target !== '_blank') {
-                        // Don't wait for fade out, just show loader immediately gives "snappier" feel?
-                        // Or reverse: fade out body? 
-                        
-                        // Let's just show loader
-                        document.getElementById('page-loader').classList.remove('hidden');
-                    }
-                });
+            // Hero Slider Logic
+            const slides = document.querySelectorAll('.hero-slide');
+            if (slides.length > 0) {
+                let currentSlide = 0;
+                const prevBtn = document.getElementById('prevSlide');
+                const nextBtn = document.getElementById('nextSlide');
+
+                function showSlide(index) {
+                    slides.forEach((slide, i) => {
+                        slide.classList.remove('active');
+                        if (i === index) slide.classList.add('active');
+                    });
+                }
+
+                function next() {
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    showSlide(currentSlide);
+                }
+
+                function prev() {
+                    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                    showSlide(currentSlide);
+                }
+
+                if (prevBtn) prevBtn.addEventListener('click', prev);
+                if (nextBtn) nextBtn.addEventListener('click', next);
+
+                // Auto slide
+                let slideInterval = setInterval(next, 5000);
+                
+                // Pause on hover
+                const container = document.querySelector('.hero-slider-container');
+                if (container) {
+                    container.addEventListener('mouseenter', () => clearInterval(slideInterval));
+                    container.addEventListener('mouseleave', () => slideInterval = setInterval(next, 5000));
+                }
+            }
+
+            // Square Back to Top Logic
+            const backToTop = document.createElement('button');
+            backToTop.innerHTML = '<i class="fa fa-chevron-up"></i>';
+            backToTop.className = 'back-to-top-square';
+            backToTop.title = "Back to Top";
+            document.body.appendChild(backToTop);
+
+            window.addEventListener('scroll', () => {
+                if ((document.body.scrollTop || document.documentElement.scrollTop) > 300) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            });
+
+            backToTop.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
     </script>

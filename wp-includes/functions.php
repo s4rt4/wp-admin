@@ -254,4 +254,30 @@ function _render_menu_tree($items, $ul_class, $depth) {
     $html .= "</ul>\n";
     return $html;
 }
+
+/**
+ * Calculate estimated read time in minutes.
+ * Standard speed: 200 words per minute.
+ *
+ * @param string $content The text content.
+ * @return int Estimated minutes.
+ */
+function get_read_time($content) {
+    if (empty($content)) return 0;
+    $word_count = get_word_count($content);
+    return ceil($word_count / 200);
+}
+
+/**
+ * Calculate word count of a content string striping tags.
+ *
+ * @param string $content The text content.
+ * @return int Word count.
+ */
+function get_word_count($content) {
+    if (empty($content)) return 0;
+    $stripped = strip_tags($content);
+    // Handle multibyte strings if needed, but str_word_count is okay for basic usage
+    return str_word_count($stripped);
+}
 ?>
