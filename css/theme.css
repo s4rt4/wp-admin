@@ -251,23 +251,34 @@ textarea {
     background: var(--card-bg);
     border-radius: 12px;
     box-shadow: var(--shadow);
-    padding: 30px;
+    padding: 0;
     position: relative;
     overflow: hidden;
     border: 1px solid var(--border-color);
 }
 
+
+.slider-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    width: 100%;
+    will-change: transform;
+}
+
 .hero-slide {
-    display: none;
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 30px;
+    display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 30px;
-    animation: fadeIn 0.5s ease;
+    box-sizing: border-box;
 }
 
-.hero-slide.active {
-    display: flex;
-}
+/* Removed .hero-slide.active */
 
 .hero-content {
     flex: 1;
@@ -308,6 +319,8 @@ textarea {
     display: flex;
     justify-content: space-between;
     pointer-events: none;
+    padding: 0 10px;
+    box-sizing: border-box;
     /* Let clicks pass through container */
 }
 
@@ -443,35 +456,102 @@ textarea {
     pointer-events: auto;
 }
 
+/* Off-canvas Overlay */
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-menu-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
 /* Responsive tweaks */
 @media (max-width: 768px) {
     .navbar-inner {
-        flex-direction: column;
+        flex-direction: row;
         gap: 15px;
-        align-items: stretch;
+        align-items: center;
     }
 
     .navbar-left {
-        justify-content: space-between;
-        width: 100%;
+        width: auto;
     }
 
     /* Mobile Menu Toggle */
     .mobile-menu-toggle {
-        display: block;
-        /* Hidden on desktop via JS/CSS or just check width */
+        display: block !important;
+        /* Force show */
     }
 
     .navbar-right {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        /* Hidden by default */
+        width: 250px;
+        height: 100vh;
+        background-color: var(--card-bg);
         flex-direction: column;
-        width: 100%;
-        gap: 10px;
-        display: none;
-        /* Hidden by default on mobile */
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: 20px;
+        gap: 20px;
+        z-index: 1002;
+        transition: right 0.3s ease-in-out;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        /* Override display none */
     }
 
     .navbar-right.active {
-        display: flex;
+        right: 0;
+    }
+
+    /* Style items inside mobile menu */
+    .navbar-right .theme-toggle-btn {
+        margin: 0;
+        color: var(--text-color);
+        background: var(--bg-color);
+        width: auto;
+        border-radius: 8px;
+        padding: 10px;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    .navbar-right .theme-toggle-btn i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .navbar-right .close-menu {
+        display: flex !important;
+        align-self: flex-end;
+        background: transparent;
+        color: var(--text-color);
+        padding: 5px;
+        margin-bottom: 20px;
+    }
+
+    .navbar-right .navbar-search {
+        width: 100%;
+        border: 1px solid var(--border-color);
+        background: var(--bg-color);
+    }
+
+    .navbar-right .navbar-search input {
+        width: 100%;
+        color: var(--text-color) !important;
     }
 
     .hero-slide {

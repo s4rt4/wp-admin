@@ -48,7 +48,7 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/theme.css?v=<?php echo time(); ?>">
     <script src="js/theme.js?v=<?php echo time(); ?>" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php if (get_option('blog_public') === '0'): ?>
@@ -163,10 +163,15 @@ $result = $conn->query($sql);
                 <a href="blog.php" class="site-title"><?php echo htmlspecialchars($site_title); ?></a>
             </div>
             
-            <!-- Mobile Toggle -->
+            <!-- Mobile Toggle (Hamburger) -->
             <button id="mobile-menu-toggle" class="theme-toggle-btn mobile-menu-toggle" style="display:none; margin-left:auto;"><i class="fa fa-bars"></i></button>
 
+            <!-- Mobile Overlay -->
+            <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+            <!-- Off-canvas Menu Content -->
             <div class="navbar-right" id="navbar-right">
+                <button class="close-menu theme-toggle-btn" id="closeMenuBtn" style="display:none;"><i class="fa fa-times"></i></button>
                 <form action="blog.php" method="GET" class="navbar-search">
                     <input type="text" name="search" placeholder="Search articles..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
                     <button type="submit"><i class="fa fa-search"></i></button>
@@ -194,29 +199,31 @@ $result = $conn->query($sql);
     <?php if (!empty($featured_posts)): ?>
     <!-- Hero Slider -->
     <div class="hero-slider-container">
-        <?php foreach ($featured_posts as $index => $post): ?>
-            <div class="hero-slide <?php echo $index === 0 ? 'active' : ''; ?>">
-                <div class="hero-content">
-                    <h2 class="hero-title"><?php echo htmlspecialchars($post['title']); ?></h2>
-                    <div class="badge-container">
-                        <span class="badge badge-date"><i class="fa fa-calendar-alt"></i> <?php echo date('M d, Y', strtotime($post['created_at'])); ?></span>
-                        <span class="badge badge-time"><i class="fa fa-clock"></i> <?php echo get_read_time($post['content']); ?> min read</span>
+        <div class="slider-track">
+            <?php foreach ($featured_posts as $index => $post): ?>
+                <div class="hero-slide">
+                    <div class="hero-content">
+                        <h2 class="hero-title"><?php echo htmlspecialchars($post['title']); ?></h2>
+                        <div class="badge-container">
+                            <span class="badge badge-date"><i class="fa fa-calendar-alt"></i> <?php echo date('M d, Y', strtotime($post['created_at'])); ?></span>
+                            <span class="badge badge-time"><i class="fa fa-clock"></i> <?php echo get_read_time($post['content']); ?> min read</span>
+                        </div>
+                        <div class="hero-excerpt">
+                            <?php 
+                            $excerpt = strip_tags($post['content']);
+                            echo strlen($excerpt) > 150 ? substr($excerpt, 0, 150) . '...' : $excerpt;
+                            ?>
+                        </div>
+                        <a href="read.php?id=<?php echo $post['id']; ?>" class="bg-btn-more">Read More</a>
                     </div>
-                    <div class="hero-excerpt">
-                        <?php 
-                        $excerpt = strip_tags($post['content']);
-                        echo strlen($excerpt) > 150 ? substr($excerpt, 0, 150) . '...' : $excerpt;
-                        ?>
+                    <?php if (!empty($post['featured_image'])): ?>
+                    <div class="hero-image">
+                        <img src="<?php echo htmlspecialchars($post['featured_image']); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>">
                     </div>
-                    <a href="read.php?id=<?php echo $post['id']; ?>" class="bg-btn-more">Read More</a>
+                    <?php endif; ?>
                 </div>
-                <?php if (!empty($post['featured_image'])): ?>
-                <div class="hero-image">
-                    <img src="<?php echo htmlspecialchars($post['featured_image']); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>">
-                </div>
-                <?php endif; ?>
-            </div>
-        <?php endforeach; ?>
+            <?php endforeach; ?>
+        </div>
         
         <!-- Navigation Arrows -->
         <div class="slider-nav">
@@ -334,28 +341,27 @@ $result = $conn->query($sql);
             // Mobile Menu Logic & Theme Toggle Logic
             // Handled by js/theme.js
 
-            // Hero Slider Logic
+            // Hero Slider Logic (Sliding)
+            const track = document.querySelector('.slider-track');
             const slides = document.querySelectorAll('.hero-slide');
-            if (slides.length > 0) {
+            
+            if (track && slides.length > 0) {
                 let currentSlide = 0;
                 const prevBtn = document.getElementById('prevSlide');
                 const nextBtn = document.getElementById('nextSlide');
 
-                function showSlide(index) {
-                    slides.forEach((slide, i) => {
-                        slide.classList.remove('active');
-                        if (i === index) slide.classList.add('active');
-                    });
+                function updateSlidePosition() {
+                    track.style.transform = `translateX(-${currentSlide * 100}%)`;
                 }
 
                 function next() {
                     currentSlide = (currentSlide + 1) % slides.length;
-                    showSlide(currentSlide);
+                    updateSlidePosition();
                 }
 
                 function prev() {
                     currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-                    showSlide(currentSlide);
+                    updateSlidePosition();
                 }
 
                 if (prevBtn) prevBtn.addEventListener('click', prev);

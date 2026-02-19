@@ -143,7 +143,7 @@ while($row = $res_c->fetch_assoc()) {
 
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/word-press/css/theme.css">
+    <link rel="stylesheet" href="/word-press/css/theme.css?v=<?php echo time(); ?>">
     <script src="/word-press/js/theme.js?v=<?php echo time(); ?>" defer></script>
     
     <!-- Standard SEO -->
@@ -359,11 +359,16 @@ while($row = $res_c->fetch_assoc()) {
                 <a href="/word-press/blog.php" class="site-title"><?php echo htmlspecialchars($site_name); ?></a>
             </div>
 
-            <!-- Mobile Toggle -->
+            <!-- Mobile Toggle (Hamburger) -->
             <button id="mobile-menu-toggle" class="theme-toggle-btn mobile-menu-toggle" style="display:none; margin-left:auto;"><i class="fa fa-bars"></i></button>
 
-            <div class="navbar-right" id="navbar-right">
-                <!-- Blog Link -->
+            <!-- Mobile Overlay -->
+            <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+            <!-- Off-canvas Menu Content -->
+            <div class="navbar-right" id="navbar-right" style="z-index: 9999 !important;">
+                <button class="close-menu theme-toggle-btn" id="closeMenuBtn" style="display:none;"><i class="fa fa-times"></i></button>
+                
                 <!-- Blog Link (Home Icon) -->
                 <a href="/word-press/blog.php" class="theme-toggle-btn" title="Back to Blog" style="text-decoration: none;">
                     <i class="fas fa-home"></i>
@@ -509,7 +514,7 @@ while($row = $res_c->fetch_assoc()) {
 </script>
 
 <!-- Reading Progress Bar -->
-<div id="read-progress" style="position:fixed; top:0; left:0; height:4px; background:#0073aa; width:0%; z-index:9999; transition: width 0.1s;"></div>
+<div id="read-progress" style="position:fixed; left:0; height:4px; background:#E67E22; width:0%; z-index:9999; transition: width 0.1s;"></div>
 
 <!-- Back to Top Button (Square) -->
 <button id="back-to-top" class="back-to-top-square" title="Back to Top"><i class="fa fa-chevron-up"></i></button>
@@ -518,6 +523,16 @@ while($row = $res_c->fetch_assoc()) {
     // Reading Progress & Back to Top
     const progressBar = document.getElementById("read-progress");
     const backToTop = document.getElementById("back-to-top");
+    const navbar = document.querySelector('.navbar-custom');
+
+    // Position progress bar below navbar
+    if (navbar && progressBar) {
+        const updateProgressPosition = () => {
+            progressBar.style.top = navbar.offsetHeight + 'px';
+        };
+        updateProgressPosition();
+        window.addEventListener('resize', updateProgressPosition);
+    }
 
     // Theme Toggle Logic
     // Now handled by js/theme.js

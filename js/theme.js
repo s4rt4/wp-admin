@@ -34,27 +34,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // 3. Mobile Menu Logic
     const mobileBtn = document.getElementById('mobile-menu-toggle');
+    const closeBtn = document.getElementById('closeMenuBtn');
     const navRight = document.getElementById('navbar-right');
+    const overlay = document.getElementById('mobileMenuOverlay');
 
-    if (mobileBtn && navRight) {
-        // Initial check
-        if (window.innerWidth <= 768) {
-            mobileBtn.style.display = 'block';
+    if (mobileBtn && navRight && overlay) {
+
+        function openMenu() {
+            navRight.classList.add('active');
+            overlay.classList.add('active');
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+
+            // Force inline styles to bypass potential CSS conflicts in read.php
+            navRight.style.display = 'flex';
+            setTimeout(() => { navRight.style.right = '0'; }, 10);
         }
 
-        // Toggle Click
-        mobileBtn.addEventListener('click', () => {
-            navRight.classList.toggle('active');
-        });
+        function closeMenu() {
+            navRight.classList.remove('active');
+            overlay.classList.remove('active');
+            // Restore body scroll
+            document.body.style.overflow = '';
 
-        // Resize Handler
-        window.addEventListener('resize', () => {
-            if (window.innerWidth <= 768) {
-                mobileBtn.style.display = 'block';
-            } else {
-                mobileBtn.style.display = 'none';
-                navRight.classList.remove('active');
-            }
-        });
+            navRight.style.right = '-100%';
+        }
+
+        // Open Click
+        mobileBtn.addEventListener('click', openMenu);
+
+        // Close Clicks
+        if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+        overlay.addEventListener('click', closeMenu);
     }
 });
