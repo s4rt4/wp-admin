@@ -65,10 +65,19 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
     exit;
 }
 
-// Allowed file types
+// Allowed file types (MIME)
 $allowedImages = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 $allowedVideos = ['video/mp4', 'video/webm', 'video/ogg'];
 $allowedTypes = array_merge($allowedImages, $allowedVideos);
+
+// Strict extension whitelist
+$allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'mp4', 'webm', 'ogg'];
+$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+if (!in_array($ext, $allowedExts)) {
+    echo json_encode(['success' => 0, 'error' => 'File extension not allowed: .' . $ext]);
+    exit;
+}
 
 $finfo = finfo_open(FILEINFO_MIME_TYPE);
 $mimeType = finfo_file($finfo, $file['tmp_name']);
@@ -87,7 +96,6 @@ if ($file['size'] > $maxSize) {
 }
 
 // Generate unique filename
-$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $safeName = date('Y-m-d_His') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 
 // Organize by year/month subfolders
