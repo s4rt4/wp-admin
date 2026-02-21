@@ -93,13 +93,6 @@
                 <li><a href="profile.php">Profile</a></li>
             </ul>
         </li>
-        <?php else: // For non-admins, show profile only? or remove completely (profile usually separate) 
-               // For now, let's assume specific Profile link in header or allow access to profile.php directly?
-               // Let's at least show Profile in sidebar for everyone
-        ?>
-        <li class="wp-has-submenu">
-             <a href="profile.php"><div class="wp-menu-image dashicons-admin-users"></div><div class="wp-menu-name">Profile</div></a>
-        </li>
         <?php endif; ?>
         <?php if (current_user_can('manage_options')): ?>
         <li class="wp-has-submenu <?php echo (isset($page_title) && $page_title === 'Tools') ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
@@ -129,6 +122,17 @@
             </ul>
         </li>
         <?php endif; ?>
+
+        <li class="wp-menu-separator"></li>
+        <li class="wp-has-submenu <?php echo (isset($is_docs_page)) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+            <a href="docs.php">
+                <div class="wp-menu-image dashicons-editor-help"></div>
+                <div class="wp-menu-name">Documentation</div>
+            </a>
+            <ul class="wp-submenu">
+                <li class="wp-first-item <?php echo (isset($is_docs_page)) ? 'current' : ''; ?>"><a href="docs.php">Overview</a></li>
+            </ul>
+        </li>
 
         <li id="collapse-menu">
             <button type="button" id="collapse-button">

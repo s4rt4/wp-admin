@@ -1241,3 +1241,254 @@ p.submit {
     padding-top: 20px;
     margin-bottom: 20px;
 }
+
+/* ==========================================================================
+   Documentation Styles
+   ========================================================================== */
+
+/* 1. Sidebar Refinement (Light Theme) */
+.docs-sidebar {
+    background: #fff !important;
+    border-right: 1px solid #ccd0d4;
+    width: 240px !important;
+    /* Slightly wider for documentation */
+}
+
+.docs-menu {
+    background: transparent !important;
+}
+
+.docs-menu li a {
+    color: #3c434a !important;
+    /* Dark text on light bg */
+}
+
+.docs-menu li a:hover {
+    background: #f0f0f1 !important;
+    color: #2271b1 !important;
+}
+
+.docs-menu .wp-menu-image {
+    background-color: #646970 !important;
+}
+
+.docs-menu a:hover .wp-menu-image {
+    background-color: #2271b1 !important;
+}
+
+.docs-menu .wp-menu-header {
+    color: #1d2327 !important;
+    border-bottom: 1px solid #f0f0f1 !important;
+    margin-top: 20px;
+}
+
+.docs-menu .wp-submenu {
+    background: #f6f7f7 !important;
+}
+
+.docs-menu .wp-submenu a {
+    color: #646970 !important;
+    border-left: 3px solid transparent;
+}
+
+.docs-menu .wp-submenu a:hover {
+    color: #2271b1 !important;
+    border-left-color: #2271b1 !important;
+}
+
+.docs-menu .back-link {
+    display: none !important;
+    /* Hide old li-based links if any remains */
+}
+
+.docs-sidebar-header {
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e4e7;
+    background: #fff;
+    margin-bottom: 5px;
+}
+
+.docs-sidebar-header .back-link {
+    background: #0073aa !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    margin: 10px 12px !important;
+    padding: 10px 15px !important;
+    border-radius: 4px !important;
+    display: flex !important;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background 0.2s;
+}
+
+.docs-sidebar-header .back-link .wp-menu-image {
+    background-color: #fff !important;
+    margin-right: 8px !important;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+}
+
+.docs-sidebar-header .back-link .wp-menu-image::before {
+    color: #0073aa !important;
+    font-size: 16px;
+}
+
+.docs-sidebar-header .back-link:hover {
+    background: #005f8a !important;
+}
+
+.docs-sidebar-header .back-link .wp-menu-name {
+    color: #fff !important;
+}
+
+/* 2. Content Area Styles */
+.docs-content {
+    background: #fff;
+    min-height: 100vh;
+}
+
+.docs-wrapper {
+    padding: 30px 40px;
+}
+
+.docs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e2e4e7;
+    background: #fff;
+}
+
+.docs-header .header-left,
+.docs-header .header-right {
+    display: flex;
+    align-items: center;
+}
+
+.docs-lang-switcher {
+    display: flex;
+    background: #f0f0f1;
+    padding: 3px;
+    border-radius: 4px;
+    margin-right: 15px;
+    border: 1px solid #dcdcde;
+}
+
+.docs-lang-switcher a {
+    text-decoration: none;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #50575e;
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.docs-lang-switcher a.active {
+    background: #fff;
+    color: #0073aa;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.docs-lang-switcher a:hover:not(.active) {
+    color: #000;
+}
+
+.docs-breadcrumbs {
+    font-size: 13px;
+    color: #646970;
+}
+
+.docs-breadcrumbs a {
+    text-decoration: none;
+    color: #2271b1;
+}
+
+.docs-breadcrumbs span {
+    color: #1d2327;
+    font-weight: 500;
+}
+
+.docs-search-container {
+    display: flex;
+    align-items: center;
+}
+
+.docs-search-box {
+    position: relative;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.docs-search-box input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-size: 15px;
+    color: #444;
+    outline: none;
+}
+
+.docs-search-box input::placeholder {
+    color: #2271b1;
+    /* Blue placeholder as in image */
+}
+
+.docs-search-box .dashicons-search {
+    background-color: #333;
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+}
+
+.docs-content-area h1 {
+    font-size: 2.5em;
+    font-weight: 400;
+    color: #1d2327;
+    margin-bottom: 15px;
+}
+
+.docs-content-area p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: #555;
+}
+
+/* Icons for docs */
+.dashicons-arrow-left-alt {
+    mask-image: url('dashicons-svg-min/arrow-left-alt.svg');
+}
+
+.dashicons-welcome-learn-more {
+    mask-image: url('dashicons-svg-min/welcome-learn-more.svg');
+}
+
+.dashicons-media-code {
+    mask-image: url('dashicons-svg-min/media-code.svg');
+}
+
+.dashicons-edit {
+    mask-image: url('dashicons-svg-min/edit.svg');
+}
+
+.dashicons-editor-help {
+    mask-image: url('dashicons-svg-min/editor-help.svg');
+}
+
+.dashicons-search {
+    mask-image: url('dashicons-svg-min/search.svg');
+}
