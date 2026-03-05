@@ -248,16 +248,19 @@ a.docs-topic-slug:hover {
 /* ----------------------------------------------------------
    4. Docs Sidebar
    ---------------------------------------------------------- */
-.docs-sidebar {
+#adminmenumain.docs-sidebar {
     width: 220px !important;
     flex-shrink: 0;
-    background: #1d2327;
-    height: calc(100vh - 78px);
-    overflow-y: auto;
-    position: fixed;
-    top: 78px;
-    left: 0;
-    z-index: 80;
+    background: #1d2327 !important;
+    height: calc(100vh - 78px) !important;
+    overflow-y: auto !important;
+    position: fixed !important;
+    top: 78px !important;
+    left: 0 !important;
+    z-index: 80 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-right: 1px solid #1d2327 !important;
 }
 
 .docs-sidebar-header {
@@ -281,77 +284,85 @@ a.docs-topic-slug:hover {
     color: #fff;
 }
 
-.docs-menu {
+#adminmenu.docs-menu {
     list-style: none;
     padding: 8px 0;
+    margin: 0;
 }
 
-.docs-menu .wp-menu-header {
+#adminmenu.docs-menu .wp-menu-header {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .08em;
     color: #646970;
     padding: 12px 14px 4px;
+    margin: 0;
 }
 
-.docs-menu>li>a {
+#adminmenu.docs-menu>li>a {
     display: flex;
     align-items: center;
     padding: 8px 14px;
-    color: #a7aaad;
+    color: #a7aaad !important;
     font-size: 13px;
     text-decoration: none;
     gap: 10px;
     transition: background .15s, color .15s;
+    margin: 0;
 }
 
-.docs-menu>li>a:hover {
-    background: #2c3338;
-    color: #fff;
+#adminmenu.docs-menu>li>a:hover {
+    background: #2c3338 !important;
+    color: #fff !important;
 }
 
-.docs-menu>li.wp-has-current-submenu>a {
-    background: #2271b1;
-    color: #fff;
+#adminmenu.docs-menu>li.wp-has-current-submenu>a {
+    background: #2271b1 !important;
+    color: #fff !important;
 }
 
-.docs-menu>li.wp-has-current-submenu>a .wp-menu-image,
-.docs-menu>li>a:hover .wp-menu-image {
-    background-color: #fff;
+#adminmenu.docs-menu>li.wp-has-current-submenu>a .wp-menu-image,
+#adminmenu.docs-menu>li>a:hover .wp-menu-image {
+    background-color: transparent !important;
+    color: #fff !important;
 }
 
-.docs-menu .wp-submenu {
+#adminmenu.docs-menu .wp-submenu {
     display: none;
     list-style: none;
-    background: #2c3338;
+    background: #2c3338 !important;
     padding: 4px 0;
+    margin: 0;
 }
 
-.docs-menu li.wp-has-current-submenu .wp-submenu,
-.docs-menu li.wp-has-submenu.wp-menu-open .wp-submenu {
+#adminmenu.docs-menu li.wp-has-current-submenu .wp-submenu,
+#adminmenu.docs-menu li.wp-has-submenu.wp-menu-open .wp-submenu {
     display: block;
 }
 
-.docs-menu .wp-submenu li a {
+#adminmenu.docs-menu .wp-submenu li a {
     display: block;
     padding: 5px 14px 5px 44px;
-    color: #b4b9be;
+    color: #b4b9be !important;
     font-size: 12.5px;
     text-decoration: none;
     border-left: 3px solid transparent;
     transition: color .15s, border-color .15s;
+    margin: 0;
 }
 
-.docs-menu .wp-submenu li a:hover {
-    color: #fff;
-    border-left-color: #2271b1;
+#adminmenu.docs-menu .wp-submenu li a:hover {
+    color: #fff !important;
+    border-left-color: #2271b1 !important;
+    background: transparent !important;
 }
 
-.docs-menu .wp-submenu li.current>a {
-    color: #fff;
+#adminmenu.docs-menu .wp-submenu li.current>a {
+    color: #fff !important;
     font-weight: 600;
-    border-left-color: #72aee6;
+    border-left-color: #72aee6 !important;
+    background: transparent !important;
 }
 
 /* ----------------------------------------------------------
@@ -741,7 +752,7 @@ a.docs-topic-slug:hover {
    16. Responsive
    ---------------------------------------------------------- */
 @media (max-width: 960px) {
-    .docs-sidebar {
+    #adminmenumain.docs-sidebar {
         width: 180px !important;
     }
 
@@ -752,8 +763,8 @@ a.docs-topic-slug:hover {
 }
 
 @media (max-width: 760px) {
-    .docs-sidebar {
-        display: none;
+    #adminmenumain.docs-sidebar {
+        display: none !important;
     }
 
     .docs-main {
