@@ -5,7 +5,9 @@
 require_once 'auth_check.php';
 
 // Language detection
-if (!isset($_SESSION)) { session_start(); }
+if (!isset($_SESSION)) {
+    session_start();
+}
 if (isset($_GET['lang'])) {
     $_SESSION['docs_lang'] = $_GET['lang'] === 'en' ? 'en' : 'id';
 }
@@ -19,6 +21,17 @@ require_once 'sidebar-docs.php';
 
 // Breadcrumbs logic based on URL params (mockup for now)
 $topic = isset($_GET['topic']) ? $_GET['topic'] : 'getting-started';
+
+/**
+ * Helper: Get URL for a docs asset image
+ */
+if (!function_exists('get_docs_asset_url')) {
+    function get_docs_asset_url(string $filename): string
+    {
+        return '../wp-admin/docs/doc-files/' . ltrim($filename, '/');
+    }
+}
+
 ?>
 
 <div id="wpcontent" class="docs-content">
@@ -29,17 +42,18 @@ $topic = isset($_GET['topic']) ? $_GET['topic'] : 'getting-started';
                 <nav class="docs-breadcrumbs">
                     <a href="docs.php">Home</a>
                     <?php
-                    if ($topic !== 'getting-started') {
-                        $parts = explode('-', $topic);
-                        $trail = '';
-                        foreach ($parts as $part) {
-                            $trail .= ' / <span>' . ucwords($part) . '</span>';
-                        }
-                        echo $trail;
-                    } else {
-                        echo ' / <span>Overview</span>';
-                    }
-                    ?>
+if ($topic !== 'getting-started') {
+    $parts = explode('-', $topic);
+    $trail = '';
+    foreach ($parts as $part) {
+        $trail .= ' / <span>' . ucwords($part) . '</span>';
+    }
+    echo $trail;
+}
+else {
+    echo ' / <span>Overview</span>';
+}
+?>
                 </nav>
             </div>
             
@@ -62,23 +76,37 @@ $topic = isset($_GET['topic']) ? $_GET['topic'] : 'getting-started';
         <!-- Documentation Content Area -->
         <div class="docs-content-area">
             <?php
-            if ($topic === 'getting-started') {
-                if ($lang === 'en') {
-                    echo "<h1>Welcome to the Documentation</h1>";
-                    echo "<p>Please select a topic from the sidebar to begin.</p>";
-                } else {
-                    echo "<h1>Selamat Datang di Dokumentasi</h1>";
-                    echo "<p>Silakan pilih topik dari sidebar untuk memulai.</p>";
-                }
-            } else {
-                echo "<h1>" . ucwords(str_replace('-', ' ', $topic)) . "</h1>";
-                if ($lang === 'en') {
-                    echo "<p>Documentation content for this section will be placed here.</p>";
-                } else {
-                    echo "<p>Konten dokumentasi untuk bagian ini akan ditempatkan di sini.</p>";
-                }
-            }
-            ?>
+if ($topic === 'getting-started') {
+    if ($lang === 'en') {
+        echo "<h1>Welcome to the Documentation</h1>";
+        echo "<p>Please select a topic from the sidebar to begin.</p>";
+    }
+    else {
+        echo "<h1>Selamat Datang di Dokumentasi</h1>";
+        echo "<p>Silakan pilih topik dari sidebar untuk memulai.</p>";
+    }
+}
+else {
+    $doc_file = __DIR__ . '/docs/' . $lang . '/' . $topic . '.php';
+    $fallback_file = __DIR__ . '/docs/id/' . $topic . '.php';
+    if (file_exists($doc_file)) {
+        include $doc_file;
+    }
+    elseif (file_exists($fallback_file)) {
+        include $fallback_file;
+    }
+    else {
+        if ($lang === 'en') {
+            echo "<h1>" . ucwords(str_replace('-', ' ', $topic)) . "</h1>";
+            echo "<p>Documentation content for this section is coming soon.</p>";
+        }
+        else {
+            echo "<h1>" . ucwords(str_replace('-', ' ', $topic)) . "</h1>";
+            echo "<p>Konten dokumentasi untuk bagian ini segera hadir.</p>";
+        }
+    }
+}
+?>
         </div>
     </div>
 </div>

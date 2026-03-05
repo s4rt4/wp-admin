@@ -89,7 +89,10 @@ $l = $labels[$lang];
             </a>
             <ul class="wp-submenu">
                 <li class="wp-first-item <?php echo ($topic === 'pages-all' || $topic === 'pages') ? 'current' : ''; ?>"><a href="docs.php?topic=pages-all">All Pages</a></li>
-                <li class="<?php echo ($topic === 'pages-builder') ? 'current' : ''; ?>"><a href="docs.php?topic=pages-builder">Add New / Builder</a></li>
+                <li class="<?php echo ($topic === 'pages-new') ? 'current' : ''; ?>"><a href="docs.php?topic=pages-new">Add New (Modal)</a></li>
+                <li class="<?php echo ($topic === 'pages-builder-grapesjs') ? 'current' : ''; ?>"><a href="docs.php?topic=pages-builder-grapesjs">GrapesJS Editor</a></li>
+                <li class="<?php echo ($topic === 'pages-builder-editorjs') ? 'current' : ''; ?>"><a href="docs.php?topic=pages-builder-editorjs">Editor.js</a></li>
+                <li class="<?php echo ($topic === 'pages-builder-monaco') ? 'current' : ''; ?>"><a href="docs.php?topic=pages-builder-monaco">Monaco Editor</a></li>
             </ul>
         </li>
 

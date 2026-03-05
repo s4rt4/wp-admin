@@ -1,73 +1,75 @@
-# Roadmap Pengembangan: Menuju CMS "Production-Grade"
+PERHATIAN. bisa jadi plan ini ada yang miss atau tidak sesuai, jadi kamu bisa laporkan kepada saya. untuk aslinya
 
-Berdasarkan diskusi terbaru, berikut adalah rencana pengembangan prioritas untuk meningkatkan kapabilitas CMS ini menjadi lebih profesional, aman, dan scalable.
+# Roadmap Pengembangan: Konten Dokumentasi Terintegrasi
 
-## 1. Nested Menus (Submenu Support)
-Saat ini sistem menu hanya mendukung satu level (flat). Website modern membutuhkan navigasi hirarkis (dropdown).
+Tujuan tahap ini adalah mengisi setiap submenu di sidebar dokumentasi dengan panduan yang lengkap, sistematis, dan multibahasa (ID/EN).
 
--   **Tujuan:** Memungkinkan setiap item menu memiliki status "Parent" atau "Child".
--   **Implementasi:**
-    -   **Database:** Update tabel `menu_items` untuk menambahkan kolom `parent_id`.
-    -   **Admin UI:** Update `menus.php` agar item bisa di-nest (drag & drop indentasi atau parent selector).
-    -   **Frontend:** Update logic render menu (recursive walker) untuk menampilkan dropdown `<ul><li>...</li></ul>`.
+## 1. Strategi Arsitektur Konten
+Dokumentasi akan disimpan dalam folder yang telah dibuat:
+-   **Indonesian:** `wp-admin/docs/id/{topic}.php`
+-   **English:** `wp-admin/docs/en/{topic}.php`
+saya sudah siapkan gambar untuk pendukung docs disini : C:\laragon\www\word-press\wp-admin\docs\doc-files
 
-## 2. Advanced Tag Manager System (Native & Secure)
-Implementasi sistem injeksi script yang *terkontrol*, aman, dan user-friendly. Berbeda dengan Snippet Manager (yang untuk logika PHP/App), Tag Manager khusus untuk integrasi pihak ketiga (Analytics, Ads, Pixel).
 
-### Konsep Arsitektur
-`Admin Panel` -> `Tag Manager Module (DB)` -> `Sanitizer + Validator` -> `Renderer` -> `Frontend Hooks`
+Sistem akan menggunakan `docs.php` sebagai loader utama yang memanggil file berdasarkan parameter `topic` di URL.
 
-### A. Struktur Database
-Tabel baru: `site_tags`
--   `id` (INT, PK)
--   `name` (VARCHAR) - Label untuk admin (misal: "Google Analytics")
--   `type` (ENUM) - `analytics`, `ads`, `pixel`, `custom`, `verification`
--   `placement` (ENUM) - `head`, `body_open`, `body_close`
--   `content` (TEXT) - ID tracking atau raw script
--   `config` (JSON) - Untuk menyimpan settings tambahan (misal: ID only mode)
--   `status` (ENUM) - `active`, `inactive`
--   `priority` (INT) - Urutan load
--   `created_at` (TIMESTAMP)
+## 2. Pemetaan File (Slug to File)
+Berikut adalah daftar file yang perlu disiapkan untuk setiap submenu:
 
-### B. Fitur & UX
-Dashboard baru di **Tools > Tag Manager**.
+### A. Dashboard
+-   `dashboard-home.php`: Panduan ringkasan statistik dan aktivitas terbaru.
 
-#### 1. Structured Mode (Default & Recommended)
-User tidak perlu copy-paste script penuh. Cukup masukkan ID. CMS yang akan generate script standar yang aman.
--   **Google Analytics:** Input `Measurement ID` (G-XXXXX).
--   **Google Ads:** Input `Conversion ID`.
--   **Meta Pixel:** Input `Pixel ID`.
--   **Verification:** Input meta code verification string.
+### B. Postingan (Posts)
+-   `posts-all.php`: Cara mengelola dan memfilter daftar postingan.
+-   `posts-new.php`: Tutorial menulis konten, menggunakan fitur editor, dan optimasi SEO.
+-   `posts-featured.php`: Panduan fitur Postingan Unggulan (Featured Posts).
+-   `posts-published.php`: Panduan manajemen post yang sudah tayang.
+-   `posts-drafts.php`: Pengelolaan draf dan penjadwalan konten.
+-   `posts-categories.php`: Panduan pengorganisasian kategori.
+-   `posts-tags.php`: Penggunaan tag untuk navigasi konten.
 
-#### 2. Custom Script Mode (Advanced)
-Untuk script custom yang spesifik.
--   **Editor:** Code editor (Monaco) dengan validasi.
--   **Security:**
-    -   Whitelist tag HTML (`<script>`, `<noscript>`, `<meta>`, `<link>`).
-    -   Block dangerous attributes (`onclick`, `onerror`).
-    -   Validasi syntax sebelum simpan.
+### C. Media
+-   `media-library.php`: Manajemen aset gambar dan video.
+-   `media-new.php`: Prosedur upload dan batasan tipe file.
 
-### C. Hook System (Renderer)
-Fungsi global `render_tags($placement)` yang dipanggil di template.
+### D. Halaman (Pages)
+-   `pages-all.php`: Manajemen struktur halaman statis.
+-   `pages-new.php`: Tutorial pemilihan tipe builder melalui modal "Add New".
+-   `pages-builder-grapesjs.php`: Panduan kustomisasi visual dengan **GrapesJS**.
+dan khusus untuk builder grapes js akan ada docs mendetail karena mempunyai banyak widget.
+setiap widget sudah saya siapkan iconnya disini : C:\laragon\www\word-press\wp-admin\docs\doc-files\grapesjs-widget
+saya ingin khusus penejelasan setiap widget grapesjs dimasukkan kedalam tabel,
+sebelah kiri iconnya, sebelah kanannya penjelasan fungsi.
+perhatikan. widget saya punya 3 group. 1 basic, 2 forms, 3 sections. jadi kelompokkan setiap widget dalam groupnya.
+-   `pages-builder-editorjs.php`: Panduan menulis konten berbasis blok dengan **Editor.js**.
+-   `pages-builder-monaco.php`: Panduan pengkodean manual (HTML/CSS/JS) dengan **Monaco Editor**.
 
-```php
-// Di header.php
-<head>
-    ...
-    <?php render_tags('head'); ?>
-</head>
-<body>
-    <?php render_tags('body_open'); ?>
-    ...
-```
+### E. Tampilan & Pengaturan (Appearance & Settings)
+-   `appearance-themes.php`: Cara kustomisasi tampilan.
+-   `appearance-menus.php`: Pengaturan navigasi situs.
+-   `settings-general.php`: Konfigurasi dasar situs (Judul, Deskripsi, Bahasa).
+-   `settings-permalinks.php`: Optimasi struktur URL.
 
-### D. Keunggulan Sistem Ini
-1.  **Aman:** Mencegah admin tidak sengaja merusak layout atau menyisipkan XSS berbahaya.
-2.  **Clean:** Memisahkan data tracking dari template core.
-3.  **Scalable:** Mudah menambah jenis tag baru di masa depan.
-4.  **Performance:** Script bisa di-disable tanpa menghapus data.
+## 3. Standar Penulisan Konten
+Setiap file dokumentasi harus mengikuti standar berikut:
+1.  **Judul & Deskripsi:** Penjelasan singkat fungsi menu.
+2.  **Langkah-langkah:** Gunakan list bernomor (1, 2, 3) untuk instruksi.
+3.  **Visual:** Sertakan minimal 1 screenshot untuk setiap panduan utama (Disimpan di `wp-admin/docs/assets/`).
+4.  **Tip/Peringatan:** Gunakan blok khusus untuk informasi krusial (misal: "Hati-hati saat menghapus database").
+
+## 4. Tahapan Implementasi (Phasing)
+-   **Fase 1 (Core):** Dashboard & Getting Started.
+-   **Fase 2 (Content):** Posts, Media, & Pages (Fokus pada Page Builder).
+-   **Fase 3 (System):** Users, Tools, & Settings.
 
 ---
+**Status Saat Ini:**
+- [x] Struktur folder `id/` dan `en/` siap.
+- [x] Loader dinamis `docs.php` siap.
+- [x] Sidebar dinamis & Breadcrumbs siap.
+- [x] Penulisan konten dimulai dari **Fase 1 (ID & EN)**.
+- [x] Fase 1 selesai: Dashboard Home (ID & EN).
+- [x] Fase 2 selesai: Posts (7 topik), Media (2 topik), Pages (5 topik termasuk GrapesJS dengan 49 widget 3 grup, Editor.js, Monaco) — ID & EN.
+- [x] Fase 3 selesai: Appearance (2), Settings (5), Users (3), Tools (5) — ID & EN.
+- [x] docs.php diupdate untuk mengload file konten secara dinamis dari folder id/ atau en/.
 
-**Rekomendasi Eksekusi:**
-Disarankan memulai dari **Tag Manager System** terlebih dahulu karena arsitekturnya lebih kompleks dan fundamental untuk keamanan website production.
