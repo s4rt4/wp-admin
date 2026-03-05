@@ -1,0 +1,802 @@
+/* ============================================================
+   docs.css — Stylesheet khusus untuk halaman Dokumentasi
+   Dimuat oleh docs.php
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   1. Layout Utama Docs
+   ---------------------------------------------------------- */
+.docs-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.docs-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 32px);
+}
+
+/* ----------------------------------------------------------
+   2. Docs Topbar (search + lang + topic slug)
+   ---------------------------------------------------------- */
+.docs-topbar {
+    position: sticky;
+    top: 32px;
+    z-index: 90;
+    background: #fff;
+    border-bottom: 1px solid #dcdcde;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    height: 46px;
+    flex-shrink: 0;
+}
+
+/* Current topic slug badge */
+.docs-topic-slug {
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    color: #50575e;
+    background: #f0f0f1;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 2px 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Breadcrumb inside topbar */
+.docs-topbar .docs-breadcrumbs {
+    font-size: 12px;
+    color: #757d88;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.docs-topbar .docs-breadcrumbs a {
+    color: #2271b1;
+    text-decoration: none;
+}
+
+.docs-topbar .docs-breadcrumbs a:hover {
+    color: #135e96;
+    text-decoration: underline;
+}
+
+.docs-topbar .docs-breadcrumbs .sep {
+    color: #ccc;
+    font-size: 10px;
+}
+
+.docs-topbar .docs-breadcrumbs .current-crumb {
+    color: #1d2327;
+    font-weight: 500;
+}
+
+/* Spacer pushes search + lang to the right */
+.docs-topbar-spacer {
+    flex: 1;
+}
+
+/* Search Box */
+.docs-search-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.docs-search-input {
+    width: 220px;
+    height: 30px;
+    padding: 0 10px 0 32px;
+    border: 1px solid #dcdcde;
+    border-radius: 20px;
+    font-size: 12px;
+    outline: none;
+    background: #f6f7f7;
+    color: #1d2327;
+    transition: border-color .2s, box-shadow .2s, width .25s;
+}
+
+.docs-search-input:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 2px rgba(34, 113, 177, .15);
+    width: 280px;
+    background: #fff;
+}
+
+.docs-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background-color: #757d88;
+    mask-image: url('dashicons-svg-min/search.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    pointer-events: none;
+}
+
+/* Language Switcher */
+.docs-lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.docs-lang-switcher a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 24px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #757d88;
+    border: 1px solid transparent;
+    text-decoration: none;
+    transition: all .15s;
+}
+
+.docs-lang-switcher a:hover {
+    color: #2271b1;
+    border-color: #2271b1;
+}
+
+.docs-lang-switcher a.active {
+    color: #fff;
+    background: #2271b1;
+    border-color: #2271b1;
+}
+
+/* Search Results Dropdown */
+.docs-search-results {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 320px;
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .12);
+    z-index: 200;
+    overflow: hidden;
+    display: none;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.docs-search-results.active {
+    display: block;
+}
+
+.docs-search-results-inner {
+    padding: 4px 0;
+}
+
+.docs-search-result-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 14px;
+    cursor: pointer;
+    gap: 2px;
+    transition: background .1s;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.docs-search-result-item:last-child {
+    border-bottom: none;
+}
+
+.docs-search-result-item:hover,
+.docs-search-result-item.focused {
+    background: #f0f6fc;
+}
+
+.docs-search-result-item .result-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1d2327;
+}
+
+.docs-search-result-item .result-section {
+    font-size: 11px;
+    color: #96a0ac;
+}
+
+.docs-search-result-item .result-title mark {
+    background: #fff3cd;
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+.docs-search-empty {
+    padding: 16px;
+    text-align: center;
+    color: #96a0ac;
+    font-size: 13px;
+}
+
+/* ----------------------------------------------------------
+   3. Docs Body Layout (sidebar + main)
+   ---------------------------------------------------------- */
+.docs-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+/* ----------------------------------------------------------
+   4. Docs Sidebar
+   ---------------------------------------------------------- */
+.docs-sidebar {
+    width: 220px !important;
+    flex-shrink: 0;
+    background: #1d2327;
+    min-height: calc(100vh - 78px);
+    /* topbar 46 + adminbar 32 */
+    overflow-y: auto;
+    position: sticky;
+    top: 78px;
+    /* adminbar + topbar */
+    align-self: flex-start;
+}
+
+.docs-sidebar-header {
+    padding: 8px 0;
+    border-bottom: 1px solid #2c3338;
+}
+
+.docs-sidebar-header .back-link {
+    display: flex;
+    align-items: center;
+    padding: 8px 14px;
+    color: #a7aaad;
+    text-decoration: none;
+    font-size: 13px;
+    gap: 8px;
+    transition: background .15s, color .15s;
+}
+
+.docs-sidebar-header .back-link:hover {
+    background: #2c3338;
+    color: #fff;
+}
+
+.docs-menu {
+    list-style: none;
+    padding: 8px 0;
+}
+
+.docs-menu .wp-menu-header {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #646970;
+    padding: 12px 14px 4px;
+}
+
+.docs-menu>li>a {
+    display: flex;
+    align-items: center;
+    padding: 8px 14px;
+    color: #a7aaad;
+    font-size: 13px;
+    text-decoration: none;
+    gap: 10px;
+    transition: background .15s, color .15s;
+}
+
+.docs-menu>li>a:hover {
+    background: #2c3338;
+    color: #fff;
+}
+
+.docs-menu>li.wp-has-current-submenu>a {
+    background: #2271b1;
+    color: #fff;
+}
+
+.docs-menu>li.wp-has-current-submenu>a .wp-menu-image,
+.docs-menu>li>a:hover .wp-menu-image {
+    background-color: #fff;
+}
+
+.docs-menu .wp-submenu {
+    display: none;
+    list-style: none;
+    background: #2c3338;
+    padding: 4px 0;
+}
+
+.docs-menu li.wp-has-current-submenu .wp-submenu,
+.docs-menu li.wp-has-submenu.wp-menu-open .wp-submenu {
+    display: block;
+}
+
+.docs-menu .wp-submenu li a {
+    display: block;
+    padding: 5px 14px 5px 44px;
+    color: #b4b9be;
+    font-size: 12.5px;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: color .15s, border-color .15s;
+}
+
+.docs-menu .wp-submenu li a:hover {
+    color: #fff;
+    border-left-color: #2271b1;
+}
+
+.docs-menu .wp-submenu li.current>a {
+    color: #fff;
+    font-weight: 600;
+    border-left-color: #72aee6;
+}
+
+/* ----------------------------------------------------------
+   5. Docs Main Content Area
+   ---------------------------------------------------------- */
+.docs-main {
+    flex: 1;
+    padding: 28px 36px;
+    max-width: 900px;
+    min-width: 0;
+}
+
+/* ----------------------------------------------------------
+   6. Typography & Content Styles
+   ---------------------------------------------------------- */
+.docs-main h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1d2327;
+    margin-bottom: 12px;
+    line-height: 1.3;
+    border-bottom: 2px solid #f0f0f1;
+    padding-bottom: 14px;
+}
+
+.docs-main h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d2327;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.docs-main h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #3c434a;
+    margin-top: 24px;
+    margin-bottom: 10px;
+}
+
+.docs-main p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #3c434a;
+    margin-bottom: 14px;
+}
+
+.docs-main strong {
+    color: #1d2327;
+}
+
+.docs-main kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    background: #f6f7f7;
+    border: 1px solid #c3c4c7;
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #1d2327;
+}
+
+.docs-main code {
+    background: #f0f0f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #d63638;
+}
+
+/* ----------------------------------------------------------
+   7. Lead Paragraph
+   ---------------------------------------------------------- */
+.docs-lead {
+    font-size: 15px !important;
+    color: #50575e !important;
+    line-height: 1.75 !important;
+    margin-bottom: 20px !important;
+    padding: 14px 18px;
+    background: #f6f7f7;
+    border-left: 4px solid #2271b1;
+    border-radius: 0 6px 6px 0;
+}
+
+/* ----------------------------------------------------------
+   8. Screenshots / Images
+   ---------------------------------------------------------- */
+.docs-screenshot {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.docs-screenshot img {
+    max-width: 100%;
+    max-height: 420px;
+    width: auto;
+    height: auto;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.docs-caption {
+    font-size: 12px !important;
+    color: #757d88 !important;
+    font-style: italic;
+    margin-top: 8px !important;
+    text-align: center;
+}
+
+/* ----------------------------------------------------------
+   9. Divider
+   ---------------------------------------------------------- */
+.docs-divider {
+    border: none;
+    border-top: 1px solid #f0f0f1;
+    margin: 28px 0;
+}
+
+/* ----------------------------------------------------------
+   10. Steps / Ordered List
+   ---------------------------------------------------------- */
+.docs-steps {
+    list-style: none;
+    counter-reset: step-counter;
+    padding: 0;
+    margin: 0 0 16px;
+}
+
+.docs-steps>li {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #3c434a;
+    align-items: flex-start;
+}
+
+.docs-steps>li::before {
+    counter-increment: step-counter;
+    content: counter(step-counter);
+    width: 26px;
+    height: 26px;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.docs-steps>li>strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: #1d2327;
+}
+
+.docs-steps>li>p {
+    margin-bottom: 4px !important;
+}
+
+.docs-steps>li>div {
+    flex: 1;
+}
+
+/* ----------------------------------------------------------
+   11. Unordered List
+   ---------------------------------------------------------- */
+.docs-list {
+    margin: 8px 0 12px 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.docs-list li {
+    padding: 4px 0 4px 22px;
+    position: relative;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #3c434a;
+}
+
+.docs-list li::before {
+    content: '›';
+    position: absolute;
+    left: 8px;
+    color: #2271b1;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+/* ----------------------------------------------------------
+   12. Tables
+   ---------------------------------------------------------- */
+.docs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 24px;
+    font-size: 13.5px;
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+}
+
+.docs-table thead th {
+    background: #f6f7f7;
+    color: #1d2327;
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid #dcdcde;
+    white-space: nowrap;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.docs-table tbody tr {
+    border-bottom: 1px solid #f0f0f1;
+    transition: background .1s;
+}
+
+.docs-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.docs-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.docs-table td {
+    padding: 10px 14px;
+    color: #3c434a;
+    vertical-align: top;
+    line-height: 1.6;
+}
+
+.docs-table td strong {
+    color: #1d2327;
+}
+
+.docs-table td code {
+    font-size: 11.5px;
+}
+
+/* Widget Table (GrapesJS) - icon column */
+.docs-widget-table td:first-child {
+    width: 56px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 6px 8px;
+}
+
+.docs-widget-table td:first-child img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+    background: #f0f0f1;
+    padding: 4px;
+}
+
+.docs-widget-table td:nth-child(2) {
+    width: 160px;
+    white-space: nowrap;
+}
+
+/* ----------------------------------------------------------
+   13. Tip / Warning Blocks
+   ---------------------------------------------------------- */
+.docs-tip,
+.docs-warning {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border-radius: 6px;
+    margin: 20px 0;
+    font-size: 13.5px;
+    line-height: 1.65;
+}
+
+.docs-tip {
+    background: #edfaef;
+    border: 1px solid #b5e7bb;
+    color: #1a4a2e;
+}
+
+.docs-tip .dashicons {
+    color: #1a7431;
+    flex-shrink: 0;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 1;
+    margin-top: 0;
+}
+
+.docs-warning {
+    background: #fff8e1;
+    border: 1px solid #ffcc02;
+    color: #5f4500;
+}
+
+.docs-warning .dashicons {
+    color: #bd8600;
+    flex-shrink: 0;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 1;
+    margin-top: 0;
+}
+
+.docs-tip div,
+.docs-warning div {
+    flex: 1;
+    min-width: 0;
+}
+
+.docs-tip p,
+.docs-warning p {
+    margin-bottom: 0 !important;
+}
+
+/* ----------------------------------------------------------
+   14. Old docs-header (inside #wpcontent) remove/override
+   ---------------------------------------------------------- */
+.docs-header {
+    display: none !important;
+}
+
+/* ----------------------------------------------------------
+   15. Welcome / Getting Started screen
+   ---------------------------------------------------------- */
+.docs-welcome {
+    padding: 40px;
+    text-align: center;
+    max-width: 600px;
+    margin: 60px auto 0;
+}
+
+.docs-welcome .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #2271b1;
+    margin-bottom: 16px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.docs-welcome h1 {
+    border: none !important;
+    margin-bottom: 12px;
+}
+
+.docs-welcome p {
+    font-size: 15px;
+    color: #50575e;
+}
+
+/* ----------------------------------------------------------
+   16. Responsive
+   ---------------------------------------------------------- */
+@media (max-width: 960px) {
+    .docs-sidebar {
+        width: 180px !important;
+    }
+
+    .docs-main {
+        padding: 20px 22px;
+    }
+}
+
+@media (max-width: 760px) {
+    .docs-sidebar {
+        display: none;
+    }
+
+    .docs-topbar .docs-breadcrumbs {
+        display: none;
+    }
+
+    .docs-search-input {
+        width: 160px;
+    }
+
+    .docs-main {
+        padding: 16px;
+    }
+}
+
+/* ----------------------------------------------------------
+   17. Dashicons used in docs tip/warning blocks
+   ---------------------------------------------------------- */
+@font-face {
+    font-family: 'dashicons';
+    src: url('dashicons-svg-min/../fonts/dashicons.woff2') format('woff2'),
+        url('dashicons-svg-min/../fonts/dashicons.woff') format('woff'),
+        url('dashicons-svg-min/../fonts/dashicons.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.dashicons,
+.dashicons-before::before {
+    font-family: 'dashicons';
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+}
+
+
+.dashicons-lightbulb::before {
+    content: "\f534";
+}
+
+.dashicons-warning::before {
+    content: "\f534";
+}
+
+.dashicons-info::before {
+    content: "\f348";
+}
+
+.dashicons-search::before {
+    content: "\f179";
+}
+
+.dashicons-arrow-left-alt::before {
+    content: "\f340";
+}

@@ -1,9 +1,8 @@
 <?php
 /**
  * Docs: Pages - GrapesJS Builder (ID)
- * Note: Widget icons are at /docs/doc-files/grapesjs-widget/
  */
-$base_path = '../docs/doc-files/grapesjs-widget/';
+$base_path = 'docs/doc-files/grapesjs-widget/';
 ?>
 <h1>GrapesJS Page Builder</h1>
 <p class="docs-lead"><strong>GrapesJS</strong> adalah editor halaman visual drag &amp; drop yang memungkinkan Anda membuat desain halaman yang kaya tanpa perlu menulis kode. Cukup seret widget ke kanvas dan atur tampilannya secara visual.</p>
@@ -39,10 +38,7 @@ $base_path = '../docs/doc-files/grapesjs-widget/';
     </li>
 </ol>
 
-<div class="docs-screenshot">
-    <img src="<?php echo get_docs_asset_url('grapesjs-complete-widget.png'); ?>" alt="Semua Widget GrapesJS" onerror="this.style.display='none'">
-    <p class="docs-caption">Panel widget lengkap GrapesJS.</p>
-</div>
+
 
 <hr class="docs-divider">
 

@@ -13,77 +13,181 @@ if (isset($_GET['lang'])) {
 }
 $lang = isset($_SESSION['docs_lang']) ? $_SESSION['docs_lang'] : 'id';
 
-$page_title = 'Documentation';
-$is_docs_page = true; // Flag for styling
+$page_title = $lang === 'en' ? 'Documentation' : 'Dokumentasi';
+$is_docs_page = true;
 
-require_once 'header.php';
-require_once 'sidebar-docs.php';
-
-// Breadcrumbs logic based on URL params (mockup for now)
-$topic = isset($_GET['topic']) ? $_GET['topic'] : 'getting-started';
+// Topic
+$topic = isset($_GET['topic']) ? preg_replace('/[^a-z0-9\-]/', '', $_GET['topic']) : 'getting-started';
 
 /**
  * Helper: Get URL for a docs asset image
+ * Path is relative to wp-admin/, served from docs.php
  */
 if (!function_exists('get_docs_asset_url')) {
     function get_docs_asset_url(string $filename): string
     {
-        return '../wp-admin/docs/doc-files/' . ltrim($filename, '/');
+        return 'docs/doc-files/' . ltrim($filename, '/');
     }
 }
 
-?>
+/**
+ * Build human-readable breadcrumb label from topic slug
+ */
+function topic_label(string $topic): string
+{
+    $map = [
+        'dashboard-home' => 'Dashboard Home',
+        'posts-all' => 'All Posts',
+        'posts-new' => 'Add New Post',
+        'posts-featured' => 'Featured Posts',
+        'posts-published' => 'Published Posts',
+        'posts-drafts' => 'Drafts',
+        'posts-categories' => 'Categories',
+        'posts-tags' => 'Tags',
+        'media-library' => 'Media Library',
+        'media-new' => 'Add New Media',
+        'pages-all' => 'All Pages',
+        'pages-new' => 'Add New Page',
+        'pages-builder-grapesjs' => 'GrapesJS Editor',
+        'pages-builder-editorjs' => 'Editor.js',
+        'pages-builder-monaco' => 'Monaco Editor',
+        'appearance-themes' => 'Customize',
+        'appearance-menus' => 'Menus',
+        'settings-general' => 'General',
+        'settings-writing' => 'Writing',
+        'settings-reading' => 'Reading',
+        'settings-media' => 'Media',
+        'settings-permalinks' => 'Permalinks',
+        'users-all' => 'All Users',
+        'users-new' => 'Add New User',
+        'users-profile' => 'Profile',
+        'tools-db' => 'Database Backup',
+        'tools-io' => 'Import / Export',
+        'tools-health' => 'Site Health',
+        'tools-snippets' => 'Snippets',
+        'tools-tm' => 'Tag Manager',
+    ];
+    return $map[$topic] ?? ucwords(str_replace('-', ' ', $topic));
+}
 
-<div id="wpcontent" class="docs-content">
-    <div class="docs-wrapper">
-        <!-- Documentation Header -->
-        <div class="docs-header">
-            <div class="header-left">
-                <nav class="docs-breadcrumbs">
-                    <a href="docs.php">Home</a>
-                    <?php
-if ($topic !== 'getting-started') {
-    $parts = explode('-', $topic);
-    $trail = '';
-    foreach ($parts as $part) {
-        $trail .= ' / <span>' . ucwords($part) . '</span>';
-    }
-    echo $trail;
+/**
+ * Get section (first segment of slug)
+ */
+function topic_section(string $topic): string
+{
+    $section_map = [
+        'dashboard' => 'Dashboard',
+        'posts' => 'Posts',
+        'media' => 'Media',
+        'pages' => 'Pages',
+        'appearance' => 'Appearance',
+        'settings' => 'Settings',
+        'users' => 'Users',
+        'tools' => 'Tools',
+    ];
+    $prefix = explode('-', $topic)[0];
+    return $section_map[$prefix] ?? '';
 }
-else {
-    echo ' / <span>Overview</span>';
-}
+
+$topic_label = topic_label($topic);
+$topic_section = topic_section($topic);
+
+require_once 'db_config.php';
 ?>
-                </nav>
-            </div>
-            
-            <div class="header-right">
-                <div class="docs-lang-switcher">
-                    <a href="?lang=id" class="<?php echo $lang === 'id' ? 'active' : ''; ?>">ID</a>
-                    <a href="?lang=en" class="<?php echo $lang === 'en' ? 'active' : ''; ?>">EN</a>
-                </div>
-                <div class="docs-search-container">
-                    <div class="docs-search-box">
-                        <input type="text" placeholder="<?php echo $lang === 'en' ? 'Search documentation' : 'Cari dokumentasi'; ?>" readonly>
-                        <span class="dashicons dashicons-search"></span>
-                    </div>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html lang="<?php echo $lang; ?>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($topic_label . ' — ' . ($lang === 'en' ? 'Documentation' : 'Dokumentasi')); ?></title>
+    <?php
+$_fav = get_option('site_favicon', '');
+if ($_fav): ?>
+    <link rel="icon" href="<?php echo htmlspecialchars($_fav); ?>">
+    <?php
+endif; ?>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="colors.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<?php
+$admin_color = get_option('admin_color_scheme', 'fresh');
+?>
+<body class="wp-admin admin-color-<?php echo htmlspecialchars($admin_color); ?> is-docs">
+<?php require_once 'topbar.php'; ?>
+
+<div class="content-wrapper" style="padding-top:0; display:block;">
+
+    <!-- ====== DOCS TOPBAR (sticky, below admin bar) ====== -->
+    <div class="docs-topbar" id="docs-topbar">
+        <!-- Breadcrumbs -->
+        <nav class="docs-breadcrumbs" aria-label="breadcrumb">
+            <a href="docs.php"><?php echo $lang === 'en' ? 'Docs' : 'Dok'; ?></a>
+            <?php if ($topic_section): ?>
+                <span class="sep">›</span>
+                <span><?php echo htmlspecialchars($topic_section); ?></span>
+            <?php
+endif; ?>
+            <?php if ($topic !== 'getting-started'): ?>
+                <span class="sep">›</span>
+                <span class="current-crumb"><?php echo htmlspecialchars($topic_label); ?></span>
+            <?php
+endif; ?>
+        </nav>
+
+        <!-- Topic Slug Badge -->
+        <?php if ($topic !== 'getting-started'): ?>
+        <span class="docs-topic-slug"><?php echo htmlspecialchars($topic); ?></span>
+        <?php
+endif; ?>
+
+        <div class="docs-topbar-spacer"></div>
+
+        <!-- Live Search -->
+        <div class="docs-search-wrap">
+            <span class="docs-search-icon" aria-hidden="true"></span>
+            <input
+                type="text"
+                id="docs-search-input"
+                class="docs-search-input"
+                placeholder="<?php echo $lang === 'en' ? 'Search docs  /' : 'Cari docs  /'; ?>"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Search documentation"
+            >
+            <div id="docs-search-results" class="docs-search-results" role="listbox"></div>
         </div>
 
-        <hr class="wp-header-end">
+        <!-- Language Switcher -->
+        <div class="docs-lang-switcher">
+            <a href="?topic=<?php echo urlencode($topic); ?>&lang=id" class="<?php echo $lang === 'id' ? 'active' : ''; ?>">ID</a>
+            <a href="?topic=<?php echo urlencode($topic); ?>&lang=en" class="<?php echo $lang === 'en' ? 'active' : ''; ?>">EN</a>
+        </div>
+    </div>
 
-        <!-- Documentation Content Area -->
-        <div class="docs-content-area">
+    <!-- ====== DOCS BODY ====== -->
+    <div class="docs-body">
+
+        <!-- Sidebar -->
+        <?php require_once 'sidebar-docs.php'; ?>
+
+        <!-- Main Content -->
+        <main class="docs-main" id="docs-main" role="main">
             <?php
 if ($topic === 'getting-started') {
     if ($lang === 'en') {
-        echo "<h1>Welcome to the Documentation</h1>";
-        echo "<p>Please select a topic from the sidebar to begin.</p>";
+        echo '<div class="docs-welcome">';
+        echo '<span class="dashicons dashicons-book-alt"></span>';
+        echo '<h1>Welcome to the Documentation</h1>';
+        echo '<p>Select a topic from the sidebar to get started. You can also use the search bar above or press <kbd>/</kbd> to quickly find what you need.</p>';
+        echo '</div>';
     }
     else {
-        echo "<h1>Selamat Datang di Dokumentasi</h1>";
-        echo "<p>Silakan pilih topik dari sidebar untuk memulai.</p>";
+        echo '<div class="docs-welcome">';
+        echo '<span class="dashicons dashicons-book-alt"></span>';
+        echo '<h1>Selamat Datang di Dokumentasi</h1>';
+        echo '<p>Pilih topik dari sidebar untuk memulai. Anda juga bisa menggunakan kotak pencarian di atas atau tekan <kbd>/</kbd> untuk menemukan topik dengan cepat.</p>';
+        echo '</div>';
     }
 }
 else {
@@ -97,18 +201,21 @@ else {
     }
     else {
         if ($lang === 'en') {
-            echo "<h1>" . ucwords(str_replace('-', ' ', $topic)) . "</h1>";
-            echo "<p>Documentation content for this section is coming soon.</p>";
+            echo '<h1>' . htmlspecialchars($topic_label) . '</h1>';
+            echo '<p>Documentation content for this section is coming soon.</p>';
         }
         else {
-            echo "<h1>" . ucwords(str_replace('-', ' ', $topic)) . "</h1>";
-            echo "<p>Konten dokumentasi untuk bagian ini segera hadir.</p>";
+            echo '<h1>' . htmlspecialchars($topic_label) . '</h1>';
+            echo '<p>Konten dokumentasi untuk bagian ini segera hadir.</p>';
         }
     }
 }
 ?>
-        </div>
-    </div>
-</div>
+        </main>
 
-<?php require_once 'footer.php'; ?>
+    </div><!-- /.docs-body -->
+</div><!-- /.content-wrapper -->
+
+<script src="docs.js"></script>
+</body>
+</html>

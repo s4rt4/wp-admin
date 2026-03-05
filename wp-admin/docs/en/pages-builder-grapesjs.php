@@ -2,7 +2,7 @@
 /**
  * Docs: Pages - GrapesJS Builder (EN)
  */
-$base_path = '../docs/doc-files/grapesjs-widget/';
+$base_path = 'docs/doc-files/grapesjs-widget/';
 ?>
 <h1>GrapesJS Page Builder</h1>
 <p class="docs-lead"><strong>GrapesJS</strong> is a visual drag &amp; drop page editor that lets you create rich page designs without writing code. Simply drag widgets onto the canvas and arrange them visually.</p>
@@ -38,10 +38,7 @@ $base_path = '../docs/doc-files/grapesjs-widget/';
     </li>
 </ol>
 
-<div class="docs-screenshot">
-    <img src="<?php echo get_docs_asset_url('grapesjs-complete-widget.png'); ?>" alt="All GrapesJS Widgets" onerror="this.style.display='none'">
-    <p class="docs-caption">The complete GrapesJS widget panel.</p>
-</div>
+
 
 <hr class="docs-divider">
 
