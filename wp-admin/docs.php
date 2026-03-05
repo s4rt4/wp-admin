@@ -135,9 +135,9 @@ endif; ?>
 endif; ?>
         </nav>
 
-        <!-- Topic Slug Badge -->
+        <!-- Topic Slug Badge - Clickable -->
         <?php if ($topic !== 'getting-started'): ?>
-        <span class="docs-topic-slug"><?php echo htmlspecialchars($topic); ?></span>
+        <a href="docs.php?topic=<?php echo urlencode($topic); ?>&lang=<?php echo htmlspecialchars($lang); ?>" class="docs-topic-slug" title="Tautan langsung ke topik ini"><?php echo htmlspecialchars($topic); ?></a>
         <?php
 endif; ?>
 

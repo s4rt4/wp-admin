@@ -35,7 +35,7 @@
     flex-shrink: 0;
 }
 
-/* Current topic slug badge */
+/* Current topic slug badge — clickable link */
 .docs-topic-slug {
     font-size: 11px;
     font-family: 'Courier New', monospace;
@@ -46,6 +46,15 @@
     padding: 2px 8px;
     white-space: nowrap;
     flex-shrink: 0;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+}
+
+a.docs-topic-slug:hover {
+    background: #e0e0e2;
+    border-color: #2271b1;
+    color: #2271b1;
 }
 
 /* Breadcrumb inside topbar */
@@ -243,17 +252,16 @@
     width: 220px !important;
     flex-shrink: 0;
     background: #1d2327;
-    min-height: calc(100vh - 78px);
-    /* topbar 46 + adminbar 32 */
+    height: calc(100vh - 78px);
     overflow-y: auto;
-    position: sticky;
+    position: fixed;
     top: 78px;
-    /* adminbar + topbar */
-    align-self: flex-start;
+    left: 0;
+    z-index: 80;
 }
 
 .docs-sidebar-header {
-    padding: 8px 0;
+    padding: 0;
     border-bottom: 1px solid #2c3338;
 }
 
@@ -350,10 +358,13 @@
    5. Docs Main Content Area
    ---------------------------------------------------------- */
 .docs-main {
+    margin-left: 220px;
+    /* same as sidebar width */
     flex: 1;
     padding: 28px 36px;
-    max-width: 900px;
+    max-width: 960px;
     min-width: 0;
+    min-height: calc(100vh - 78px);
 }
 
 /* ----------------------------------------------------------
@@ -735,6 +746,7 @@
     }
 
     .docs-main {
+        margin-left: 180px;
         padding: 20px 22px;
     }
 }
@@ -744,16 +756,17 @@
         display: none;
     }
 
+    .docs-main {
+        margin-left: 0;
+        padding: 16px;
+    }
+
     .docs-topbar .docs-breadcrumbs {
         display: none;
     }
 
     .docs-search-input {
         width: 160px;
-    }
-
-    .docs-main {
-        padding: 16px;
     }
 }
 
