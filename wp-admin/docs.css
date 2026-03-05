@@ -263,25 +263,39 @@ a.docs-topic-slug:hover {
     border-right: 1px solid #1d2327 !important;
 }
 
-.docs-sidebar-header {
-    padding: 0;
+#adminmenumain.docs-sidebar .docs-sidebar-header {
+    padding: 12px 14px;
     border-bottom: 1px solid #2c3338;
 }
 
-.docs-sidebar-header .back-link {
+#adminmenumain.docs-sidebar .docs-sidebar-header .docs-back-link {
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 8px 14px;
-    color: #a7aaad;
+    color: #fff !important;
+    background: #2271b1 !important;
     text-decoration: none;
     font-size: 13px;
+    font-weight: 500;
+    border-radius: 4px;
     gap: 8px;
-    transition: background .15s, color .15s;
+    transition: background .15s;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-.docs-sidebar-header .back-link:hover {
-    background: #2c3338;
-    color: #fff;
+#adminmenumain.docs-sidebar .docs-sidebar-header .docs-back-link:hover {
+    background: #135e96 !important;
+    color: #fff !important;
+}
+
+#adminmenumain.docs-sidebar .docs-sidebar-header .docs-back-link .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: -2px;
+    /* sesuaikan spacing ikon dengan teks */
 }
 
 #adminmenu.docs-menu {
