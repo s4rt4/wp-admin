@@ -39,3 +39,14 @@
         <strong>Perhatian:</strong> Kode PHP yang salah dapat menyebabkan error fatal pada situs. Selalu uji snippet di lingkungan lokal sebelum mengaktifkannya di situs produksi.
     </div>
 </div>
+
+<hr class="docs-divider">
+
+<h2>Kekuatan Shortcode (Powerful Shortcodes)</h2>
+<p>Fitur snippets sangatlah <strong>powerful</strong> berkat dukungan integrasinya menggunakan sistem <strong>Shortcode</strong>. Setiap snippet yang Anda buat (baik HTML, PHP, Javascript, maupun CSS) otomatis menghasilkan shortcode unik.</p>
+<p>Anda dapat mengakses dan menyalin shortcode ini, lalu <strong>menempelkannya secara fleksibel di mana saja</strong>, termasuk:</p>
+<ul class="docs-list">
+    <li>Di dalam teks Editor Artikel / Postingan.</li>
+    <li>Ke dalam komponen elemen dari Visual Page Builder, seperti saat menyusun struktur desain dengan <em>GrapesJS</em>.</li>
+</ul>
+<p>Kehadiran sistem integrasi ini membebaskan Anda membuat komponen kompleks dan menyuntikkan fungsi / kode kemana saja tanpa halangan infrastruktur tata letak.</p>

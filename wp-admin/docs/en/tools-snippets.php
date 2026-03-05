@@ -39,3 +39,14 @@
         <strong>Warning:</strong> Incorrect PHP code can cause a fatal error on the site. Always test snippets in a local environment before activating them on the production site.
     </div>
 </div>
+
+<hr class="docs-divider">
+
+<h2>The Power of Shortcodes</h2>
+<p>The snippets feature is extremely <strong>powerful</strong> thanks to its integration with the <strong>Shortcode</strong> system. Every snippet you create (whether HTML, PHP, Javascript, or CSS) automatically generates a unique shortcode.</p>
+<p>You can access and copy this shortcode, then <strong>flexibly paste it anywhere</strong> on your site, including:</p>
+<ul class="docs-list">
+    <li>Inside the text of an Article / Post Editor.</li>
+    <li>Into component elements of a Visual Page Builder, such as when structuring layouts with <em>GrapesJS</em>.</li>
+</ul>
+<p>This integration system frees you to build complex components and inject execution code anywhere without layout constraints.</p>

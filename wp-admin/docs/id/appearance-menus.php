@@ -54,3 +54,20 @@
         <strong>Tips:</strong> Gunakan <em>Tautan Kustom</em> untuk menambahkan tautan ke situs eksternal atau halaman yang belum dibuat di admin, seperti tautan ke profil media sosial.
     </div>
 </div>
+
+<hr class="docs-divider">
+
+<h2>Menu Shortcodes</h2>
+<p>Setiap menu yang Anda buat otomatis memiliki sebuah <strong>Shortcode</strong>. Anda dapat menyalin shortcode ini dan menempelkannya di mana saja di situs Anda, seperti di dalam postingan, halaman (termasuk Page Builder), atau widget untuk menampilkan menu tersebut secara instan.</p>
+
+<div class="docs-screenshot">
+    <img src="<?php echo get_docs_asset_url('menu-shortcodes.png'); ?>" alt="Menu Shortcodes" onerror="this.style.display='none'">
+    <p class="docs-caption">Kolom shortcode pada daftar dan pengaturan menu.</p>
+</div>
+
+<div class="docs-tip">
+    <span class="dashicons dashicons-lightbulb"></span>
+    <div>
+        <strong>Tips:</strong> Penggunaan shortcode sangatlah <em>powerful</em>. Untuk contoh penggunaan shortcode tingkat lanjut menggunakan kode khusus, lihat bagian <a href="docs.php?topic=tools-snippets&lang=id">Peralatan &rarr; Snippets</a>.
+    </div>
+</div>

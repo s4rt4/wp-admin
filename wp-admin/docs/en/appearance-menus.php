@@ -54,3 +54,20 @@
         <strong>Tip:</strong> Use <em>Custom Links</em> to add links to external sites or pages not yet created in the admin, such as links to social media profiles.
     </div>
 </div>
+
+<hr class="docs-divider">
+
+<h2>Menu Shortcodes</h2>
+<p>Every menu you create automatically generates a <strong>Shortcode</strong>. You can copy this shortcode and paste it anywhere on your site, such as inside posts, pages (including Page Builders), or widgets, to instantly display the menu.</p>
+
+<div class="docs-screenshot">
+    <img src="<?php echo get_docs_asset_url('menu-shortcodes.png'); ?>" alt="Menu Shortcodes" onerror="this.style.display='none'">
+    <p class="docs-caption">Shortcode column in the menu settings list.</p>
+</div>
+
+<div class="docs-tip">
+    <span class="dashicons dashicons-lightbulb"></span>
+    <div>
+        <strong>Tip:</strong> The use of shortcodes is incredibly <em>powerful</em>. For more advanced shortcode usage utilizing custom code, check the <a href="docs.php?topic=tools-snippets&lang=en">Tools &rarr; Snippets</a> section.
+    </div>
+</div>
