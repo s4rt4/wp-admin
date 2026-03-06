@@ -6,7 +6,8 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 
 - **Advanced Content Editors:**
     - **GrapesJS:** For visual, drag-and-drop page design (perfect for Landing Pages, features 49+ custom widgets).
-    - **Editor.js:** For structured, block-based content editing (perfect for Articles/Blog posts).
+    - **Editor.js:** For structured, block-based page building.
+    - **Toast UI Editor:** A powerful Markdown and WYSIWYG editor for writing standard Posts and Articles.
     - **Monaco Editor:** A powerful IDE-like code editor for writing raw HTML, CSS, JavaScript, and PHP snippets.
 - **Powerful Shortcode & Snippet System:**
     - Create custom PHP, CSS, or JS snippets in the admin panel.
@@ -65,7 +66,7 @@ Use the following credentials to access the admin panel:
 - **Backend:** Native PHP (No frameworks).
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript.
 - **Database:** MySQL.
-- **Libraries/Editors:** GrapesJS, Editor.js, Monaco Editor, Chart.js.
+- **Libraries/Editors:** GrapesJS, Editor.js, Toast UI Editor, Monaco Editor, Chart.js.
 
 ## Disclaimer
 
