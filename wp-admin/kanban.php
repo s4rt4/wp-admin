@@ -251,7 +251,7 @@ endif; ?>
 /* ─── Columns ────────────────────────── */
 .kanban-wrap {
     display: flex;
-    gap: 0;               /* gap removed, using border-right as divider */
+    gap: 16px;            /* Jarak antar kolom */
     min-height: 65vh;
     align-items: flex-start;
     min-width: max-content;
@@ -259,14 +259,21 @@ endif; ?>
 .kb-column {
     background: #f4f5f7;
     width: 290px; min-width: 290px;
-    padding: 14px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
     flex-shrink: 0;
-    border-right: 1px solid #dcdcde;   /* ← divider */
+    overflow: hidden; /* Prevent child blocks from sticking out of border radius */
 }
-.kb-column:last-child { border-right: none; }
-.kb-col-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.kb-col-hdr h3 { font-size: 13px; font-weight: 700; margin: 0; display:flex;align-items:center;gap:6px; }
-.kb-col-count { background:#e1e5ef; color:#3c434a; border-radius:20px; font-size:10px; padding:1px 7px; font-weight:600; }
+.kb-column-body {
+    padding: 14px;
+}
+.kb-col-hdr { 
+    display:flex; align-items:center; justify-content:space-between; 
+    padding: 12px 14px;
+    color: #fff;
+}
+.kb-col-hdr h3 { font-size: 14px; font-weight: 700; margin: 0; display:flex;align-items:center;gap:6px; color: #fff;}
+.kb-col-count { background:rgba(255,255,255,0.25); color:#fff; border-radius:20px; font-size:11px; padding:2px 8px; font-weight:600; }
 .kb-col-acts { display:flex; gap:2px; }
 
 /* ─── Cards ──────────────────────────── */
@@ -391,21 +398,21 @@ function renderBoard(data) {
         colEl.dataset.colId = col.id;
         var count = (col.cards || []).length;
 
-        colEl.style.borderTop = '4px solid ' + (col.color || '#e2e8f0');
-        colEl.style.borderTopLeftRadius = '6px';
-        colEl.style.borderTopRightRadius = '6px';
+        var headColor = col.color || '#2271b1';
 
         colEl.innerHTML =
-            '<div class="kb-col-hdr">' +
+            '<div class="kb-col-hdr" style="background-color:' + headColor + ';">' +
                 '<h3>' + stripEmoji(esc(col.name)) + ' <span class="kb-col-count">' + count + '</span></h3>' +
                 '<div class="kb-col-acts">' +
-                    '<button class="kb-icn-btn" onclick="openCardModal(' + col.id + ')" title="Add card"><i class="fa-solid fa-plus"></i></button>' +
-                    '<button class="kb-icn-btn del" onclick="deleteColumn(event,' + col.id + ')" title="Delete column"><i class="fa-solid fa-trash"></i></button>' +
+                    '<button class="kb-icn-btn" style="color:#fff;" onclick="openCardModal(' + col.id + ')" title="Add card"><i class="fa-solid fa-plus"></i></button>' +
+                    '<button class="kb-icn-btn del" style="color:#fff;" onclick="deleteColumn(event,' + col.id + ')" title="Delete column"><i class="fa-solid fa-trash"></i></button>' +
                 '</div>' +
             '</div>' +
-            '<div class="kb-cards" id="col-' + col.id + '"></div>' +
-            '<button onclick="openCardModal(' + col.id + ')" style="width:100%;margin-top:8px;padding:7px;border:1px dashed #c3c4c7;border-radius:6px;background:none;cursor:pointer;color:#646970;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;">' +
-                '<i class="fa-solid fa-plus" style="font-size:11px;"></i> Add card</button>';
+            '<div class="kb-column-body">' + 
+                '<div class="kb-cards" id="col-' + col.id + '"></div>' +
+                '<button onclick="openCardModal(' + col.id + ')" style="width:100%;margin-top:8px;padding:7px;border:1px dashed #c3c4c7;border-radius:6px;background:none;cursor:pointer;color:#646970;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;">' +
+                    '<i class="fa-solid fa-plus" style="font-size:11px;"></i> Add card</button>' +
+            '</div>';
 
         wrap.appendChild(colEl);
         var list = colEl.querySelector('#col-' + col.id);
