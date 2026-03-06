@@ -2,11 +2,10 @@
 require_once 'auth_check.php';
 require_once 'db_config.php';
 
-if (!current_user_can('edit_posts')) {
+if (!current_user_can('edit_posts'))
     die("Access denied");
-}
 
-// --- Auto-install tables if not exist ---
+// --- Auto-install tables ---
 $conn->query("CREATE TABLE IF NOT EXISTS kanban_boards (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -14,7 +13,6 @@ $conn->query("CREATE TABLE IF NOT EXISTS kanban_boards (
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
-
 $conn->query("CREATE TABLE IF NOT EXISTS kanban_columns (
     id INT AUTO_INCREMENT PRIMARY KEY,
     board_id INT NOT NULL,
@@ -22,7 +20,6 @@ $conn->query("CREATE TABLE IF NOT EXISTS kanban_columns (
     position INT DEFAULT 0,
     color VARCHAR(20) DEFAULT '#e2e8f0'
 )");
-
 $conn->query("CREATE TABLE IF NOT EXISTS kanban_cards (
     id INT AUTO_INCREMENT PRIMARY KEY,
     column_id INT NOT NULL,
@@ -32,259 +29,291 @@ $conn->query("CREATE TABLE IF NOT EXISTS kanban_cards (
     due_date DATE,
     assigned_to INT,
     position INT DEFAULT 0,
-    post_id INT DEFAULT NULL,
-    form_submission_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+$conn->query("CREATE TABLE IF NOT EXISTS kanban_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    board_id INT NOT NULL,
+    card_id INT NOT NULL,
+    card_title VARCHAR(255),
+    from_column_name VARCHAR(100),
+    to_column_name VARCHAR(100),
+    moved_by INT NOT NULL,
+    moved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 $page_title = 'Kanban Board';
 require_once 'header.php';
 require_once 'sidebar.php';
 
-// Fetch all boards
 $boards = $conn->query("SELECT * FROM kanban_boards ORDER BY created_at DESC");
+$boards_arr = [];
+while ($b = $boards->fetch_assoc())
+    $boards_arr[] = $b;
 ?>
 
-<!-- SortableJS -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <div id="wpcontent">
 <div class="wrap">
-    <h1 class="wp-heading-inline">
-        <span class="dashicons dashicons-screenoptions" style="font-size:28px;line-height:1;margin-right:6px;"></span>
-        Kanban Board
-    </h1>
-    <a href="#" id="btn-new-board" class="page-title-action">+ New Board</a>
 
-    <div id="kanban-app" style="margin-top:20px;">
-        <?php if ($boards && $boards->num_rows > 0): ?>
-        <!-- Board Selector -->
-        <div class="kanban-board-tabs" id="boardTabs" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-            <?php $first = true;
-    while ($board = $boards->fetch_assoc()): ?>
-            <button class="kanban-board-tab <?php echo $first ? 'active' : ''; ?>"
-                data-board-id="<?php echo $board['id']; ?>"
-                onclick="loadBoard(<?php echo $board['id']; ?>, this)"
-                style="padding:8px 18px;border-radius:6px;border:2px solid <?php echo $first ? '#2271b1' : '#c3c4c7'; ?>;background:<?php echo $first ? '#2271b1' : '#fff'; ?>;color:<?php echo $first ? '#fff' : '#3c434a'; ?>;cursor:pointer;font-weight:600;font-size:13px;transition:all .2s;">
-                <?php echo htmlspecialchars($board['name']); ?>
-                <?php if (current_user_can('manage_options')): ?>
-                <span class="dashicons dashicons-trash" onclick="deleteBoard(event, <?php echo $board['id']; ?>)" style="font-size:14px;margin-left:6px;color:<?php echo $first ? '#ffaaaa' : '#cc1818'; ?>;"></span>
-                <?php
-        endif; ?>
-            </button>
-            <?php $first = false;
-    endwhile; ?>
+    <!-- Top Header Bar -->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1 style="margin:0;display:flex;align-items:center;gap:8px;">
+            <span class="dashicons dashicons-screenoptions" style="font-size:26px;line-height:1;"></span>
+            Kanban Board
+        </h1>
+        <button id="btn-new-board" class="page-title-action">+ New Board</button>
+        <button id="btn-add-col" class="page-title-action" style="display:none;" onclick="promptAddColumn()">+ Add Column</button>
+        <button id="btn-show-history" class="page-title-action" style="display:none;background:#f6f7f7;color:#3c434a;" onclick="toggleHistory()">📋 Activity Log</button>
+    </div>
+
+    <!-- Board Tabs -->
+    <div id="board-tabs-wrap" style="display:flex;gap:0;margin:18px 0 0;border-bottom:2px solid #dcdcde;overflow-x:auto;padding-bottom:0;">
+        <?php foreach ($boards_arr as $board): ?>
+        <div class="kb-tab" data-board-id="<?php echo $board['id']; ?>"
+            onclick="loadBoard(<?php echo $board['id']; ?>, this)"
+            style="display:flex;align-items:center;gap:8px;padding:8px 20px;cursor:pointer;border:2px solid transparent;border-bottom:none;border-radius:6px 6px 0 0;margin-bottom:-2px;white-space:nowrap;font-size:13px;font-weight:600;color:#646970;background:#f6f7f7;transition:all .15s;">
+            <?php echo htmlspecialchars($board['name']); ?>
+            <?php if (current_user_can('manage_options')): ?>
+            <span class="kb-tab-delete dashicons dashicons-no-alt"
+                onclick="deleteBoard(event, <?php echo $board['id']; ?>, '<?php echo addslashes($board['name']); ?>')"
+                title="Delete this board"
+                style="font-size:14px;width:14px;height:14px;line-height:14px;opacity:.5;transition:opacity .15s;"
+                onmouseover="this.style.opacity='1';this.style.color='#cc1818';"
+                onmouseout="this.style.opacity='.5';this.style.color='inherit';">
+            </span>
+            <?php
+    endif; ?>
         </div>
         <?php
-else: ?>
-        <div id="kanban-empty" style="text-align:center;padding:60px 20px;color:#646970;">
-            <span class="dashicons dashicons-screenoptions" style="font-size:64px;color:#c3c4c7;display:block;margin-bottom:16px;"></span>
-            <h2 style="color:#646970;">Belum ada Board</h2>
-            <p>Klik <strong>"+ New Board"</strong> untuk membuat board pertama Anda.</p>
-        </div>
+endforeach; ?>
+        <?php if (empty($boards_arr)): ?>
+        <div style="padding:10px 0;color:#999;font-size:13px;">No boards yet. Click <strong>+ New Board</strong> to get started.</div>
         <?php
 endif; ?>
-
-        <!-- Board Content Area -->
-        <div id="board-content" style="overflow-x:auto;padding-bottom:16px;"></div>
     </div>
+
+    <!-- Board Content -->
+    <div id="board-content" style="padding-top:20px;"></div>
+
+    <!-- Activity Log Pane -->
+    <div id="history-pane" style="display:none;margin-top:20px;background:#fff;border:1px solid #dcdcde;border-radius:8px;overflow:hidden;">
+        <div style="padding:12px 18px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;">
+            <strong style="font-size:14px;">📋 Card Activity Log</strong>
+            <button onclick="toggleHistory()" style="background:none;border:none;cursor:pointer;color:#646970;font-size:18px;line-height:1;">&times;</button>
+        </div>
+        <div id="history-list" style="padding:14px 18px;max-height:300px;overflow-y:auto;font-size:13px;"></div>
+    </div>
+
 </div>
 </div>
 
 <!-- Modal: New Board -->
-<div id="modal-board" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:10px;width:440px;max-width:95vw;padding:28px;box-shadow:0 8px 40px rgba(0,0,0,.25);">
-        <h3 style="margin:0 0 20px;font-size:16px;">Buat Board Baru</h3>
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Nama Board</label>
-        <input id="inp-board-name" type="text" placeholder="contoh: Marketing Q2 2026" style="width:100%;padding:9px 12px;border:1px solid #8c8f94;border-radius:4px;font-size:14px;box-sizing:border-box;margin-bottom:14px;">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Deskripsi (opsional)</label>
-        <textarea id="inp-board-desc" rows="3" placeholder="Deskripsi singkat board ini..." style="width:100%;padding:9px 12px;border:1px solid #8c8f94;border-radius:4px;font-size:14px;box-sizing:border-box;resize:vertical;margin-bottom:20px;"></textarea>
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px;">Buat kolom default?</label>
-        <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="default-cols">
-            <label style="font-size:12px;display:flex;gap:5px;align-items:center;cursor:pointer;"><input type="checkbox" value="📋 To Do" checked> To Do</label>
-            <label style="font-size:12px;display:flex;gap:5px;align-items:center;cursor:pointer;"><input type="checkbox" value="⚡ In Progress" checked> In Progress</label>
-            <label style="font-size:12px;display:flex;gap:5px;align-items:center;cursor:pointer;"><input type="checkbox" value="✅ Done" checked> Done</label>
+<div id="modal-board" class="kb-modal" style="display:none;">
+    <div class="kb-modal-box" style="width:420px;">
+        <div class="kb-modal-header"><h3>Create New Board</h3><button onclick="closeModal('modal-board')">&times;</button></div>
+        <div class="kb-modal-body">
+            <label>Board Name *</label>
+            <input id="inp-board-name" type="text" placeholder="e.g. Marketing Q2 2026">
+            <label style="margin-top:12px;">Description (optional)</label>
+            <textarea id="inp-board-desc" rows="2" placeholder="Short description..."></textarea>
+            <label style="margin-top:12px;">Create default columns?</label>
+            <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;" id="default-cols">
+                <label class="kb-chk"><input type="checkbox" value="📋 To Do" checked> To Do</label>
+                <label class="kb-chk"><input type="checkbox" value="⚡ In Progress" checked> In Progress</label>
+                <label class="kb-chk"><input type="checkbox" value="✅ Done" checked> Done</label>
+            </div>
         </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;">
-            <button onclick="document.getElementById('modal-board').style.display='none'" style="padding:8px 18px;border:1px solid #c3c4c7;border-radius:4px;background:#f6f7f7;cursor:pointer;font-size:14px;">Batal</button>
-            <button onclick="createBoard()" style="padding:8px 20px;border:none;border-radius:4px;background:#2271b1;color:#fff;cursor:pointer;font-size:14px;font-weight:600;">Buat Board</button>
+        <div class="kb-modal-footer">
+            <button onclick="closeModal('modal-board')" class="kb-btn-secondary">Cancel</button>
+            <button onclick="createBoard()" class="kb-btn-primary">Create Board</button>
         </div>
     </div>
 </div>
 
-<!-- Modal: New/Edit Card -->
-<div id="modal-card" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:10px;width:500px;max-width:95vw;padding:28px;box-shadow:0 8px 40px rgba(0,0,0,.25);">
-        <h3 id="modal-card-title" style="margin:0 0 20px;font-size:16px;">Tambah Kartu Baru</h3>
-        <input type="hidden" id="card-edit-id" value="">
-        <input type="hidden" id="card-column-id" value="">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Judul *</label>
-        <input id="inp-card-title" type="text" placeholder="Judul task..." style="width:100%;padding:9px 12px;border:1px solid #8c8f94;border-radius:4px;font-size:14px;box-sizing:border-box;margin-bottom:14px;">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Deskripsi</label>
-        <textarea id="inp-card-desc" rows="3" style="width:100%;padding:9px 12px;border:1px solid #8c8f94;border-radius:4px;font-size:14px;box-sizing:border-box;resize:vertical;margin-bottom:14px;"></textarea>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
-            <div>
-                <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Prioritas</label>
-                <select id="inp-card-priority" style="width:100%;padding:8px;border:1px solid #8c8f94;border-radius:4px;font-size:13px;">
-                    <option value="low">🟢 Low</option>
-                    <option value="medium" selected>🟡 Medium</option>
-                    <option value="high">🔴 High</option>
-                </select>
-            </div>
-            <div>
-                <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Due Date</label>
-                <input id="inp-card-due" type="date" style="width:100%;padding:8px;border:1px solid #8c8f94;border-radius:4px;font-size:13px;box-sizing:border-box;">
+<!-- Modal: New / Edit Card -->
+<div id="modal-card" class="kb-modal" style="display:none;">
+    <div class="kb-modal-box" style="width:500px;">
+        <div class="kb-modal-header">
+            <h3 id="modal-card-title">Add New Card</h3>
+            <button onclick="closeModal('modal-card')">&times;</button>
+        </div>
+        <div class="kb-modal-body">
+            <input type="hidden" id="card-edit-id">
+            <input type="hidden" id="card-column-id">
+            <label>Title *</label>
+            <input id="inp-card-title" type="text" placeholder="Card title...">
+            <label style="margin-top:12px;">Description</label>
+            <textarea id="inp-card-desc" rows="3" placeholder="Details..."></textarea>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                <div>
+                    <label>Priority</label>
+                    <select id="inp-card-priority">
+                        <option value="low">🟢 Low</option>
+                        <option value="medium" selected>🟡 Medium</option>
+                        <option value="high">🔴 High</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Due Date</label>
+                    <input id="inp-card-due" type="date">
+                </div>
             </div>
         </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;">
-            <button onclick="closeCardModal()" style="padding:8px 18px;border:1px solid #c3c4c7;border-radius:4px;background:#f6f7f7;cursor:pointer;font-size:14px;">Batal</button>
-            <button onclick="saveCard()" style="padding:8px 20px;border:none;border-radius:4px;background:#2271b1;color:#fff;cursor:pointer;font-size:14px;font-weight:600;">Simpan</button>
+        <div class="kb-modal-footer">
+            <button onclick="closeModal('modal-card')" class="kb-btn-secondary">Cancel</button>
+            <button onclick="saveCard()" class="kb-btn-primary">Save Card</button>
         </div>
     </div>
 </div>
 
 <style>
-.kanban-columns-wrap { display:flex; gap:18px; min-height:60vh; align-items:flex-start; padding-bottom:12px; }
-.kanban-column { background:#f1f2f4; border-radius:10px; width:290px; min-width:290px; padding:14px; flex-shrink:0; }
-.kanban-col-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.kanban-col-header h3 { font-size:14px; font-weight:700; margin:0; }
-.kanban-cards-list { min-height:60px; transition:background .15s; }
-.kanban-cards-list.drag-over { background:rgba(34,113,177,.08); border-radius:6px; }
-.kanban-card { background:#fff; border-radius:8px; padding:12px 14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.08); cursor:grab; border-left:4px solid #2271b1; transition:box-shadow .15s; position:relative; }
-.kanban-card:hover { box-shadow:0 3px 12px rgba(0,0,0,.14); }
-.kanban-card.prio-high { border-left-color:#cc1818; }
-.kanban-card.prio-low { border-left-color:#00a32a; }
-.kanban-card.prio-medium { border-left-color:#dba617; }
-.kanban-card h4 { margin:0 0 6px; font-size:13px; font-weight:600; line-height:1.4; padding-right:40px; }
-.kanban-card .card-meta { font-size:11px; color:#787c82; display:flex; gap:10px; flex-wrap:wrap; }
-.kanban-card .card-actions { position:absolute; top:10px; right:10px; display:flex; gap:4px; opacity:0; transition:opacity .15s; }
-.kanban-card:hover .card-actions { opacity:1; }
-.card-btn { background:none; border:none; cursor:pointer; padding:2px; border-radius:3px; color:#646970; font-size:13px; }
-.card-btn:hover { background:#f0f0f1; color:#1d2327; }
-.btn-add-col { background:#fff; border:2px dashed #c3c4c7; border-radius:10px; width:250px; min-width:250px; height:60px; cursor:pointer; color:#646970; font-size:14px; font-weight:600; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px; }
-.btn-add-col:hover { border-color:#2271b1; color:#2271b1; background:#f0f6fc; }
-.badge-prio { padding:2px 7px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase; }
-.badge-high { background:#fce8e8; color:#a30000; }
-.badge-medium { background:#fef9e5; color:#7a5601; }
-.badge-low { background:#e8f8ee; color:#185c2e; }
+/* ─── Layout ─────────────────────────────── */
+.kb-tab.active { background:#fff!important;color:#2271b1!important;border-color:#dcdcde!important;border-bottom-color:#fff!important; }
+.kb-tab:hover:not(.active) { background:#ececec!important; }
+.kanban-wrap { display:flex;gap:18px;min-height:60vh;align-items:flex-start;overflow-x:auto;padding-bottom:16px; }
+.kb-column  { background:#f1f2f4;border-radius:10px;width:290px;min-width:290px;padding:14px;flex-shrink:0; }
+.kb-col-hdr { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px; }
+.kb-col-hdr h3 { font-size:14px;font-weight:700;margin:0; }
+.kb-cards   { min-height:60px; }
+.kb-card    { background:#fff;border-radius:8px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);cursor:grab;border-left:4px solid #2271b1;position:relative;transition:box-shadow .15s; }
+.kb-card:hover { box-shadow:0 3px 14px rgba(0,0,0,.14); }
+.kb-card.prio-high   { border-left-color:#cc1818; }
+.kb-card.prio-low    { border-left-color:#00a32a; }
+.kb-card.prio-medium { border-left-color:#dba617; }
+.kb-card h4 { margin:0 0 6px;font-size:13px;font-weight:600;padding-right:50px;line-height:1.4; }
+.kb-card-acts { position:absolute;top:9px;right:9px;display:flex;gap:3px;opacity:0;transition:opacity .15s; }
+.kb-card:hover .kb-card-acts { opacity:1; }
+.kb-icn-btn { background:none;border:none;cursor:pointer;padding:3px;border-radius:4px;color:#787c82;font-size:13px;line-height:1; }
+.kb-icn-btn:hover { background:#f0f0f1;color:#1d2327; }
+.kb-icn-btn.del:hover { background:#fce8e8;color:#cc1818; }
+.kb-card .meta { font-size:11px;color:#787c82;display:flex;gap:8px;flex-wrap:wrap;margin-top:4px; }
+.badge { padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700; }
+.badge-high   { background:#fce8e8;color:#a30000; }
+.badge-medium { background:#fef9e5;color:#7a5601; }
+.badge-low    { background:#e8f8ee;color:#185c2e; }
+.kb-add-col-ph { background:#fff;border:2px dashed #c3c4c7;border-radius:10px;width:240px;min-width:240px;height:56px;cursor:pointer;color:#646970;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s; }
+.kb-add-col-ph:hover { border-color:#2271b1;color:#2271b1;background:#f0f6fc; }
+/* ─── Modal ──────────────────────────────── */
+.kb-modal { position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center; }
+.kb-modal-box { background:#fff;border-radius:10px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden; }
+.kb-modal-header { padding:18px 22px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between; }
+.kb-modal-header h3 { margin:0;font-size:15px; }
+.kb-modal-header button { background:none;border:none;font-size:22px;cursor:pointer;color:#646970;line-height:1; }
+.kb-modal-body { padding:20px 22px; }
+.kb-modal-body label { display:block;font-size:13px;font-weight:600;margin-bottom:5px; }
+.kb-modal-body input[type=text],.kb-modal-body input[type=date],.kb-modal-body select,.kb-modal-body textarea { width:100%;padding:8px 10px;border:1px solid #8c8f94;border-radius:4px;font-size:13px;box-sizing:border-box; }
+.kb-modal-footer { padding:14px 22px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:10px; }
+.kb-btn-primary { padding:8px 20px;border:none;border-radius:4px;background:#2271b1;color:#fff;cursor:pointer;font-size:13px;font-weight:600; }
+.kb-btn-primary:hover { background:#135e96; }
+.kb-btn-secondary { padding:8px 18px;border:1px solid #c3c4c7;border-radius:4px;background:#f6f7f7;cursor:pointer;font-size:13px; }
+.kb-chk { font-size:12px;display:flex;align-items:center;gap:5px;cursor:pointer; }
+/* ─── History ──────────────────────────── */
+.hist-row { display:flex;gap:12px;align-items:baseline;padding:6px 0;border-bottom:1px solid #f0f0f0; }
+.hist-row:last-child { border-bottom:none; }
+.hist-time { font-size:11px;color:#787c82;white-space:nowrap;min-width:130px; }
+.hist-text { font-size:12px;color:#3c434a;line-height:1.5; }
 </style>
 
 <script>
 var _activeBoardId = null;
+var _historyVisible = false;
 
-document.getElementById('btn-new-board').addEventListener('click', function(e){
-    e.preventDefault();
+// ─── Board ──────────────────────────────────────────
+document.getElementById('btn-new-board').addEventListener('click', function(){
     document.getElementById('inp-board-name').value = '';
     document.getElementById('inp-board-desc').value = '';
-    document.getElementById('modal-board').style.display = 'flex';
-    setTimeout(function(){ document.getElementById('inp-board-name').focus(); }, 100);
+    showModal('modal-board');
+    setTimeout(function(){ document.getElementById('inp-board-name').focus(); }, 120);
 });
 
 function createBoard() {
     var name = document.getElementById('inp-board-name').value.trim();
-    if (!name) { alert('Nama board tidak boleh kosong!'); return; }
+    if (!name) { document.getElementById('inp-board-name').focus(); return; }
     var desc = document.getElementById('inp-board-desc').value.trim();
     var cols = [];
     document.querySelectorAll('#default-cols input:checked').forEach(function(c){ cols.push(c.value); });
-
-    fetch('api/kanban.php', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ action:'create_board', name:name, description:desc, default_columns:cols })
-    }).then(r=>r.json()).then(function(d){
-        if (d.success) { location.reload(); }
-        else { alert('Gagal: ' + (d.error||'Unknown error')); }
+    apiFetch({ action:'create_board', name:name, description:desc, default_columns:cols }, function(d){
+        if (d.success) location.reload();
+        else alert('Error: ' + (d.error || 'Unknown'));
     });
 }
 
-function deleteBoard(e, boardId) {
+function deleteBoard(e, boardId, boardName) {
     e.stopPropagation();
-    if (!confirm('Hapus board ini beserta semua kolom dan kartunya? Tindakan ini tidak bisa dibatalkan.')) return;
-    fetch('api/kanban.php', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ action:'delete_board', board_id:boardId })
-    }).then(r=>r.json()).then(function(d){ if(d.success) location.reload(); });
+    if (!confirm('Delete board "' + boardName + '" and all its columns and cards? This cannot be undone.')) return;
+    apiFetch({ action:'delete_board', board_id:boardId }, function(d){
+        if (d.success) location.reload();
+    });
 }
 
-function loadBoard(boardId, btn) {
+function loadBoard(boardId, tabEl) {
     _activeBoardId = boardId;
-    document.querySelectorAll('.kanban-board-tab').forEach(function(t){
-        t.style.background = '#fff'; t.style.color = '#3c434a'; t.style.borderColor = '#c3c4c7';
-        t.querySelectorAll('.dashicons-trash').forEach(i=>i.style.color='#cc1818');
-    });
-    btn.style.background = '#2271b1'; btn.style.color = '#fff'; btn.style.borderColor = '#2271b1';
-    btn.querySelectorAll('.dashicons-trash').forEach(i=>i.style.color='#ffaaaa');
-
-    document.getElementById('board-content').innerHTML = '<p style="padding:20px;color:#999;">Loading...</p>';
+    document.querySelectorAll('.kb-tab').forEach(function(t){ t.classList.remove('active'); });
+    tabEl.classList.add('active');
+    document.getElementById('btn-add-col').style.display = '';
+    document.getElementById('btn-show-history').style.display = '';
+    document.getElementById('board-content').innerHTML = '<p style="color:#999;padding:10px;">Loading...</p>';
+    if (_historyVisible) renderHistory();
 
     fetch('api/kanban.php?action=get_board&board_id=' + boardId)
-        .then(r=>r.json()).then(function(d){
-            if (!d.success) { document.getElementById('board-content').innerHTML = '<p style="color:red;">Gagal memuat board.</p>'; return; }
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (!d.success) { document.getElementById('board-content').innerHTML = '<p style="color:red;">Failed to load board.</p>'; return; }
             renderBoard(d.data);
         });
 }
 
+// ─── Board Rendering ────────────────────────────────
 function renderBoard(data) {
     var wrap = document.createElement('div');
-    wrap.className = 'kanban-columns-wrap';
+    wrap.className = 'kanban-wrap';
 
     data.columns.forEach(function(col) {
         var colEl = document.createElement('div');
-        colEl.className = 'kanban-column';
+        colEl.className = 'kb-column';
         colEl.dataset.colId = col.id;
 
-        var cardCount = col.cards ? col.cards.length : 0;
-        colEl.innerHTML = `
-            <div class="kanban-col-header">
-                <h3>${escHtml(col.name)} <span style="background:#e1e5ef;color:#3c434a;border-radius:20px;font-size:11px;padding:1px 8px;font-weight:600;">${cardCount}</span></h3>
-                <div style="display:flex;gap:4px;">
-                    <button class="card-btn" onclick="openCardModal(${col.id})" title="Tambah kartu"><span class="dashicons dashicons-plus" style="font-size:18px;width:18px;height:18px;"></span></button>
-                    <button class="card-btn" onclick="deleteColumn(${col.id})" title="Hapus kolom"><span class="dashicons dashicons-trash" style="font-size:16px;width:16px;height:16px;color:#a30000;"></span></button>
-                </div>
-            </div>
-            <div class="kanban-cards-list" id="col-list-${col.id}"></div>
-            <button onclick="openCardModal(${col.id})" style="width:100%;margin-top:10px;padding:7px;border:1px dashed #c3c4c7;border-radius:6px;background:none;cursor:pointer;color:#646970;font-size:12px;">+ Tambah kartu</button>
-        `;
+        var count = (col.cards || []).length;
+        colEl.innerHTML =
+            '<div class="kb-col-hdr">' +
+                '<h3>' + esc(col.name) + ' <span style="background:#e1e5ef;color:#3c434a;border-radius:20px;font-size:10px;padding:1px 7px;font-weight:600;">' + count + '</span></h3>' +
+                '<div style="display:flex;gap:2px;">' +
+                    '<button class="kb-icn-btn" onclick="openCardModal(' + col.id + ')" title="Add card"><span class="dashicons dashicons-plus" style="font-size:16px;width:16px;height:16px;"></span></button>' +
+                    '<button class="kb-icn-btn del" onclick="deleteColumn(event,' + col.id + ')" title="Delete column"><span class="dashicons dashicons-trash" style="font-size:14px;width:14px;height:14px;"></span></button>' +
+                '</div>' +
+            '</div>' +
+            '<div class="kb-cards" id="col-' + col.id + '"></div>' +
+            '<button onclick="openCardModal(' + col.id + ')" style="width:100%;margin-top:8px;padding:6px;border:1px dashed #c3c4c7;border-radius:6px;background:none;cursor:pointer;color:#646970;font-size:12px;">+ Add card</button>';
+
         wrap.appendChild(colEl);
+        var list = colEl.querySelector('#col-' + col.id);
+        (col.cards || []).forEach(function(card){ list.appendChild(makeCardEl(card)); });
 
-        var list = colEl.querySelector('#col-list-' + col.id);
-        (col.cards || []).forEach(function(card) {
-            list.appendChild(makeCardEl(card));
-        });
-
-        // Make sortable
         new Sortable(list, {
             group: 'kanban',
             animation: 150,
-            ghostClass: 'card-ghost',
             onEnd: function(evt) {
                 var cardId = evt.item.dataset.cardId;
-                var newColId = evt.to.closest('.kanban-column').dataset.colId;
+                var newColId = evt.to.closest('.kb-column').dataset.colId;
                 var order = [];
-                evt.to.querySelectorAll('.kanban-card').forEach(function(c,i){ order.push({id:c.dataset.cardId, position:i}); });
-                fetch('api/kanban.php', {
-                    method:'POST',
-                    headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({ action:'move_card', card_id:cardId, column_id:newColId, order:order })
+                evt.to.querySelectorAll('.kb-card').forEach(function(c,i){ order.push({ id:c.dataset.cardId, position:i }); });
+                apiFetch({ action:'move_card', card_id:cardId, column_id:newColId, board_id:_activeBoardId, order:order }, function(){
+                    if (_historyVisible) renderHistory();
+                    // Update column count badges
+                    refreshColCounts();
                 });
             }
         });
     });
 
-    // Add column button
-    var addColBtn = document.createElement('button');
-    addColBtn.className = 'btn-add-col';
-    addColBtn.innerHTML = '<span class="dashicons dashicons-plus"></span> Tambah Kolom';
-    addColBtn.onclick = function(){
-        var name = prompt('Nama kolom baru:');
-        if (!name) return;
-        fetch('api/kanban.php', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ action:'create_column', board_id:_activeBoardId, name:name })
-        }).then(r=>r.json()).then(function(d){ if(d.success) loadBoard(_activeBoardId, document.querySelector('.kanban-board-tab.active')||document.querySelectorAll('.kanban-board-tab')[0]); });
-    };
-    wrap.appendChild(addColBtn);
+    // Placeholder for add column (visual only – button now in topbar)
+    var ph = document.createElement('div');
+    ph.className = 'kb-add-col-ph';
+    ph.innerHTML = '<span class="dashicons dashicons-plus"></span> Add Column';
+    ph.onclick = promptAddColumn;
+    wrap.appendChild(ph);
 
     document.getElementById('board-content').innerHTML = '';
     document.getElementById('board-content').appendChild(wrap);
@@ -292,101 +321,146 @@ function renderBoard(data) {
 
 function makeCardEl(card) {
     var el = document.createElement('div');
-    var prioClass = 'prio-' + card.priority;
-    el.className = 'kanban-card ' + prioClass;
+    el.className = 'kb-card prio-' + card.priority;
     el.dataset.cardId = card.id;
-
-    var badgeClass = 'badge-' + card.priority;
+    var badgeCls = 'badge-' + card.priority;
     var prioLabel = card.priority === 'high' ? '🔴 High' : card.priority === 'low' ? '🟢 Low' : '🟡 Medium';
-    var dueHtml = card.due_date ? `<span>📅 ${card.due_date}</span>` : '';
-
-    el.innerHTML = `
-        <div class="card-actions">
-            <button class="card-btn" onclick="editCard(${card.id})" title="Edit"><span class="dashicons dashicons-edit" style="font-size:14px;width:14px;height:14px;"></span></button>
-            <button class="card-btn" onclick="deleteCard(${card.id})" title="Hapus"><span class="dashicons dashicons-trash" style="font-size:14px;width:14px;height:14px;color:#a30000;"></span></button>
-        </div>
-        <h4>${escHtml(card.title)}</h4>
-        ${card.description ? `<p style="font-size:12px;color:#646970;margin:0 0 8px;line-height:1.5;">${escHtml(card.description)}</p>` : ''}
-        <div class="card-meta">
-            <span class="badge-prio ${badgeClass}">${prioLabel}</span>
-            ${dueHtml}
-        </div>
-    `;
+    var dueHtml = card.due_date ? '<span>📅 ' + card.due_date + '</span>' : '';
+    el.innerHTML =
+        '<div class="kb-card-acts">' +
+            '<button class="kb-icn-btn" onclick="editCard(' + card.id + ')" title="Edit"><span class="dashicons dashicons-edit" style="font-size:13px;width:13px;height:13px;"></span></button>' +
+            '<button class="kb-icn-btn del" onclick="deleteCard(event,' + card.id + ')" title="Delete"><span class="dashicons dashicons-trash" style="font-size:13px;width:13px;height:13px;"></span></button>' +
+        '</div>' +
+        '<h4>' + esc(card.title) + '</h4>' +
+        (card.description ? '<p style="font-size:12px;color:#646970;margin:0 0 6px;line-height:1.5;">' + esc(card.description) + '</p>' : '') +
+        '<div class="meta"><span class="badge ' + badgeCls + '">' + prioLabel + '</span>' + dueHtml + '</div>';
     return el;
 }
 
-function openCardModal(colId, cardData) {
-    document.getElementById('card-column-id').value = colId;
-    document.getElementById('card-edit-id').value = cardData ? cardData.id : '';
-    document.getElementById('modal-card-title').textContent = cardData ? 'Edit Kartu' : 'Tambah Kartu Baru';
-    document.getElementById('inp-card-title').value = cardData ? cardData.title : '';
-    document.getElementById('inp-card-desc').value = cardData ? (cardData.description||'') : '';
-    document.getElementById('inp-card-priority').value = cardData ? cardData.priority : 'medium';
-    document.getElementById('inp-card-due').value = cardData ? (cardData.due_date||'') : '';
-    document.getElementById('modal-card').style.display = 'flex';
-    setTimeout(function(){ document.getElementById('inp-card-title').focus(); }, 100);
+function refreshColCounts() {
+    document.querySelectorAll('.kb-column').forEach(function(col){
+        var h3 = col.querySelector('.kb-col-hdr h3');
+        var count = col.querySelectorAll('.kb-card').length;
+        var badge = h3.querySelector('span');
+        if (badge) badge.textContent = count;
+    });
 }
 
-function closeCardModal() { document.getElementById('modal-card').style.display = 'none'; }
+// ─── Column ─────────────────────────────────────────
+function promptAddColumn() {
+    if (!_activeBoardId) { alert('Please select or create a board first.'); return; }
+    var name = prompt('New column name:');
+    if (!name || !name.trim()) return;
+    apiFetch({ action:'create_column', board_id:_activeBoardId, name:name.trim() }, function(d){
+        if (d.success) loadBoard(_activeBoardId, document.querySelector('.kb-tab.active'));
+    });
+}
+
+function deleteColumn(e, colId) {
+    e.stopPropagation();
+    if (!confirm('Delete this column and all its cards?')) return;
+    apiFetch({ action:'delete_column', column_id:colId }, function(d){
+        if (d.success) loadBoard(_activeBoardId, document.querySelector('.kb-tab.active'));
+    });
+}
+
+// ─── Card CRUD ───────────────────────────────────────
+function openCardModal(colId, cardData) {
+    document.getElementById('card-column-id').value = colId || '';
+    document.getElementById('card-edit-id').value   = cardData ? cardData.id : '';
+    document.getElementById('modal-card-title').textContent = cardData ? 'Edit Card' : 'Add New Card';
+    document.getElementById('inp-card-title').value    = cardData ? cardData.title : '';
+    document.getElementById('inp-card-desc').value     = cardData ? (cardData.description || '') : '';
+    document.getElementById('inp-card-priority').value = cardData ? cardData.priority : 'medium';
+    document.getElementById('inp-card-due').value      = cardData ? (cardData.due_date || '') : '';
+    showModal('modal-card');
+    setTimeout(function(){ document.getElementById('inp-card-title').focus(); }, 120);
+}
 
 function saveCard() {
     var title = document.getElementById('inp-card-title').value.trim();
-    if (!title) { alert('Judul kartu tidak boleh kosong!'); return; }
+    if (!title) { document.getElementById('inp-card-title').focus(); return; }
+    var editId = document.getElementById('card-edit-id').value;
     var payload = {
-        action: document.getElementById('card-edit-id').value ? 'update_card' : 'create_card',
-        column_id: document.getElementById('card-column-id').value,
-        id: document.getElementById('card-edit-id').value,
-        title: title,
+        action:      editId ? 'update_card' : 'create_card',
+        id:          editId,
+        column_id:   document.getElementById('card-column-id').value,
+        title:       title,
         description: document.getElementById('inp-card-desc').value.trim(),
-        priority: document.getElementById('inp-card-priority').value,
-        due_date: document.getElementById('inp-card-due').value,
+        priority:    document.getElementById('inp-card-priority').value,
+        due_date:    document.getElementById('inp-card-due').value,
     };
-    fetch('api/kanban.php', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
-    }).then(r=>r.json()).then(function(d){
-        if(d.success) {
-            closeCardModal();
-            loadBoard(_activeBoardId, document.querySelector('.kanban-board-tab[data-board-id="'+_activeBoardId+'"]'));
-        } else { alert('Gagal menyimpan kartu!'); }
+    apiFetch(payload, function(d){
+        if (d.success) {
+            closeModal('modal-card');
+            loadBoard(_activeBoardId, document.querySelector('.kb-tab.active'));
+        } else { alert('Failed to save card.'); }
     });
 }
 
 function editCard(cardId) {
     fetch('api/kanban.php?action=get_card&card_id=' + cardId)
-        .then(r=>r.json()).then(function(d){
-            if(d.success) openCardModal(d.data.column_id, d.data);
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if (d.success) openCardModal(d.data.column_id, d.data); });
+}
+
+function deleteCard(e, cardId) {
+    e.stopPropagation();
+    if (!confirm('Delete this card? This cannot be undone.')) return;
+    apiFetch({ action:'delete_card', card_id:cardId }, function(d){
+        if (d.success) loadBoard(_activeBoardId, document.querySelector('.kb-tab.active'));
+    });
+}
+
+// ─── Activity Log ────────────────────────────────────
+function toggleHistory() {
+    _historyVisible = !_historyVisible;
+    document.getElementById('history-pane').style.display = _historyVisible ? '' : 'none';
+    if (_historyVisible) renderHistory();
+}
+
+function renderHistory() {
+    if (!_activeBoardId) return;
+    var el = document.getElementById('history-list');
+    el.innerHTML = '<p style="color:#999;font-size:12px;">Loading...</p>';
+    fetch('api/kanban.php?action=get_history&board_id=' + _activeBoardId)
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (!d.success || !d.data.length) {
+                el.innerHTML = '<p style="color:#999;font-size:12px;text-align:center;padding:10px 0;">No card movements recorded yet.</p>';
+                return;
+            }
+            el.innerHTML = d.data.map(function(h){
+                return '<div class="hist-row">' +
+                    '<span class="hist-time">' + h.moved_at + '</span>' +
+                    '<span class="hist-text"><strong>' + esc(h.author) + '</strong> moved <em>"' + esc(h.card_title) + '"</em>' +
+                    (h.from_column_name ? ' from <strong>' + esc(h.from_column_name) + '</strong>' : '') +
+                    ' to <strong>' + esc(h.to_column_name) + '</strong></span>' +
+                '</div>';
+            }).join('');
         });
 }
 
-function deleteCard(cardId) {
-    if (!confirm('Hapus kartu ini?')) return;
+// ─── Utilities ───────────────────────────────────────
+function apiFetch(payload, cb) {
     fetch('api/kanban.php', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ action:'delete_card', card_id:cardId })
-    }).then(r=>r.json()).then(function(d){
-        if(d.success) loadBoard(_activeBoardId, document.querySelector('.kanban-board-tab[data-board-id="'+_activeBoardId+'"]'));
-    });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); }).then(cb);
 }
 
-function deleteColumn(colId) {
-    if (!confirm('Hapus kolom ini beserta semua kartunya?')) return;
-    fetch('api/kanban.php', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ action:'delete_column', column_id:colId })
-    }).then(r=>r.json()).then(function(d){
-        if(d.success) loadBoard(_activeBoardId, document.querySelector('.kanban-board-tab[data-board-id="'+_activeBoardId+'"]'));
-    });
-}
+function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-function escHtml(s) {
+function esc(s) {
     if (!s) return '';
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Auto-load first board
+// Auto-load first board on page load
 window.addEventListener('DOMContentLoaded', function(){
-    var firstTab = document.querySelector('.kanban-board-tab');
+    var firstTab = document.querySelector('.kb-tab');
     if (firstTab) firstTab.click();
 });
 </script>
