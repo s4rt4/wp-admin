@@ -23,25 +23,28 @@ $post = [
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['post_title'];
     $content = $_POST['content']; // SunEditor content
-    
+
     // Determine Status based on button clicked
     if (isset($_POST['publish'])) {
         // If updating an existing post, trust the dropdown
         if ($post_id > 0) {
             $status = $_POST['post_status'];
-        } else {
+        }
+        else {
             // If creating a new post, "Publish" button implies publish intent,
             // unless they specifically chose something else? 
             // Actually, simplified: If they click Publish on a new post, make it publish.
             // If they wanted draft, they should click "Save Draft".
             $status = 'publish';
         }
-    } elseif (isset($_POST['save'])) {
+    }
+    elseif (isset($_POST['save'])) {
         $status = 'draft';
-    } else {
+    }
+    else {
         $status = $_POST['post_status']; // Fallback
     }
-    
+
     $visibility = $_POST['visibility'];
     $created_at = $_POST['aa'] . '-' . $_POST['mm'] . '-' . $_POST['jj'] . ' ' . $_POST['hh'] . ':' . $_POST['mn'] . ':00'; // Simplified date assembly
     $author_id = $_SESSION['user_id'];
@@ -50,10 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $slug = trim($_POST['post_name']);
     if (empty($slug)) {
         $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
-    } else {
+    }
+    else {
         $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug)));
     }
-    
+
     // Ensure unique slug (simple version)
     // TODO: rigorous unique check
 
@@ -65,12 +69,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
-        
+
         // Generate unique filename
         $ext = strtolower(pathinfo($_FILES['featured_image']['name'], PATHINFO_EXTENSION));
         $file_name = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
         $target_file = $upload_dir . $file_name;
-        
+
         // Proper validation should be here (file type, size, etc.)
         if (move_uploaded_file($_FILES['featured_image']['tmp_name'], $target_file)) {
             // Save path relative to site root so blog.php (in root) works: wp-admin/media/filename
@@ -79,21 +83,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // SEO Fields
-    $meta_title    = trim($_POST['meta_title'] ?? '');
-    $meta_desc     = trim($_POST['meta_desc'] ?? '');
+    $meta_title = trim($_POST['meta_title'] ?? '');
+    $meta_desc = trim($_POST['meta_desc'] ?? '');
     $focus_keyword = trim($_POST['focus_keyword'] ?? '');
 
     if ($post_id > 0) {
         $stmt = $conn->prepare("UPDATE posts SET title=?, slug=?, content=?, status=?, visibility=?, created_at=?, updated_at=NOW(), featured_image=?, meta_title=?, meta_desc=?, focus_keyword=? WHERE id=?");
         $stmt->bind_param("ssssssssssi", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $meta_title, $meta_desc, $focus_keyword, $post_id);
-    } else {
+    }
+    else {
         $stmt = $conn->prepare("INSERT INTO posts (title, slug, content, status, visibility, created_at, updated_at, featured_image, author_id, meta_title, meta_desc, focus_keyword) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)");
         $stmt->bind_param("sssssssisss", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $author_id, $meta_title, $meta_desc, $focus_keyword);
     }
 
     if ($stmt->execute()) {
         $post_id = $post_id > 0 ? $post_id : $stmt->insert_id;
-        
+
         // --- Save Categories ---
         // 1. Clear existing
         $conn->query("DELETE FROM post_categories WHERE post_id = $post_id");
@@ -124,9 +129,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Redirect to edit page
+        // --- Save Revision Snapshot ---
+        $conn->query("CREATE TABLE IF NOT EXISTS post_revisions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            post_id INT NOT NULL,
+            content LONGTEXT NOT NULL,
+            title VARCHAR(255),
+            revised_by INT NOT NULL,
+            revised_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            note VARCHAR(255) DEFAULT NULL
+        )");
+        $rev_uid = $_SESSION['user_id'];
+        $stmt_rev = $conn->prepare("INSERT INTO post_revisions (post_id, content, title, revised_by) VALUES (?, ?, ?, ?)");
+        $stmt_rev->bind_param("issi", $post_id, $content, $title, $rev_uid);
+        $stmt_rev->execute();
+        // Keep only last 20 revisions
+        $conn->query("DELETE FROM post_revisions WHERE post_id=$post_id AND id NOT IN (SELECT id FROM (SELECT id FROM post_revisions WHERE post_id=$post_id ORDER BY revised_at DESC LIMIT 20) t)");
+
         header("Location: post-new.php?id=$post_id&message=saved");
+
         exit;
-    } else {
+    }
+    else {
         $error = "Error saving post: " . $conn->error;
     }
 }
@@ -143,10 +167,10 @@ if ($post_id > 0) {
         if (!isset($post['slug'])) {
             $post['slug'] = '';
         }
-        
+
         // Ownership Check
         if ($post['author_id'] != $_SESSION['user_id'] && !current_user_can('edit_others_posts')) {
-             die("Access denied. You cannot edit this post.");
+            die("Access denied. You cannot edit this post.");
         }
     }
 }
@@ -163,8 +187,8 @@ $aa = date('Y', $ts);
 $hh = date('H', $ts);
 $mn = date('i', $ts);
 $month_names = [
-    '01'=>'Jan', '02'=>'Feb', '03'=>'Mar', '04'=>'Apr', '05'=>'May', '06'=>'Jun',
-    '07'=>'Jul', '08'=>'Aug', '09'=>'Sep', '10'=>'Oct', '11'=>'Nov', '12'=>'Dec'
+    '01' => 'Jan', '02' => 'Feb', '03' => 'Mar', '04' => 'Apr', '05' => 'May', '06' => 'Jun',
+    '07' => 'Jul', '08' => 'Aug', '09' => 'Sep', '10' => 'Oct', '11' => 'Nov', '12' => 'Dec'
 ];
 ?>
 
@@ -213,7 +237,8 @@ $month_names = [
             if (t) { t.style.transition = 'opacity 0.4s'; t.style.opacity = '0'; setTimeout(function(){ t && t.remove(); }, 400); }
         }, 3000);
         </script>
-        <?php endif; ?>
+        <?php
+endif; ?>
 
         <form method="post" action="" enctype="multipart/form-data">
             <div id="poststuff">
@@ -240,9 +265,10 @@ $month_names = [
                                     <button type="button" class="button button-small" onclick="saveSlug()">OK</button>
                                     <a href="#" class="cancel-slug-edit" onclick="cancelSlug()">Cancel</a>
                                 </span>
-                                <?php if($post_id > 0): ?>
+                                <?php if ($post_id > 0): ?>
                                     <!-- View Post Removed as per request -->
-                                <?php endif; ?>
+                                <?php
+endif; ?>
                             </div>
                         </div>
 
@@ -322,11 +348,13 @@ $month_names = [
                                                 <input type="submit" name="save" id="save-post" value="Save Draft" class="button">
                                             </div>
                                             <div id="preview-action">
-                                                <?php if($post_id > 0): ?>
+                                                <?php if ($post_id > 0): ?>
                                                     <a class="preview button" href="../read.php?id=<?php echo $post_id; ?>" target="_blank">Preview</a>
-                                                <?php else: ?>
+                                                <?php
+else: ?>
                                                     <a class="preview button" href="#" onclick="alert('Please save as draft first!'); return false;">Preview</a>
-                                                <?php endif; ?>
+                                                <?php
+endif; ?>
                                             </div>
                                             <div class="clear"></div>
                                         </div>
@@ -362,9 +390,10 @@ $month_names = [
                                             <div id="timestampdiv" class="hide-if-js" style="display:none; margin-top: 5px;">
                                                 <div class="timestamp-wrap">
                                                     <select id="mm" name="mm">
-                                                        <?php foreach($month_names as $k => $v): ?>
+                                                        <?php foreach ($month_names as $k => $v): ?>
                                                             <option value="<?php echo $k; ?>" <?php echo $mm == $k ? 'selected' : ''; ?>><?php echo $v; ?>-<?php echo $k; ?></option>
-                                                        <?php endforeach; ?>
+                                                        <?php
+endforeach; ?>
                                                     </select>
                                                     <input type="text" id="jj" name="jj" value="<?php echo $jj; ?>" size="2" maxlength="2" autocomplete="off">, 
                                                     <input type="text" id="aa" name="aa" value="<?php echo $aa; ?>" size="4" maxlength="4" autocomplete="off"> @ 
@@ -380,18 +409,21 @@ $month_names = [
                                     </div>
                                     <div id="major-publishing-actions">
                                         <div id="delete-action">
-                                            <?php if($post_id > 0): ?>
+                                            <?php if ($post_id > 0): ?>
                                                 <a class="submitdelete deletion" href="posts.php?action=delete&id=<?php echo $post_id; ?>" onclick="return confirm('Move to Trash?');">Move to Trash</a>
-                                            <?php endif; ?>
+                                            <?php
+endif; ?>
                                         </div>
                                         <div id="publishing-action">
                                         <span class="spinner"></span>
                                         <?php if (current_user_can('publish_posts')): ?>
                                             <input type="submit" name="publish" id="publish" class="button button-primary button-large" value="<?php echo $post_id > 0 ? 'Update' : 'Publish'; ?>">
-                                        <?php else: ?>
+                                        <?php
+else: ?>
                                             <input type="submit" name="save" id="save-post" value="Save Draft" class="button button-primary button-large">
                                             <p class="description" style="margin-top:5px;">You can only save as Draft.</p>
-                                        <?php endif; ?>
+                                        <?php
+endif; ?>
                                     </div>
                                     <div class="clear"></div>
                                 </div>
@@ -412,35 +444,37 @@ $month_names = [
                                 <div id="category-all" class="tabs-panel">
                                     <ul id="categorychecklist" data-wp-lists="list:category" class="categorychecklist form-no-clear">
                                         <?php
-                                        // Fetch Categories
-                                        $cats_result = $conn->query("SELECT * FROM categories ORDER BY name ASC");
-                                        
-                                        // Fetch selected categories for this post
-                                        $selected_cats = [];
-                                        if ($post_id > 0) {
-                                            $sc_result = $conn->query("SELECT category_id FROM post_categories WHERE post_id = $post_id");
-                                            while($sc = $sc_result->fetch_assoc()) {
-                                                $selected_cats[] = $sc['category_id'];
-                                            }
-                                        } elseif ($post_id == 0) {
-                                            // Default Category for new posts
-                                            $default_cat = get_option('default_category');
-                                            if ($default_cat) {
-                                                $selected_cats[] = $default_cat;
-                                            }
-                                        }
+// Fetch Categories
+$cats_result = $conn->query("SELECT * FROM categories ORDER BY name ASC");
 
-                                        if ($cats_result->num_rows > 0) {
-                                            while($cat = $cats_result->fetch_assoc()) {
-                                                $checked = in_array($cat['id'], $selected_cats) ? 'checked' : '';
-                                                echo '<li id="category-' . $cat['id'] . '" class="popular-category">';
-                                                echo '<label class="selectit"><input value="' . $cat['id'] . '" type="checkbox" name="post_category[]" id="in-category-' . $cat['id'] . '" ' . $checked . '> ' . htmlspecialchars($cat['name']) . '</label>';
-                                                echo '</li>';
-                                            }
-                                        } else {
-                                            echo '<li>No categories found.</li>';
-                                        }
-                                        ?>
+// Fetch selected categories for this post
+$selected_cats = [];
+if ($post_id > 0) {
+    $sc_result = $conn->query("SELECT category_id FROM post_categories WHERE post_id = $post_id");
+    while ($sc = $sc_result->fetch_assoc()) {
+        $selected_cats[] = $sc['category_id'];
+    }
+}
+elseif ($post_id == 0) {
+    // Default Category for new posts
+    $default_cat = get_option('default_category');
+    if ($default_cat) {
+        $selected_cats[] = $default_cat;
+    }
+}
+
+if ($cats_result->num_rows > 0) {
+    while ($cat = $cats_result->fetch_assoc()) {
+        $checked = in_array($cat['id'], $selected_cats) ? 'checked' : '';
+        echo '<li id="category-' . $cat['id'] . '" class="popular-category">';
+        echo '<label class="selectit"><input value="' . $cat['id'] . '" type="checkbox" name="post_category[]" id="in-category-' . $cat['id'] . '" ' . $checked . '> ' . htmlspecialchars($cat['name']) . '</label>';
+        echo '</li>';
+    }
+}
+else {
+    echo '<li>No categories found.</li>';
+}
+?>
                                     </ul>
                                 </div>
 
@@ -448,19 +482,20 @@ $month_names = [
                                 <div id="category-pop" class="tabs-panel" style="display: none;">
                                     <ul id="categorychecklist-pop" class="categorychecklist form-no-clear">
                                         <?php
-                                        $most_used_cats = $conn->query("SELECT c.id, c.name, COUNT(pc.post_id) as count FROM categories c JOIN post_categories pc ON c.id = pc.category_id GROUP BY c.id ORDER BY count DESC LIMIT 5");
-                                        
-                                        if ($most_used_cats && $most_used_cats->num_rows > 0) {
-                                            while($cat = $most_used_cats->fetch_assoc()) {
-                                                $checked = in_array($cat['id'], $selected_cats) ? 'checked' : '';
-                                                echo '<li id="popular-category-' . $cat['id'] . '" class="popular-category">';
-                                                echo '<label class="selectit"><input value="' . $cat['id'] . '" type="checkbox" name="post_category[]" id="in-popular-category-' . $cat['id'] . '" ' . $checked . '> ' . htmlspecialchars($cat['name']) . '</label>';
-                                                echo '</li>';
-                                            }
-                                        } else {
-                                            echo '<li>No popular categories yet.</li>';
-                                        }
-                                        ?>
+$most_used_cats = $conn->query("SELECT c.id, c.name, COUNT(pc.post_id) as count FROM categories c JOIN post_categories pc ON c.id = pc.category_id GROUP BY c.id ORDER BY count DESC LIMIT 5");
+
+if ($most_used_cats && $most_used_cats->num_rows > 0) {
+    while ($cat = $most_used_cats->fetch_assoc()) {
+        $checked = in_array($cat['id'], $selected_cats) ? 'checked' : '';
+        echo '<li id="popular-category-' . $cat['id'] . '" class="popular-category">';
+        echo '<label class="selectit"><input value="' . $cat['id'] . '" type="checkbox" name="post_category[]" id="in-popular-category-' . $cat['id'] . '" ' . $checked . '> ' . htmlspecialchars($cat['name']) . '</label>';
+        echo '</li>';
+    }
+}
+else {
+    echo '<li>No popular categories yet.</li>';
+}
+?>
                                     </ul>
                                 </div>
 
@@ -486,29 +521,30 @@ $month_names = [
                                     <div id="tag-all" class="tabs-panel">
                                         <ul id="tagchecklist" data-wp-lists="list:tag" class="categorychecklist form-no-clear">
                                             <?php
-                                            // Fetch Tags
-                                            $tags_result = $conn->query("SELECT * FROM tags ORDER BY name ASC");
-                                            
-                                            // Fetch selected tags for this post
-                                            $selected_tags = [];
-                                            if ($post_id > 0) {
-                                                $st_result = $conn->query("SELECT tag_id FROM post_tags WHERE post_id = $post_id");
-                                                while($st = $st_result->fetch_assoc()) {
-                                                    $selected_tags[] = $st['tag_id'];
-                                                }
-                                            }
+// Fetch Tags
+$tags_result = $conn->query("SELECT * FROM tags ORDER BY name ASC");
 
-                                            if ($tags_result->num_rows > 0) {
-                                                while($tag = $tags_result->fetch_assoc()) {
-                                                     $checked = in_array($tag['id'], $selected_tags) ? 'checked' : '';
-                                                    echo '<li id="tag-' . $tag['id'] . '">';
-                                                    echo '<label class="selectit"><input value="' . $tag['id'] . '" type="checkbox" name="tax_input[post_tag][]" id="in-tag-' . $tag['id'] . '" ' . $checked . '> ' . htmlspecialchars($tag['name']) . '</label>';
-                                                    echo '</li>';
-                                                }
-                                            } else {
-                                                echo '<li>No tags found.</li>';
-                                            }
-                                            ?>
+// Fetch selected tags for this post
+$selected_tags = [];
+if ($post_id > 0) {
+    $st_result = $conn->query("SELECT tag_id FROM post_tags WHERE post_id = $post_id");
+    while ($st = $st_result->fetch_assoc()) {
+        $selected_tags[] = $st['tag_id'];
+    }
+}
+
+if ($tags_result->num_rows > 0) {
+    while ($tag = $tags_result->fetch_assoc()) {
+        $checked = in_array($tag['id'], $selected_tags) ? 'checked' : '';
+        echo '<li id="tag-' . $tag['id'] . '">';
+        echo '<label class="selectit"><input value="' . $tag['id'] . '" type="checkbox" name="tax_input[post_tag][]" id="in-tag-' . $tag['id'] . '" ' . $checked . '> ' . htmlspecialchars($tag['name']) . '</label>';
+        echo '</li>';
+    }
+}
+else {
+    echo '<li>No tags found.</li>';
+}
+?>
                                         </ul>
                                     </div>
 
@@ -516,19 +552,20 @@ $month_names = [
                                     <div id="tag-pop" class="tabs-panel" style="display: none;">
                                         <ul id="tagchecklist-pop" class="categorychecklist form-no-clear">
                                             <?php
-                                            $most_used_tags = $conn->query("SELECT t.id, t.name, COUNT(pt.post_id) as count FROM tags t JOIN post_tags pt ON t.id = pt.tag_id GROUP BY t.id ORDER BY count DESC LIMIT 5");
-                                            
-                                            if ($most_used_tags && $most_used_tags->num_rows > 0) {
-                                                while($tag = $most_used_tags->fetch_assoc()) {
-                                                    $checked = in_array($tag['id'], $selected_tags) ? 'checked' : '';
-                                                    echo '<li id="popular-tag-' . $tag['id'] . '">';
-                                                    echo '<label class="selectit"><input value="' . $tag['id'] . '" type="checkbox" name="tax_input[post_tag][]" id="in-popular-tag-' . $tag['id'] . '" ' . $checked . '> ' . htmlspecialchars($tag['name']) . '</label>';
-                                                    echo '</li>';
-                                                }
-                                            } else {
-                                                echo '<li>No popular tags yet.</li>';
-                                            }
-                                            ?>
+$most_used_tags = $conn->query("SELECT t.id, t.name, COUNT(pt.post_id) as count FROM tags t JOIN post_tags pt ON t.id = pt.tag_id GROUP BY t.id ORDER BY count DESC LIMIT 5");
+
+if ($most_used_tags && $most_used_tags->num_rows > 0) {
+    while ($tag = $most_used_tags->fetch_assoc()) {
+        $checked = in_array($tag['id'], $selected_tags) ? 'checked' : '';
+        echo '<li id="popular-tag-' . $tag['id'] . '">';
+        echo '<label class="selectit"><input value="' . $tag['id'] . '" type="checkbox" name="tax_input[post_tag][]" id="in-popular-tag-' . $tag['id'] . '" ' . $checked . '> ' . htmlspecialchars($tag['name']) . '</label>';
+        echo '</li>';
+    }
+}
+else {
+    echo '<li>No popular tags yet.</li>';
+}
+?>
                                         </ul>
                                     </div>
 
@@ -544,10 +581,10 @@ $month_names = [
                             <h2 class="hndle ui-sortable-handle"><span>Featured image</span></h2>
                             <div class="inside">
                                 <p class="hide-if-no-js">
-                                    <?php 
-                                    $has_img = !empty($post['featured_image']);
-                                    $img_src = $has_img ? '../' . htmlspecialchars($post['featured_image']) : '';
-                                    ?>
+                                    <?php
+$has_img = !empty($post['featured_image']);
+$img_src = $has_img ? '../' . htmlspecialchars($post['featured_image']) : '';
+?>
                                     <img id="featured-image-preview" src="<?php echo $img_src; ?>" style="max-width:100%; height:auto; display:<?php echo $has_img ? 'block' : 'none'; ?>; margin-bottom:10px; border-radius:4px; border:1px solid #ddd; padding:4px;">
                                     
                                     <input type="file" name="featured_image" id="featured_image" accept="image/*" onchange="previewFeaturedImage(this)">
@@ -570,6 +607,60 @@ $month_names = [
                                 </p>
                             </div>
                         </div>
+
+                        <?php if ($post_id > 0): ?>
+                        <!-- Revisions Meta Box -->
+                        <div id="revisionsdiv" class="postbox">
+                            <h2 class="hndle ui-sortable-handle" style="cursor:pointer;" onclick="toggleRevisions()">
+                                <span>🕒 Revisions</span>
+                                <span id="rev-toggle-icon" style="float:right;font-size:16px;color:#646970;">▼</span>
+                            </h2>
+                            <div class="inside" id="revisions-inside" style="padding:0;">
+                                <div id="revisions-list" style="padding:10px 14px;max-height:250px;overflow-y:auto;">
+                                    <p style="color:#999;font-size:12px;text-align:center;padding:10px 0;">Loading revisions...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                        function toggleRevisions() {
+                            var el = document.getElementById('revisions-inside');
+                            var icon = document.getElementById('rev-toggle-icon');
+                            if (el.style.display === 'none') { el.style.display = ''; icon.textContent = '▼'; }
+                            else { el.style.display = 'none'; icon.textContent = '▶'; }
+                        }
+                        function loadRevisions() {
+                            fetch('api/revisions.php?action=list&post_id=<?php echo $post_id; ?>')
+                                .then(r=>r.json()).then(function(d){
+                                    var el = document.getElementById('revisions-list');
+                                    if (!d.success || !d.data.length) {
+                                        el.innerHTML = '<p style="color:#999;font-size:12px;text-align:center;padding:10px 0;">No revisions yet.</p>';
+                                        return;
+                                    }
+                                    el.innerHTML = d.data.map(function(r){
+                                        return '<div style="border-bottom:1px solid #f0f0f0;padding:8px 0;display:flex;justify-content:space-between;align-items:center;">'
+                                            + '<div><div style="font-size:12px;font-weight:600;">' + r.title + '</div>'
+                                            + '<div style="font-size:11px;color:#787c82;">' + r.revised_at + ' by ' + r.author + '</div></div>'
+                                            + '<button onclick="restoreRevision('+r.id+')" style="padding:3px 10px;border:1px solid #2271b1;border-radius:3px;background:#fff;color:#2271b1;cursor:pointer;font-size:11px;white-space:nowrap;">Restore</button>'
+                                            + '</div>';
+                                    }).join('');
+                                });
+                        }
+                        function restoreRevision(revId) {
+                            if (!confirm('Restore konten ke versi ini? Konten editor saat ini akan digantikan.')) return;
+                            fetch('api/revisions.php?action=get&revision_id=' + revId)
+                                .then(r=>r.json()).then(function(d){
+                                    if (!d.success) { alert('Gagal memuat revisi.'); return; }
+                                    if (window._toastEditor) {
+                                        window._toastEditor.setHTML(d.data.content);
+                                        document.getElementById('content').value = d.data.content;
+                                        alert('Konten berhasil di-restore! Ingat: klik Update/Save untuk menyimpan perubahan ini.');
+                                    }
+                                });
+                        }
+                        window.addEventListener('DOMContentLoaded', function(){ loadRevisions(); });
+                        </script>
+                        <?php
+endif; ?>
 
                         </div>
 
