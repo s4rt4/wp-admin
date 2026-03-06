@@ -68,9 +68,28 @@
     </tbody>
 </table>
 
+<hr class="docs-divider">
+
+<h2>Revision History</h2>
+<p>The post editor automatically saves your work as you write. The <strong>Revision History</strong> panel on the right side shows all saved revisions for the current post.</p>
+<ul class="docs-list">
+    <li><strong>Auto-save</strong> &mdash; The editor periodically saves a draft in the background so you never lose progress.</li>
+    <li><strong>View Revisions</strong> &mdash; Click any entry in the Revision History panel to preview that version's content.</li>
+    <li><strong>Restore a Revision</strong> &mdash; Click <strong>Restore</strong> on any revision to roll back the post content to that saved point.</li>
+</ul>
+
+<div class="docs-info">
+    <span class="dashicons dashicons-info"></span>
+    <div>
+        <strong>Tip:</strong> Revisions are saved per-post. If you accidentally overwrite good content, just open Revision History and restore a previous version.
+    </div>
+</div>
+
+<hr class="docs-divider">
+
 <div class="docs-tip">
     <span class="dashicons dashicons-lightbulb"></span>
     <div>
-        <strong>SEO Tip:</strong> Meta Title should ideally be no more than 60 characters, and Meta Description between 120–160 characters for the best results in search engines.
+        <strong>SEO Tip:</strong> Meta Title should ideally be no more than 60 characters, and Meta Description between 120&ndash;160 characters for the best results in search engines.
     </div>
 </div>

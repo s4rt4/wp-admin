@@ -35,7 +35,7 @@ $l = $labels[$lang];
 <div id="adminmenumain" class="docs-sidebar">
     <div class="docs-sidebar-header">
         <a href="index.php" class="docs-back-link">
-            <span class="dashicons dashicons-arrow-left-alt"></span>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0;" xmlns="http://www.w3.org/2000/svg"><path d="M15 9H7.83l3.88-3.88c.39-.39.39-1.02 0-1.41-.39-.39-1.01-.39-1.4 0l-5.59 5.59c-.39.39-.39 1.02 0 1.41l5.59 5.59c.39.39 1.01.39 1.4 0 .39-.39.39-1.02 0-1.41L7.83 11H15c.55 0 1-.45 1-1s-.45-1-1-1z"/></svg>
             <span class="text"><?php echo $l['back']; ?></span>
         </a>
     </div>
@@ -46,13 +46,14 @@ $l = $labels[$lang];
         <li class="wp-menu-separator"></li>
 
         <!-- Dashboard -->
-        <li class="wp-has-submenu <?php echo(strpos($topic, 'dashboard') === 0) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+        <li class="wp-has-submenu <?php echo(strpos($topic, 'dashboard') === 0 || $topic === 'tools-kanban') ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
             <a href="docs.php?topic=dashboard">
                 <div class="wp-menu-image dashicons-dashboard"></div>
                 <div class="wp-menu-name"><?php echo $l['dashboard']; ?></div>
             </a>
             <ul class="wp-submenu">
                 <li class="wp-first-item <?php echo($topic === 'dashboard-home' || $topic === 'dashboard') ? 'current' : ''; ?>"><a href="docs.php?topic=dashboard-home">Home</a></li>
+                <li class="<?php echo($topic === 'tools-kanban') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-kanban"><?php echo $l['kanban']; ?></a></li>
             </ul>
         </li>
 
@@ -151,7 +152,6 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-snippets' || $topic === 'tools') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-snippets">Snippets</a></li>
                 <li class="<?php echo($topic === 'tools-tm') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-tm">Tag Manager</a></li>
                 <li class="<?php echo($topic === 'tools-form-builder') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-form-builder"><?php echo $l['form_builder']; ?></a></li>
-                <li class="<?php echo($topic === 'tools-kanban') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-kanban"><?php echo $l['kanban']; ?></a></li>
             </ul>
         </li>
 

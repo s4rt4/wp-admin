@@ -68,9 +68,28 @@
     </tbody>
 </table>
 
+<hr class="docs-divider">
+
+<h2>Riwayat Revisi</h2>
+<p>Editor postingan menyimpan pekerjaan Anda secara otomatis saat menulis. Panel <strong>Riwayat Revisi</strong> di sebelah kanan menampilkan semua revisi yang tersimpan untuk postingan saat ini.</p>
+<ul class="docs-list">
+    <li><strong>Simpan Otomatis</strong> &mdash; Editor secara berkala menyimpan draf di latar belakang agar Anda tidak kehilangan progres.</li>
+    <li><strong>Lihat Revisi</strong> &mdash; Klik entri mana pun di panel Riwayat Revisi untuk melihat pratinjau isi versi tersebut.</li>
+    <li><strong>Pulihkan Revisi</strong> &mdash; Klik <strong>Pulihkan</strong> pada revisi mana pun untuk mengembalikan konten postingan ke titik simpan tersebut.</li>
+</ul>
+
+<div class="docs-info">
+    <span class="dashicons dashicons-info"></span>
+    <div>
+        <strong>Tips:</strong> Revisi disimpan per-postingan. Jika Anda tidak sengaja menimpa konten yang baik, cukup buka Riwayat Revisi dan pulihkan versi sebelumnya.
+    </div>
+</div>
+
+<hr class="docs-divider">
+
 <div class="docs-tip">
     <span class="dashicons dashicons-lightbulb"></span>
     <div>
-        <strong>Tips SEO:</strong> Meta Title sebaiknya tidak lebih dari 60 karakter, dan Meta Description antara 120–160 karakter untuk hasil terbaik di mesin pencari.
+        <strong>Tips SEO:</strong> Meta Title sebaiknya tidak lebih dari 60 karakter, dan Meta Description antara 120&ndash;160 karakter untuk hasil terbaik di mesin pencari.
     </div>
 </div>
