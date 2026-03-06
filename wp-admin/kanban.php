@@ -22,6 +22,7 @@ while ($b = $res->fetch_assoc())
 ?>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous">
 
 <div id="wpcontent">
 <div class="wrap">
@@ -29,18 +30,18 @@ while ($b = $res->fetch_assoc())
     <!-- ── Header ─────────────────────────────── -->
     <div class="kb-header">
         <h1 class="kb-title">
-            <span class="dashicons dashicons-screenoptions"></span>
+            <i class="fa-solid fa-table-columns"></i>
             Kanban Board
         </h1>
         <div class="kb-actions">
             <button id="btn-new-board" class="kb-action-btn kb-action-primary" onclick="openNewBoardModal()">
-                <span class="dashicons dashicons-plus-alt2"></span> New Board
+                <i class="fa-solid fa-plus"></i> New Board
             </button>
             <button id="btn-add-col" class="kb-action-btn" style="display:none;" onclick="promptAddColumn()">
-                <span class="dashicons dashicons-insert-after"></span> Add Column
+                <i class="fa-solid fa-table-columns"></i> Add Column
             </button>
             <button id="btn-show-history" class="kb-action-btn" style="display:none;" onclick="toggleHistory()">
-                <span class="dashicons dashicons-backup"></span> Activity Log
+                <i class="fa-solid fa-clock-rotate-left"></i> Activity Log
             </button>
         </div>
     </div>
@@ -56,7 +57,7 @@ while ($b = $res->fetch_assoc())
                 <button class="kb-tab-del"
                     onclick="deleteBoard(event, <?php echo $board['id']; ?>, '<?php echo addslashes(htmlspecialchars($board['name'])); ?>')"
                     title="Delete board">
-                    <span class="dashicons dashicons-no-alt"></span>
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
                 <?php
     endif; ?>
@@ -77,7 +78,7 @@ endif; ?>
     <div id="history-pane" style="display:none;margin-top:16px;background:#fff;border:1px solid #dcdcde;border-radius:8px;overflow:hidden;">
         <div style="padding:12px 18px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;background:#f6f7f7;">
             <strong style="font-size:13px;display:flex;align-items:center;gap:6px;">
-                <span class="dashicons dashicons-backup" style="color:#2271b1;"></span> Card Activity Log
+                <i class="fa-solid fa-clock-rotate-left" style="color:#2271b1;"></i> Card Activity Log
             </strong>
             <button onclick="toggleHistory()" style="background:none;border:none;cursor:pointer;color:#646970;font-size:20px;line-height:1;">&times;</button>
         </div>
@@ -91,7 +92,7 @@ endif; ?>
 <div id="modal-board" class="kb-modal" style="display:none;">
     <div class="kb-modal-box" style="width:420px;">
         <div class="kb-modal-header">
-            <h3><span class="dashicons dashicons-screenoptions"></span> Create New Board</h3>
+            <h3><i class="fa-solid fa-table-columns"></i> Create New Board</h3>
             <button onclick="closeModal('modal-board')">&times;</button>
         </div>
         <div class="kb-modal-body">
@@ -109,7 +110,7 @@ endif; ?>
         <div class="kb-modal-footer">
             <button onclick="closeModal('modal-board')" class="kb-btn-secondary">Cancel</button>
             <button onclick="createBoard()" class="kb-btn-primary">
-                <span class="dashicons dashicons-yes-alt" style="font-size:16px;width:16px;height:16px;line-height:16px;"></span> Create Board
+                <i class="fa-solid fa-check"></i> Create Board
             </button>
         </div>
     </div>
@@ -119,7 +120,7 @@ endif; ?>
 <div id="modal-card" class="kb-modal" style="display:none;">
     <div class="kb-modal-box" style="width:500px;">
         <div class="kb-modal-header">
-            <h3 id="modal-card-title"><span class="dashicons dashicons-index-card"></span> Add New Card</h3>
+            <h3 id="modal-card-title"><i class="fa-solid fa-note-sticky"></i> Add New Card</h3>
             <button onclick="closeModal('modal-card')">&times;</button>
         </div>
         <div class="kb-modal-body">
@@ -147,7 +148,7 @@ endif; ?>
         <div class="kb-modal-footer">
             <button onclick="closeModal('modal-card')" class="kb-btn-secondary">Cancel</button>
             <button onclick="saveCard()" class="kb-btn-primary">
-                <span class="dashicons dashicons-yes-alt" style="font-size:16px;width:16px;height:16px;line-height:16px;"></span> Save Card
+                <i class="fa-solid fa-check"></i> Save Card
             </button>
         </div>
     </div>
@@ -157,17 +158,17 @@ endif; ?>
 /* ─── Header ─────────────────────────── */
 .kb-header { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:4px; }
 .kb-title  { margin:0; font-size:23px; display:flex; align-items:center; gap:8px; }
-.kb-title .dashicons { font-size:26px; width:26px; height:26px; color:#2271b1; }
+.kb-title i { color:#2271b1; }
 .kb-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
 .kb-action-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 15px; font-size: 13px; font-weight: 600; cursor: pointer;
     border: 1px solid #c3c4c7; border-radius: 6px;
     background: #fff; color: #3c434a;
     transition: all .15s; line-height: 1.4;
 }
-.kb-action-btn .dashicons { font-size: 16px; width: 16px; height: 16px; line-height: 16px; }
+.kb-action-btn i { font-size: 13px; }
 .kb-action-btn:hover { background: #f0f6fc; border-color: #2271b1; color: #2271b1; }
 .kb-action-primary {
     background: #2271b1; border-color: #2271b1; color: #fff;
@@ -207,14 +208,13 @@ endif; ?>
 }
 .kb-tab-del {
     display: inline-flex; align-items: center; justify-content: center;
-    background: none; border: none; cursor: pointer; padding: 0;
-    width: 18px; height: 18px; border-radius: 3px;
-    color: #a7aaad;
+    background: none; border: none; cursor: pointer; padding: 2px 4px;
+    border-radius: 3px; color: #a7aaad;
+    font-size: 13px; line-height: 1;
     transition: color .15s, background .15s;
     flex-shrink: 0;
 }
 .kb-tab-del:hover { background: #fce8e8; color: #cc1818; }
-.kb-tab-del .dashicons { font-size: 14px; width: 14px; height: 14px; line-height: 14px; }
 .kb-tab.active .kb-tab-del { color: #a7aaad; }
 .kb-tabs-empty { padding: 10px 4px; color: #999; font-size: 13px; }
 
@@ -259,26 +259,26 @@ endif; ?>
 .kb-card:hover .kb-card-acts { opacity: 1; }
 .kb-icn-btn {
     background: none; border: none; cursor: pointer;
-    padding: 3px; border-radius: 4px; color: #787c82; line-height: 1;
+    padding: 4px 5px; border-radius: 4px; color: #787c82; line-height: 1;
+    font-size: 12px;
 }
-.kb-icn-btn .dashicons { font-size: 14px; width: 14px; height: 14px; line-height: 14px; }
 .kb-icn-btn:hover { background: #f0f0f1; color: #1d2327; }
 .kb-icn-btn.del:hover { background: #fce8e8; color: #cc1818; }
 .kb-card .meta { font-size: 11px; color: #787c82; display:flex; gap:8px; flex-wrap:wrap; margin-top:5px; align-items:center; }
-.badge { padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; display:inline-flex;align-items:center;gap:3px; }
-.badge .dashicons { font-size: 11px; width: 11px; height: 11px; line-height: 11px; }
+.badge { padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; display:inline-flex;align-items:center;gap:4px; }
+.badge i { font-size: 10px; }
 .badge-high   { background: #fce8e8; color: #a30000; }
 .badge-medium { background: #fef9e5; color: #7a5601; }
 .badge-low    { background: #e8f8ee; color: #185c2e; }
-.kb-due { display:inline-flex;align-items:center;gap:3px; }
-.kb-due .dashicons { font-size: 12px; width: 12px; height: 12px; line-height: 12px; color: #787c82; }
+.kb-due { display:inline-flex;align-items:center;gap:4px; font-size:11px; }
+.kb-due i { font-size: 11px; color: #787c82; }
 
 /* ─── Modal ──────────────────────────── */
 .kb-modal { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:100000; display:flex; align-items:center; justify-content:center; }
 .kb-modal-box { background:#fff; border-radius:10px; max-width:95vw; box-shadow:0 8px 40px rgba(0,0,0,.25); overflow:hidden; }
 .kb-modal-header { padding:16px 20px; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between; background:#f6f7f7; }
 .kb-modal-header h3 { margin:0; font-size:14px; display:flex; align-items:center; gap:8px; }
-.kb-modal-header h3 .dashicons { color:#2271b1; font-size:18px;width:18px;height:18px;line-height:18px; }
+.kb-modal-header h3 i { color:#2271b1; font-size:15px; }
 .kb-modal-header > button { background:none; border:none; font-size:22px; cursor:pointer; color:#646970; line-height:1; }
 .kb-modal-body { padding:20px 22px; }
 .kb-modal-body label { display:block; font-size:13px; font-weight:600; margin-bottom:5px; color:#1d2327; }
@@ -363,17 +363,15 @@ function renderBoard(data) {
 
         colEl.innerHTML =
             '<div class="kb-col-hdr">' +
-                '<h3>' + esc(col.name) + ' <span class="kb-col-count">' + count + '</span></h3>' +
+                '<h3>' + stripEmoji(esc(col.name)) + ' <span class="kb-col-count">' + count + '</span></h3>' +
                 '<div class="kb-col-acts">' +
-                    '<button class="kb-icn-btn" onclick="openCardModal(' + col.id + ')" title="Add card">' +
-                        '<span class="dashicons dashicons-plus-alt2"></span></button>' +
-                    '<button class="kb-icn-btn del" onclick="deleteColumn(event,' + col.id + ')" title="Delete column">' +
-                        '<span class="dashicons dashicons-trash"></span></button>' +
+                    '<button class="kb-icn-btn" onclick="openCardModal(' + col.id + ')" title="Add card"><i class="fa-solid fa-plus"></i></button>' +
+                    '<button class="kb-icn-btn del" onclick="deleteColumn(event,' + col.id + ')" title="Delete column"><i class="fa-solid fa-trash"></i></button>' +
                 '</div>' +
             '</div>' +
             '<div class="kb-cards" id="col-' + col.id + '"></div>' +
-            '<button onclick="openCardModal(' + col.id + ')" style="width:100%;margin-top:8px;padding:7px;border:1px dashed #c3c4c7;border-radius:6px;background:none;cursor:pointer;color:#646970;font-size:12px;display:flex;align-items:center;justify-content:center;gap:4px;">' +
-                '<span class="dashicons dashicons-plus" style="font-size:14px;width:14px;height:14px;line-height:14px;"></span> Add card</button>';
+            '<button onclick="openCardModal(' + col.id + ')" style="width:100%;margin-top:8px;padding:7px;border:1px dashed #c3c4c7;border-radius:6px;background:none;cursor:pointer;color:#646970;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;">' +
+                '<i class="fa-solid fa-plus" style="font-size:11px;"></i> Add card</button>';
 
         wrap.appendChild(colEl);
         var list = colEl.querySelector('#col-' + col.id);
@@ -399,26 +397,26 @@ function renderBoard(data) {
 }
 
 function makeCardEl(card) {
-    var el    = document.createElement('div');
+    var el = document.createElement('div');
     el.className = 'kb-card prio-' + card.priority;
     el.dataset.cardId = card.id;
 
     var prioCls   = 'badge-' + card.priority;
-    var prioIcon  = card.priority === 'high' ? 'dashicons-arrow-up-alt' : card.priority === 'low' ? 'dashicons-arrow-down-alt' : 'dashicons-minus';
+    var prioIcon  = card.priority === 'high' ? 'fa-arrow-up' : card.priority === 'low' ? 'fa-arrow-down' : 'fa-minus';
     var prioLabel = card.priority.charAt(0).toUpperCase() + card.priority.slice(1);
     var dueHtml   = card.due_date
-        ? '<span class="kb-due"><span class="dashicons dashicons-calendar-alt"></span>' + card.due_date + '</span>'
+        ? '<span class="kb-due"><i class="fa-regular fa-calendar"></i>' + card.due_date + '</span>'
         : '';
 
     el.innerHTML =
         '<div class="kb-card-acts">' +
-            '<button class="kb-icn-btn" onclick="editCard(' + card.id + ')" title="Edit card"><span class="dashicons dashicons-edit"></span></button>' +
-            '<button class="kb-icn-btn del" onclick="deleteCard(event,' + card.id + ')" title="Delete card"><span class="dashicons dashicons-trash"></span></button>' +
+            '<button class="kb-icn-btn" onclick="editCard(' + card.id + ')" title="Edit card"><i class="fa-solid fa-pen"></i></button>' +
+            '<button class="kb-icn-btn del" onclick="deleteCard(event,' + card.id + ')" title="Delete card"><i class="fa-solid fa-trash"></i></button>' +
         '</div>' +
         '<h4>' + esc(card.title) + '</h4>' +
         (card.description ? '<p style="font-size:12px;color:#646970;margin:0 0 6px;line-height:1.5;">' + esc(card.description) + '</p>' : '') +
         '<div class="meta">' +
-            '<span class="badge ' + prioCls + '"><span class="dashicons ' + prioIcon + '"></span>' + prioLabel + '</span>' +
+            '<span class="badge ' + prioCls + '"><i class="fa-solid ' + prioIcon + '"></i>' + prioLabel + '</span>' +
             dueHtml +
         '</div>';
     return el;
@@ -455,8 +453,8 @@ function openCardModal(colId, cardData) {
     document.getElementById('card-edit-id').value   = cardData ? cardData.id : '';
     var titleEl = document.getElementById('modal-card-title');
     titleEl.innerHTML = cardData
-        ? '<span class="dashicons dashicons-edit"></span> Edit Card'
-        : '<span class="dashicons dashicons-index-card"></span> Add New Card';
+        ? '<i class="fa-solid fa-pen"></i> Edit Card'
+        : '<i class="fa-solid fa-note-sticky"></i> Add New Card';
     document.getElementById('inp-card-title').value    = cardData ? cardData.title : '';
     document.getElementById('inp-card-desc').value     = cardData ? (cardData.description || '') : '';
     document.getElementById('inp-card-priority').value = cardData ? cardData.priority : 'medium';
@@ -546,6 +544,11 @@ function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 function esc(s) {
     if (!s) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Strip emoji characters from column names stored with old emoji prefixes
+function stripEmoji(s) {
+    return s.replace(/[\u{1F300}-\u{1FAFF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FE0F}]|\s{2,}/gu, '').trim();
 }
 
 // Auto-load first board
