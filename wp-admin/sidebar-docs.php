@@ -136,6 +136,7 @@ $l = $labels[$lang];
                 <li class="wp-first-item <?php echo($topic === 'users-all' || $topic === 'users') ? 'current' : ''; ?>"><a href="docs.php?topic=users-all">All Users</a></li>
                 <li class="<?php echo($topic === 'users-new') ? 'current' : ''; ?>"><a href="docs.php?topic=users-new">Add New</a></li>
                 <li class="<?php echo($topic === 'users-profile') ? 'current' : ''; ?>"><a href="docs.php?topic=users-profile">Profile</a></li>
+                <li class="<?php echo($topic === 'users-roles') ? 'current' : ''; ?>"><a href="docs.php?topic=users-roles">Roles</a></li>
             </ul>
         </li>
 
