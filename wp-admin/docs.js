@@ -222,5 +222,26 @@
                 parentLi.classList.add('wp-menu-open');
             }
         });
+
+        // ----------------------------------------------------------------
+        // 6. Sidebar Accordion Toggle
+        // ----------------------------------------------------------------
+        const parentLinks = document.querySelectorAll('.docs-menu li.wp-has-submenu > a');
+        parentLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault(); // Mencegah pindah halaman
+                const parentLi = this.closest('li.wp-has-submenu');
+
+                // Toggle kelas 'wp-menu-open'
+                if (parentLi.classList.contains('wp-menu-open')) {
+                    parentLi.classList.remove('wp-menu-open');
+                } else {
+                    // (Opsional) Tutup menu lain yang sedang terbuka
+                    // document.querySelectorAll('.docs-menu li.wp-has-submenu').forEach(li => li.classList.remove('wp-menu-open'));
+
+                    parentLi.classList.add('wp-menu-open');
+                }
+            });
+        });
     });
 })();
