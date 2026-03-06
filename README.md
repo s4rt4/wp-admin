@@ -1,28 +1,32 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, and a built-in comprehensive documentation system.
 
 ## Features
 
-- **Dual Page Builders:**
-    - **GrapesJS:** For visual, drag-and-drop page design (perfect for Landing Pages).
+- **Advanced Content Editors:**
+    - **GrapesJS:** For visual, drag-and-drop page design (perfect for Landing Pages, features 49+ custom widgets).
     - **Editor.js:** For structured, block-based content editing (perfect for Articles/Blog posts).
-    - **SunEditor:** WYSIWYG editor for standard posts.
-- **Admin Dashboard:**
+    - **Monaco Editor:** A powerful IDE-like code editor for writing raw HTML, CSS, JavaScript, and PHP snippets.
+- **Powerful Shortcode & Snippet System:**
+    - Create custom PHP, CSS, or JS snippets in the admin panel.
+    - Snippets automatically generate **Shortcodes** that can be embedded anywhere (in posts, pages, or even inside GrapesJS page builder).
+    - Navigation Menus also act as shortcodes for flexible placement.
+- **Built-in Documentation System:**
+    - Comprehensive manual accessible right inside the admin dashboard (`wp-admin/docs.php`).
+    - **Bilingual Support** (English & Indonesian).
+    - **Live Search** with keyboard navigation (`/` shortcut).
+    - Sticky sidebar with an accordion-style hierarchy.
+- **Admin Dashboard & Management:**
     - Visitor Statistics (Page Views, Daily Visitors).
-    - Post & Page Management.
-    - User Management (Roles, Profile Pictures).
-    - Comment Moderation System.
-- **Media Manager:**
-    - Upload and manage images.
-    - Robust file handling.
-- **Frontend:**
-    - Dynamic routing (Pretty URLs).
-    - SEO-friendly structure.
-    - Comment system and Social Share integration.
-- **Security:**
-    - Admin Authentication.
-    - Protected API endpoints.
+    - Post, Page, and Media Library management.
+    - Appearance & Menu builder.
+    - User Management & Roles.
+- **Security & Structure:**
+    - Admin Authentication and Protected API endpoints.
+    - Dynamic routing (Pretty URLs) and SEO-friendly frontend.
+    - Database Backup & Restore interface.
+    - Export / Import content tools.
 
 ## Installation
 
@@ -58,10 +62,10 @@ Use the following credentials to access the admin panel:
 
 ## Tech Stack
 
-- **Backend:** Native PHP (No heavy frameworks).
-- **Frontend:** HTML5, CSS3, JavaScript.
+- **Backend:** Native PHP (No frameworks).
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript.
 - **Database:** MySQL.
-- **Libraries:** GrapesJS, Editor.js, SunEditor, Chart.js, DataTables.
+- **Libraries/Editors:** GrapesJS, Editor.js, Monaco Editor, Chart.js.
 
 ## Disclaimer
 
