@@ -152,7 +152,6 @@ render_tags('head', ['category_ids' => $blog_cat_ids]);
 <?php render_tags('body_open', ['category_ids' => $blog_cat_ids]); ?>
 
     <!-- Navbar (Blue) -->
-    <!-- Navbar (Blue) -->
     <nav class="navbar-custom">
         <div class="navbar-inner">
             <div class="navbar-left">
@@ -169,24 +168,23 @@ endif; ?>
             <!-- Mobile Toggle (Hamburger) -->
             <button id="mobile-menu-toggle" class="theme-toggle-btn mobile-menu-toggle" style="display:none; margin-left:auto;"><i class="fa fa-bars"></i></button>
 
+            <!-- Off-canvas Menu Content / Desktop Right Menu -->
+            <div class="navbar-right" id="navbar-right">
+                <button class="close-menu theme-toggle-btn" id="closeMenuBtn" style="display:none;"><i class="fa fa-times"></i></button>
+                <form action="blog.php" method="GET" class="navbar-search">
+                    <input type="text" name="search" placeholder="Search articles..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
+                <!-- Dark Mode Toggle Inside Navbar -->
+                <button id="theme-toggle-nav" class="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
         </div>
     </nav>
 
     <!-- Mobile Overlay -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
-
-    <!-- Off-canvas Menu Content -->
-    <div class="navbar-right" id="navbar-right">
-        <button class="close-menu theme-toggle-btn" id="closeMenuBtn" style="display:none;"><i class="fa fa-times"></i></button>
-        <form action="blog.php" method="GET" class="navbar-search">
-            <input type="text" name="search" placeholder="Search articles..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
-            <button type="submit"><i class="fa fa-search"></i></button>
-        </form>
-        <!-- Dark Mode Toggle Inside Navbar -->
-        <button id="theme-toggle-nav" class="theme-toggle-btn" title="Toggle Dark/Light Mode">
-            <i class="fas fa-moon"></i>
-        </button>
-    </div>
 
     <?php
 // Fetch Featured Posts
