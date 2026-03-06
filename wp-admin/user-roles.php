@@ -97,11 +97,11 @@ require_once 'sidebar.php';
     </h1>
 
     <?php if (isset($_GET['message']) && $_GET['message'] === 'saved'): ?>
-    <div class="notice notice-success"><p>✅ Pengaturan kapabilitas berhasil disimpan.</p></div>
+    <div class="notice notice-success"><p>Capability settings saved successfully.</p></div>
     <?php
 endif; ?>
 
-    <p style="color:#646970;margin-top:6px;">Kelola hak akses setiap peran pengguna secara granular. Centang kapabilitas yang diizinkan untuk setiap role.</p>
+    <p style="color:#646970;margin-top:6px;">Manage granular access permissions for each user role. Check the capabilities you want to allow for each role.</p>
 
     <form method="post" style="margin-top:20px;">
         <input type="hidden" name="save_roles" value="1">
@@ -110,7 +110,7 @@ endif; ?>
         <table class="wp-list-table widefat fixed" id="roles-table" style="min-width:700px;">
             <thead>
                 <tr>
-                    <th style="width:220px;">Kapabilitas</th>
+                    <th style="width:220px;">Capability</th>
                     <?php foreach (array_keys($default_roles) as $role): ?>
                     <th style="text-align:center;text-transform:capitalize;"><?php echo $role; ?></th>
                     <?php
@@ -140,7 +140,7 @@ endforeach; ?>
                             name="caps[<?php echo $role; ?>][]"
                             value="<?php echo $cap; ?>"
                             <?php echo $checked ? 'checked' : ''; ?>
-                            <?php echo $is_admin ? 'disabled title="Administrator selalu memiliki semua akses"' : ''; ?>
+                            <?php echo $is_admin ? 'disabled title="Administrators always have full access"' : ''; ?>
                             style="width:16px;height:16px;cursor:pointer;">
                         <?php if ($is_admin): ?>
                         <input type="hidden" name="caps[administrator][]" value="<?php echo $cap; ?>">
@@ -160,9 +160,9 @@ endforeach; ?>
 
         <div style="margin-top:20px;display:flex;align-items:center;gap:16px;">
             <button type="submit" class="button button-primary" style="padding:9px 24px;font-size:14px;">
-                💾 Simpan Semua Perubahan
+                Save All Changes
             </button>
-            <p style="color:#646970;font-size:12px;margin:0;">Perubahan akan aktif untuk semua user dengan role tersebut saat login berikutnya.</p>
+            <p style="color:#646970;font-size:12px;margin:0;">Changes will take effect for all users with that role on their next login.</p>
         </div>
     </form>
 </div>
