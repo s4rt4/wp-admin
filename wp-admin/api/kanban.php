@@ -35,9 +35,20 @@ switch ($action) {
         $stmt->execute();
         $board_id = $stmt->insert_id;
 
-        $colors = ['#dae8fc', '#fff0cc', '#d5e8d4', '#f8cecc', '#e1d5e7'];
         foreach ($default_columns as $pos => $col_name) {
-            $color = $colors[$pos % count($colors)];
+            $color = '#e2e8f0'; // Default gray
+            $ln = strtolower($col_name);
+            if ($ln === 'to do')
+                $color = '#cc1818'; // Red
+            elseif ($ln === 'in progress')
+                $color = '#2271b1'; // Blue
+            elseif ($ln === 'done')
+                $color = '#00a32a'; // Green
+            else {
+                $colors = ['#dae8fc', '#fff0cc', '#d5e8d4', '#f8cecc', '#e1d5e7'];
+                $color = $colors[$pos % count($colors)];
+            }
+
             $s2 = $conn->prepare("INSERT INTO kanban_columns (board_id, name, position, color) VALUES (?, ?, ?, ?)");
             $s2->bind_param("isis", $board_id, $col_name, $pos, $color);
             $s2->execute();
@@ -72,14 +83,15 @@ switch ($action) {
     case 'create_column':
         $board_id = intval($input['board_id'] ?? 0);
         $name = trim($input['name'] ?? '');
+        $color = trim($input['color'] ?? '#e2e8f0');
         if (!$board_id || !$name) {
             echo json_encode(['success' => false, 'error' => 'Invalid input']);
             exit;
         }
         $np_res = $conn->query("SELECT COALESCE(MAX(position),0)+1 as np FROM kanban_columns WHERE board_id=$board_id");
         $np = $np_res->fetch_assoc()['np'];
-        $stmt = $conn->prepare("INSERT INTO kanban_columns (board_id, name, position) VALUES (?, ?, ?)");
-        $stmt->bind_param("isi", $board_id, $name, $np);
+        $stmt = $conn->prepare("INSERT INTO kanban_columns (board_id, name, position, color) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("isis", $board_id, $name, $np, $color);
         $stmt->execute();
         echo json_encode(['success' => true, 'column_id' => $stmt->insert_id]);
         break;

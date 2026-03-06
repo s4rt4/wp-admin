@@ -154,6 +154,36 @@ endif; ?>
     </div>
 </div>
 
+<!-- Modal: New Column -->
+<div id="modal-column" class="kb-modal" style="display:none;">
+    <div class="kb-modal-box" style="width:400px;">
+        <div class="kb-modal-header">
+            <h3><i class="fa-solid fa-table-columns"></i> Add New Column</h3>
+            <button onclick="closeModal('modal-column')">&times;</button>
+        </div>
+        <div class="kb-modal-body">
+            <label>Column Name *</label>
+            <input id="inp-col-name" type="text" placeholder="e.g. Under Review">
+            <label style="margin-top:12px;">Head Color</label>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                <input id="inp-col-color" type="color" value="#e2e8f0" style="width:50px; height:36px; padding:2px; cursor:pointer; border:1px solid #8c8f94; border-radius:4px;">
+                <span id="col-color-hex" style="font-family:monospace; color:#646970; font-size:13px;">#e2e8f0</span>
+            </div>
+            <script>
+                document.getElementById('inp-col-color').addEventListener('input', function(e) {
+                    document.getElementById('col-color-hex').textContent = e.target.value;
+                });
+            </script>
+        </div>
+        <div class="kb-modal-footer">
+            <button onclick="closeModal('modal-column')" class="kb-btn-secondary">Cancel</button>
+            <button onclick="submitNewColumn()" class="kb-btn-primary">
+                <i class="fa-solid fa-check"></i> Add Column
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
 /* ─── Header ─────────────────────────── */
 .kb-header { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:4px; }
@@ -361,6 +391,10 @@ function renderBoard(data) {
         colEl.dataset.colId = col.id;
         var count = (col.cards || []).length;
 
+        colEl.style.borderTop = '4px solid ' + (col.color || '#e2e8f0');
+        colEl.style.borderTopLeftRadius = '6px';
+        colEl.style.borderTopRightRadius = '6px';
+
         colEl.innerHTML =
             '<div class="kb-col-hdr">' +
                 '<h3>' + stripEmoji(esc(col.name)) + ' <span class="kb-col-count">' + count + '</span></h3>' +
@@ -432,10 +466,26 @@ function refreshColCounts() {
 // ─── Column ──────────────────────────────────
 function promptAddColumn() {
     if (!_activeBoardId) { alert('Please select or create a board first.'); return; }
-    var name = prompt('New column name:');
-    if (!name || !name.trim()) return;
-    apiFetch({ action:'create_column', board_id:_activeBoardId, name:name.trim() }, function(d){
-        if (d.success) loadBoard(_activeBoardId, document.querySelector('.kb-tab.active'));
+    document.getElementById('inp-col-name').value = '';
+    document.getElementById('inp-col-color').value = '#e2e8f0';
+    var hexSpan = document.getElementById('col-color-hex');
+    if(hexSpan) hexSpan.textContent = '#e2e8f0';
+    showModal('modal-column');
+    setTimeout(function(){ document.getElementById('inp-col-name').focus(); }, 120);
+}
+
+function submitNewColumn() {
+    var name = document.getElementById('inp-col-name').value.trim();
+    if (!name) { document.getElementById('inp-col-name').focus(); return; }
+    var color = document.getElementById('inp-col-color').value;
+    
+    apiFetch({ action:'create_column', board_id:_activeBoardId, name:name, color:color }, function(d){
+        if (d.success) {
+            closeModal('modal-column');
+            loadBoard(_activeBoardId, document.querySelector('.kb-tab.active'));
+        } else {
+            alert('Error adding column: ' + (d.error || 'Unknown error'));
+        }
     });
 }
 
