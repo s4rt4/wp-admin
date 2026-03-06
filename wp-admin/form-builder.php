@@ -160,7 +160,7 @@ elseif ($view === 'edit'): ?>
         <!-- Builder Area -->
         <div>
             <div class="postbox">
-                <div class="hndle"><h2 style="margin:0;font-size:14px;">Form Fields Builder</h2></div>
+                <div class="hndle" style="padding:10px 15px; border-bottom:1px solid #ccd0d4;"><h2 style="margin:0;font-size:14px;">Form Fields Builder</h2></div>
                 <div class="inside">
                     <p style="color:#646970;font-size:13px;margin-bottom:14px;">Click a field type below to add it to the form. Drag to reorder.</p>
                     <div class="fb-widgets-grid">
@@ -203,7 +203,7 @@ elseif ($view === 'edit'): ?>
                 <input type="hidden" id="fields_json_input" name="fields_json" value="<?php echo htmlspecialchars($form_data['fields_json'] ?? '[]'); ?>">
 
                 <div class="postbox" style="margin-bottom:16px;">
-                    <div class="hndle"><h2 style="margin:0;font-size:14px;">Form Settings</h2></div>
+                    <div class="hndle" style="padding:10px 15px; border-bottom:1px solid #ccd0d4;"><h2 style="margin:0;font-size:14px;">Form Settings</h2></div>
                     <div class="inside">
                         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Form Name *</label>
                         <input type="text" name="form_name" value="<?php echo htmlspecialchars($form_data['name'] ?? ''); ?>" required
@@ -226,7 +226,7 @@ elseif ($view === 'edit'): ?>
                 </div>
 
                 <div class="postbox" style="margin-bottom:16px;">
-                    <div class="hndle"><h2 style="margin:0;font-size:14px;">Kanban Integration (optional)</h2></div>
+                    <div class="hndle" style="padding:10px 15px; border-bottom:1px solid #ccd0d4;"><h2 style="margin:0;font-size:14px;">Kanban Integration (optional)</h2></div>
                     <div class="inside">
                         <p style="font-size:12px;color:#646970;margin-top:0;">If enabled, each submission will automatically create a new card on the Kanban Board.</p>
                         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Board</label>
