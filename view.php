@@ -2,7 +2,8 @@
 // Include config
 if (file_exists(__DIR__ . '/wp-admin/db_config.php')) {
     require_once __DIR__ . '/wp-admin/db_config.php';
-} else {
+}
+else {
     require_once 'db_config.php';
 }
 
@@ -56,7 +57,8 @@ $stmt = $pdo->prepare("SELECT * FROM daily_visitors WHERE visit_date = ?");
 $stmt->execute([$today]);
 if ($stmt->fetch()) {
     $pdo->prepare("UPDATE daily_visitors SET page_views = page_views + 1 WHERE visit_date = ?")->execute([$today]);
-} else {
+}
+else {
     $pdo->prepare("INSERT INTO daily_visitors (visit_date, visitor_count, page_views) VALUES (?, 1, 1)")->execute([$today]);
 }
 
@@ -80,14 +82,17 @@ if ($page['builder_type'] === 'grapesjs' && isset($content['pages'])) {
         $html .= $pageContent['html'] ?? '';
         $css .= $pageContent['css'] ?? '';
     }
-} elseif ($page['builder_type'] === 'grapesjs' && isset($content['grapesjs']['html'])) {
+}
+elseif ($page['builder_type'] === 'grapesjs' && isset($content['grapesjs']['html'])) {
     // Fallback for pages saved without 'pages' array
     $html = $content['grapesjs']['html'] ?? '';
     $css = $content['grapesjs']['css'] ?? '';
-} elseif ($page['builder_type'] === 'editorjs' && isset($content['editorjs'])) {
+}
+elseif ($page['builder_type'] === 'editorjs' && isset($content['editorjs'])) {
     // EditorJS content - convert to HTML
     $html = convertEditorJSToHTML($content['editorjs']);
-} elseif ($page['builder_type'] === 'monaco') {
+}
+elseif ($page['builder_type'] === 'monaco') {
     // Monaco Editor (Raw HTML/PHP)
     // Note: Assuming stored content is the raw string from editor
     // If it was json_encoded (e.g. "{\"content\":\"...\"}"), we need the value
@@ -96,41 +101,43 @@ if ($page['builder_type'] === 'grapesjs' && isset($content['pages'])) {
     // If content is just a string, it's saved as string.
     // json_decode at line 53 might return null for raw string if not JSON format.
     // Let's re-fetch content if json_decode failed or check type.
-    
+
     if (is_array($content) && isset($content['content'])) {
-         // Maybe API wraps it? No, API saves direct value.
-         // Actually, if it's raw HTML string in DB, json_decode will return NULL (unless it's a valid JSON string like "true").
-         // So $content might be null.
-         // Let's use $page['content'] directly for monaco.
-         $html = $page['content'];
-    } else {
-         $html = $page['content'];
+        // Maybe API wraps it? No, API saves direct value.
+        // Actually, if it's raw HTML string in DB, json_decode will return NULL (unless it's a valid JSON string like "true").
+        // So $content might be null.
+        // Let's use $page['content'] directly for monaco.
+        $html = $page['content'];
+    }
+    else {
+        $html = $page['content'];
     }
 }
 
-function convertEditorJSToHTML($editorData) {
+function convertEditorJSToHTML($editorData)
+{
     if (!isset($editorData['blocks']) || !is_array($editorData['blocks'])) {
         return '';
     }
-    
+
     $html = '';
-    
+
     foreach ($editorData['blocks'] as $block) {
         $type = $block['type'] ?? '';
         $data = $block['data'] ?? [];
-        
+
         switch ($type) {
             case 'header':
                 $level = $data['level'] ?? 2;
                 $text = $data['text'] ?? '';
                 $html .= "<h{$level}>{$text}</h{$level}>";
                 break;
-                
+
             case 'paragraph':
                 $text = $data['text'] ?? '';
                 $html .= "<p>{$text}</p>";
                 break;
-                
+
             case 'list':
                 $style = $data['style'] ?? 'unordered';
                 $items = $data['items'] ?? [];
@@ -141,7 +148,7 @@ function convertEditorJSToHTML($editorData) {
                         $content = $item['content'] ?? $item['text'] ?? '';
                         $subItems = $item['items'] ?? [];
                         $html .= "<li>{$content}";
-                        
+
                         if (!empty($subItems)) {
                             $html .= "<{$tag}>";
                             foreach ($subItems as $subItem) {
@@ -150,15 +157,16 @@ function convertEditorJSToHTML($editorData) {
                             }
                             $html .= "</{$tag}>";
                         }
-                        
+
                         $html .= "</li>";
-                    } else {
+                    }
+                    else {
                         $html .= "<li>{$item}</li>";
                     }
                 }
                 $html .= "</{$tag}>";
                 break;
-                
+
             case 'quote':
                 $text = $data['text'] ?? '';
                 $caption = $data['caption'] ?? '';
@@ -169,12 +177,12 @@ function convertEditorJSToHTML($editorData) {
                 }
                 $html .= "</blockquote>";
                 break;
-                
+
             case 'code':
                 $code = $data['code'] ?? '';
                 $html .= "<pre><code>" . htmlspecialchars($code) . "</code></pre>";
                 break;
-                
+
             case 'table':
                 $content = $data['content'] ?? [];
                 $html .= "<table>";
@@ -187,20 +195,24 @@ function convertEditorJSToHTML($editorData) {
                 }
                 $html .= "</table>";
                 break;
-                
+
             case 'image':
                 // Support both @editorjs/image (file.url) and @editorjs/simple-image (url)
                 $url = '';
                 if (isset($data['file']['url'])) {
                     $url = $data['file']['url'];
-                } elseif (isset($data['url'])) {
+                }
+                elseif (isset($data['url'])) {
                     $url = $data['url'];
                 }
                 $caption = $data['caption'] ?? '';
                 $classes = [];
-                if (!empty($data['withBorder'])) $classes[] = 'img-border';
-                if (!empty($data['stretched'])) $classes[] = 'img-stretched';
-                if (!empty($data['withBackground'])) $classes[] = 'img-bg';
+                if (!empty($data['withBorder']))
+                    $classes[] = 'img-border';
+                if (!empty($data['stretched']))
+                    $classes[] = 'img-stretched';
+                if (!empty($data['withBackground']))
+                    $classes[] = 'img-bg';
                 $classStr = $classes ? ' class="' . implode(' ', $classes) . '"' : '';
                 $html .= "<figure{$classStr}>";
                 $html .= "<img src='" . htmlspecialchars($url) . "' alt='" . htmlspecialchars($caption) . "'>";
@@ -209,13 +221,13 @@ function convertEditorJSToHTML($editorData) {
                 }
                 $html .= "</figure>";
                 break;
-                
+
             case 'raw':
                 $html .= $data['html'] ?? '';
                 break;
         }
     }
-    
+
     return $html;
 }
 ?>
@@ -224,24 +236,28 @@ function convertEditorJSToHTML($editorData) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page['title']); ?> - <?php echo htmlspecialchars(get_option('site_title', 'My Website')); ?></title>
-    <?php 
-    $site_fav = get_option('site_favicon', '');
-    $site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-    // Fix absolute path for images if stored relatively
-    function get_asset_url($path, $site_url) {
-        if (strpos($path, 'http') === 0) return $path;
-        return $site_url . '/' . ltrim($path, '/');
-    }
-    ?>
-    <?php if($site_fav): ?>
+    <title><?php echo htmlspecialchars($page['title']); ?> - <?php echo htmlspecialchars(get_option('blogname', get_option('site_title', 'My Website'))); ?></title>
+    <?php
+$site_fav = get_option('site_favicon', '');
+$site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+// Fix absolute path for images if stored relatively
+function get_asset_url($path, $site_url)
+{
+    if (strpos($path, 'http') === 0)
+        return $path;
+    return $site_url . '/' . ltrim($path, '/');
+}
+?>
+    <?php if ($site_fav): ?>
     <link rel="icon" href="<?php echo htmlspecialchars(get_asset_url($site_fav, $site_url)); ?>" />
-    <?php endif; ?>
+    <?php
+endif; ?>
     
     <style>
         <?php if ($page['builder_type'] === 'grapesjs'): ?>
             <?php echo $css; ?>
-        <?php else: ?>
+        <?php
+else: ?>
             /* EditorJS default styles */
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -345,7 +361,8 @@ function convertEditorJSToHTML($editorData) {
                 padding: 15px;
                 border-radius: 4px;
             }
-        <?php endif; ?>
+        <?php
+endif; ?>
     </style>
     <?php render_tags('head', ['page_id' => intval($page['id'])]); ?>
 </head>
@@ -353,12 +370,13 @@ function convertEditorJSToHTML($editorData) {
 <?php render_tags('body_open', ['page_id' => intval($page['id'])]); ?>
     <header style="margin-bottom: 20px; border-bottom:1px solid #eee; padding:15px 20px; display:flex; align-items:center; justify-content:space-between; background:#fff;">
         <div style="display:flex; align-items:center;">
-            <?php 
-            $site_logo = get_option('site_logo', '');
-            $site_title = get_option('site_title', 'My Website');
-            if ($site_logo): ?>
+            <?php
+$site_logo = get_option('site_logo', '');
+$site_title = get_option('blogname', get_option('site_title', 'My Website'));
+if ($site_logo): ?>
                 <img src="<?php echo htmlspecialchars(get_asset_url($site_logo, $site_url)); ?>" alt="<?php echo htmlspecialchars($site_title); ?>" style="max-height:40px; margin-right:10px;">
-            <?php endif; ?>
+            <?php
+endif; ?>
             <div style="font-size:18px; font-weight:bold; color:#333;"><?php echo htmlspecialchars($site_title); ?></div>
         </div>
         <a href="<?php echo $site_url; ?>" class="back-link" style="text-decoration:none; color:#0073aa; font-weight:500;">Home</a>

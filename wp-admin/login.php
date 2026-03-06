@@ -12,12 +12,14 @@ if (isset($_SESSION['user_id'])) {
 define('LOGIN_MAX_ATTEMPTS', 5);
 define('LOGIN_LOCKOUT_SECONDS', 300); // 5 minutes
 
-function get_login_attempts($username) {
+function get_login_attempts($username)
+{
     $key = 'login_attempts_' . md5($username);
     return $_SESSION[$key] ?? ['count' => 0, 'last' => 0];
 }
 
-function record_login_attempt($username) {
+function record_login_attempt($username)
+{
     $key = 'login_attempts_' . md5($username);
     $data = get_login_attempts($username);
     // Reset if lockout period passed
@@ -29,7 +31,8 @@ function record_login_attempt($username) {
     $_SESSION[$key] = $data;
 }
 
-function is_locked_out($username) {
+function is_locked_out($username)
+{
     $data = get_login_attempts($username);
     if ($data['count'] >= LOGIN_MAX_ATTEMPTS) {
         $elapsed = time() - $data['last'];
@@ -42,7 +45,8 @@ function is_locked_out($username) {
     return false;
 }
 
-function clear_login_attempts($username) {
+function clear_login_attempts($username)
+{
     unset($_SESSION['login_attempts_' . md5($username)]);
 }
 
@@ -52,19 +56,26 @@ if (empty($_SESSION['login_csrf'])) {
 }
 
 // ---- Fetch site logo & favicon from DB ----
-$site_logo  = '';
-$site_fav   = '';
+$site_logo = '';
+$site_fav = '';
 $site_title = 'Admin Panel';
 try {
     $pdo_login = getDBConnection();
-    $stmt_logo = $pdo_login->prepare("SELECT option_name, option_value FROM options WHERE option_name IN ('site_logo','site_title','site_favicon')");
+    $stmt_logo = $pdo_login->prepare("SELECT option_name, option_value FROM options WHERE option_name IN ('site_logo','blogname','site_title','site_favicon')");
     $stmt_logo->execute();
+    $opts = [];
     while ($row = $stmt_logo->fetch()) {
-        if ($row['option_name'] === 'site_logo')    $site_logo  = $row['option_value'];
-        if ($row['option_name'] === 'site_title')   $site_title = $row['option_value'];
-        if ($row['option_name'] === 'site_favicon') $site_fav   = $row['option_value'];
+        $opts[$row['option_name']] = $row['option_value'];
     }
-} catch (Exception $e) { /* silently fail */ }
+    if (!empty($opts['site_logo']))
+        $site_logo = $opts['site_logo'];
+    if (!empty($opts['site_favicon']))
+        $site_fav = $opts['site_favicon'];
+    // blogname (General Settings) takes priority over legacy site_title (Themes)
+    $site_title = $opts['blogname'] ?? $opts['site_title'] ?? 'Admin Panel';
+}
+catch (Exception $e) { /* silently fail */
+}
 
 $error = '';
 $success = '';
@@ -73,7 +84,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // CSRF check
     if (empty($_POST['_csrf']) || !hash_equals($_SESSION['login_csrf'], $_POST['_csrf'])) {
         $error = "Invalid request. Please try again.";
-    } else {
+    }
+    else {
         $username = trim($_POST['username'] ?? '');
 
         // Check lockout
@@ -81,14 +93,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($lockout_remaining !== false) {
             $mins = ceil($lockout_remaining / 60);
             $error = "Too many failed attempts. Please wait {$mins} minute(s) before trying again.";
-        } else {
+        }
+        else {
             $password = $_POST['password'] ?? '';
 
             $conn_login = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
             if ($conn_login->connect_error) {
                 error_log('Login DB error: ' . $conn_login->connect_error);
                 $error = "A server error occurred. Please try again later.";
-            } else {
+            }
+            else {
                 $stmt = $conn_login->prepare("SELECT id, password, role FROM users WHERE username = ?");
                 $stmt->bind_param("s", $username);
                 $stmt->execute();
@@ -103,18 +117,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         session_regenerate_id(true);
                         clear_login_attempts($username);
 
-                        $_SESSION['user_id']   = $id;
-                        $_SESSION['username']  = $username;
+                        $_SESSION['user_id'] = $id;
+                        $_SESSION['username'] = $username;
                         $_SESSION['user_role'] = $role ?: 'subscriber';
 
                         header("Location: index.php");
                         exit();
-                    } else {
+                    }
+                    else {
                         record_login_attempt($username);
                         // ✅ Fix: Generic error — no username enumeration
                         $error = "Incorrect username or password.";
                     }
-                } else {
+                }
+                else {
                     record_login_attempt($username);
                     // Same generic message regardless of whether user exists
                     $error = "Incorrect username or password.";
@@ -128,7 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 // URL dari DB sudah absolute web path (misal /word-press/wp-admin/media/...).
 $logo_url = $site_logo ? $site_logo : '';
-$fav_url  = $site_fav  ? $site_fav  : '';
+$fav_url = $site_fav ? $site_fav : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -139,7 +155,8 @@ $fav_url  = $site_fav  ? $site_fav  : '';
 <?php if ($fav_url): ?>
     <link rel="icon" href="<?php echo htmlspecialchars($fav_url); ?>">
     <link rel="shortcut icon" href="<?php echo htmlspecialchars($fav_url); ?>">
-<?php endif; ?>
+<?php
+endif; ?>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
 
@@ -355,14 +372,16 @@ $fav_url  = $site_fav  ? $site_fav  : '';
         <a href="<?php echo htmlspecialchars($site_url_base); ?>" title="<?php echo htmlspecialchars($site_title); ?>">
             <?php if ($logo_url): ?>
                 <img src="<?php echo htmlspecialchars($logo_url); ?>" alt="<?php echo htmlspecialchars($site_title); ?>">
-            <?php else: ?>
+            <?php
+else: ?>
                 <!-- Default icon (generic admin logo) -->
                 <span class="default-logo">
                     <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm0 1.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zm-.75 3v1.5H7.5v1.5h1.75V13h1.5V9.5h1.75V8h-1.75V6.5h-1.5z"/>
                     </svg>
                 </span>
-            <?php endif; ?>
+            <?php
+endif; ?>
         </a>
         <span class="site-name"><?php echo htmlspecialchars($site_title); ?></span>
     </div>
@@ -374,7 +393,8 @@ $fav_url  = $site_fav  ? $site_fav  : '';
             <div class="login-notice login-error" role="alert">
                 <?php echo htmlspecialchars($error); ?>
             </div>
-        <?php endif; ?>
+        <?php
+endif; ?>
 
         <form method="POST" action="" id="loginform" novalidate>
             <input type="hidden" name="_csrf" value="<?php echo htmlspecialchars($_SESSION['login_csrf']); ?>">

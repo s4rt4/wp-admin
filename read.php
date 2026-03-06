@@ -8,8 +8,10 @@ if (session_status() === PHP_SESSION_NONE) {
 // Include db_config (adjust path if needed)
 if (file_exists(__DIR__ . '/wp-admin/db_config.php')) {
     require_once __DIR__ . '/wp-admin/db_config.php';
-} else {
-    require_once 'db_config.php'; 
+}
+else {
+    require_once 'db_config.php';
+
 }
 
 // Shortcode processor (needs PDO)
@@ -32,7 +34,8 @@ if (isset($_GET['slug'])) {
     if ($result->num_rows > 0) {
         $post = $result->fetch_assoc();
     }
-} elseif (isset($_GET['id'])) {
+}
+elseif (isset($_GET['id'])) {
     $id = intval($_GET['id']);
     $stmt = $conn->prepare("SELECT p.*, u.username as author_name FROM posts p LEFT JOIN users u ON p.author_id = u.id WHERE p.id = ?");
     $stmt->bind_param("i", $id);
@@ -60,7 +63,8 @@ $conn->query("UPDATE posts SET views = views + 1 WHERE id = " . $post['id']);
 $check_daily = $conn->query("SELECT * FROM daily_visitors WHERE visit_date = '$today'");
 if ($check_daily->num_rows > 0) {
     $conn->query("UPDATE daily_visitors SET page_views = page_views + 1 WHERE visit_date = '$today'");
-} else {
+}
+else {
     $conn->query("INSERT INTO daily_visitors (visit_date, visitor_count, page_views) VALUES ('$today', 1, 1)");
 }
 
@@ -91,13 +95,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
         $stmt->bind_param("isss", $post_id, $author_name, $author_email, $content);
         if ($stmt->execute()) {
             $_SESSION['comment_msg'] = '<div style="color: green; margin-bottom: 20px;">Comment submitted! Waiting for approval.</div>';
-        } else {
+        }
+        else {
             $_SESSION['comment_msg'] = '<div style="color: red; margin-bottom: 20px;">Error submitting comment.</div>';
         }
-    } else {
+    }
+    else {
         $_SESSION['comment_msg'] = '<div style="color: red; margin-bottom: 20px;">Please fill in all fields.</div>';
     }
-    
+
     // PRG: Redirect to prevent resubmission
     header("Location: " . $_SERVER['REQUEST_URI']);
     exit;
@@ -109,7 +115,7 @@ $stmt = $conn->prepare("SELECT * FROM comments WHERE post_id = ? AND status = 'a
 $stmt->bind_param("i", $post['id']);
 $stmt->execute();
 $res_c = $stmt->get_result();
-while($row = $res_c->fetch_assoc()) {
+while ($row = $res_c->fetch_assoc()) {
     $comments[] = $row;
 }
 ?>
@@ -119,27 +125,27 @@ while($row = $res_c->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php
-    // SEO helpers
-    $site_name   = get_option('site_title', 'My WordPress App');
-    $site_desc_def = get_option('site_description', '');
-    $site_logo   = get_option('site_logo', '');
-    $site_fav    = get_option('site_favicon', '');
-    
-    $site_url    = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
-    $current_url = $site_url . $_SERVER['REQUEST_URI'];
+// SEO helpers
+$site_name = get_option('blogname', get_option('site_title', 'My WordPress App'));
+$site_desc_def = get_option('site_description', '');
+$site_logo = get_option('site_logo', '');
+$site_fav = get_option('site_favicon', '');
 
-    $seo_title   = !empty($post['meta_title'])  ? $post['meta_title']  : $post['title'];
-    $seo_desc    = !empty($post['meta_desc'])   ? $post['meta_desc']   : mb_substr(strip_tags($post['content']), 0, 155) . '...';
-    $seo_keyword = !empty($post['focus_keyword']) ? $post['focus_keyword'] : '';
+$site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+$current_url = $site_url . $_SERVER['REQUEST_URI'];
 
-    // Featured image absolute URL
-    $og_image = '';
-    if (!empty($post['featured_image'])) {
-        $og_image = $site_url . '/word-press/' . ltrim($post['featured_image'], '/');
-    }
+$seo_title = !empty($post['meta_title']) ? $post['meta_title'] : $post['title'];
+$seo_desc = !empty($post['meta_desc']) ? $post['meta_desc'] : mb_substr(strip_tags($post['content']), 0, 155) . '...';
+$seo_keyword = !empty($post['focus_keyword']) ? $post['focus_keyword'] : '';
 
-    $full_title = htmlspecialchars($seo_title) . ' | ' . $site_name;
-    ?>
+// Featured image absolute URL
+$og_image = '';
+if (!empty($post['featured_image'])) {
+    $og_image = $site_url . '/word-press/' . ltrim($post['featured_image'], '/');
+}
+
+$full_title = htmlspecialchars($seo_title) . ' | ' . $site_name;
+?>
 
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -151,11 +157,13 @@ while($row = $res_c->fetch_assoc()) {
     <meta name="description" content="<?php echo htmlspecialchars($seo_desc); ?>">
     <?php if ($seo_keyword): ?>
     <meta name="keywords" content="<?php echo htmlspecialchars($seo_keyword); ?>">
-    <?php endif; ?>
+    <?php
+endif; ?>
     <link rel="canonical" href="<?php echo htmlspecialchars($current_url); ?>">
-    <?php if($site_fav): ?>
+    <?php if ($site_fav): ?>
     <link rel="icon" href="<?php echo htmlspecialchars($site_fav); ?>" />
-    <?php endif; ?>
+    <?php
+endif; ?>
 
     <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
     <meta property="og:type"        content="article">
@@ -167,7 +175,8 @@ while($row = $res_c->fetch_assoc()) {
     <meta property="og:image"       content="<?php echo htmlspecialchars($og_image); ?>">
     <meta property="og:image:width"  content="1200">
     <meta property="og:image:height" content="630">
-    <?php endif; ?>
+    <?php
+endif; ?>
     <meta property="article:published_time" content="<?php echo date('c', strtotime($post['created_at'])); ?>">
 
     <!-- Twitter Card -->
@@ -176,7 +185,8 @@ while($row = $res_c->fetch_assoc()) {
     <meta name="twitter:description" content="<?php echo htmlspecialchars($seo_desc); ?>">
     <?php if ($og_image): ?>
     <meta name="twitter:image"       content="<?php echo htmlspecialchars($og_image); ?>">
-    <?php endif; ?>
+    <?php
+endif; ?>
 
     <!-- SunEditor CSS for content rendering if needed, generally content styles should be enough -->
     <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
@@ -337,12 +347,15 @@ while($row = $res_c->fetch_assoc()) {
     <!-- Prism CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
     <?php
-    // Fetch category IDs for this post (for tag targeting)
-    $post_category_ids = [];
-    $cat_res = $conn->query("SELECT category_id FROM post_categories WHERE post_id = " . intval($post['id']));
-    if ($cat_res) { while($cr = $cat_res->fetch_assoc()) $post_category_ids[] = intval($cr['category_id']); }
-    render_tags('head', ['post_id' => intval($post['id']), 'category_ids' => $post_category_ids]);
-    ?>
+// Fetch category IDs for this post (for tag targeting)
+$post_category_ids = [];
+$cat_res = $conn->query("SELECT category_id FROM post_categories WHERE post_id = " . intval($post['id']));
+if ($cat_res) {
+    while ($cr = $cat_res->fetch_assoc())
+        $post_category_ids[] = intval($cr['category_id']);
+}
+render_tags('head', ['post_id' => intval($post['id']), 'category_ids' => $post_category_ids]);
+?>
 </head>
 </head>
 </head>
@@ -355,7 +368,8 @@ while($row = $res_c->fetch_assoc()) {
             <div class="navbar-left">
                 <?php if ($site_logo): ?>
                     <img src="<?php echo htmlspecialchars($site_logo); ?>" alt="Logo" class="site-logo-circle">
-                <?php endif; ?>
+                <?php
+endif; ?>
                 <a href="/word-press/blog.php" class="site-title"><?php echo htmlspecialchars($site_name); ?></a>
             </div>
 
@@ -387,7 +401,8 @@ while($row = $res_c->fetch_assoc()) {
         <h1><?php echo htmlspecialchars($post['title']); ?></h1>
         <div class="badge-container" style="margin-bottom:20px;">
             <span class="badge badge-date"><i class="fa fa-calendar-alt"></i> <?php echo date('M j, Y', strtotime($post['created_at'])); ?></span>
-            <?php if($post['status'] != 'publish') echo ' <span class="badge" style="background:orange;">' . ucfirst($post['status']) . '</span>'; ?>
+            <?php if ($post['status'] != 'publish')
+    echo ' <span class="badge" style="background:orange;">' . ucfirst($post['status']) . '</span>'; ?>
             <span class="badge badge-author"><i class="fa fa-user"></i> <?php echo htmlspecialchars($post['author_name'] ?? 'Admin'); ?></span>
             <span class="badge badge-words"><i class="fa fa-file-alt"></i> <?php echo get_word_count($post['content']); ?> Words</span>
             <span class="badge badge-time"><i class="fa fa-clock"></i> <?php echo get_read_time($post['content']); ?> Min Read</span>
@@ -403,11 +418,11 @@ while($row = $res_c->fetch_assoc()) {
         <div class="share-section">
             <h3>Share this article:</h3>
             <div class="share-buttons">
-                <?php 
-                    $current_url = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-                    $title_enc = urlencode($post['title']);
-                    $url_enc = urlencode($current_url);
-                ?>
+                <?php
+$current_url = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+$title_enc = urlencode($post['title']);
+$url_enc = urlencode($current_url);
+?>
                 <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo $url_enc; ?>" target="_blank" class="share-btn btn-facebook">
                     Facebook
                 </a>
@@ -444,11 +459,14 @@ while($row = $res_c->fetch_assoc()) {
                                 <?php echo nl2br(htmlspecialchars($comment['content'])); ?>
                             </div>
                         </li>
-                    <?php endforeach; ?>
+                    <?php
+    endforeach; ?>
                 </ul>
-            <?php else: ?>
+            <?php
+else: ?>
                 <p style="margin-bottom: 30px; color: #777;">No comments yet. Be the first!</p>
-            <?php endif; ?>
+            <?php
+endif; ?>
 
             <h4>Leave a Comment</h4>
             <form method="POST" class="comment-form">
