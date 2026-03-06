@@ -18,8 +18,9 @@ if (isset($_SESSION['user_id'])) {
             $current_username = $user_data['username'];
             if (!empty($user_data['profile_picture']) && file_exists('media/' . $user_data['profile_picture'])) {
                 $current_user_avatar = 'media/' . $user_data['profile_picture'];
-            } else {
-                 $current_user_avatar = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($current_username))) . "?s=32&d=mm&r=g";
+            }
+            else {
+                $current_user_avatar = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($current_username))) . "?s=32&d=mm&r=g";
             }
         }
         $user_conn->close();
@@ -29,7 +30,7 @@ if (isset($_SESSION['user_id'])) {
 <div id="wpadminbar">
     <div class="quicklinks">
         <ul class="ab-top-menu">
-            <li id="wp-admin-bar-site-name"><a class="ab-item" href="../index.php"><span class="ab-icon dashicons-admin-home"></span>My Site</a></li>
+            <li id="wp-admin-bar-site-name"><a class="ab-item" href="../index.php"><span class="ab-icon dashicons-admin-home"></span><?php echo htmlspecialchars(get_option('blogname', get_option('site_title', 'My Site'))); ?></a></li>
             <li id="wp-admin-bar-comments"><a class="ab-item" href="#"><span class="ab-icon dashicons-admin-comments"></span><span class="ab-label">0</span></a></li>
             <li id="wp-admin-bar-new-content" class="menupop">
                 <a class="ab-item" href="post-new.php">

@@ -12,27 +12,23 @@ if (!current_user_can('manage_options')) {
 // Handle Form Submission
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $site_title = trim($_POST['site_title'] ?? '');
-    $site_desc  = trim($_POST['site_description'] ?? '');
-    $site_logo  = trim($_POST['site_logo'] ?? '');
-    $site_fav   = trim($_POST['site_favicon'] ?? '');
-    $admin_color = trim($_POST['admin_color_scheme'] ?? 'fresh'); // Restore Color Setting
-    
-    update_option('site_title', $site_title);
-    update_option('site_description', $site_desc);
+    $site_logo = trim($_POST['site_logo'] ?? '');
+    $site_fav = trim($_POST['site_favicon'] ?? '');
+    $admin_color = trim($_POST['admin_color_scheme'] ?? 'fresh');
+
     update_option('site_logo', $site_logo);
     update_option('site_favicon', $site_fav);
-    update_option('admin_color_scheme', $admin_color); // Save Color Setting
-    
+    update_option('admin_color_scheme', $admin_color);
+
     $message = '<div class="updated"><p>Settings saved.</p></div>';
 }
 
 // Get current options
-$opt_title = get_option('site_title', 'My WordPress App');
-$opt_desc  = get_option('site_description', '');
-$opt_logo  = get_option('site_logo', '');
-$opt_fav   = get_option('site_favicon', '');
-$opt_color = get_option('admin_color_scheme', 'fresh'); // Fetch Color Setting
+$opt_logo = get_option('site_logo', '');
+$opt_fav = get_option('site_favicon', '');
+$opt_color = get_option('admin_color_scheme', 'fresh');
+// Read site title for display only (managed via General Settings)
+$opt_title = get_option('blogname', get_option('site_title', 'My Site'));
 
 $page_title = 'Customize Theme';
 require_once 'header.php';
@@ -55,33 +51,31 @@ require_once 'sidebar.php'; // Restore Sidebar
                     <div class="postbox">
                         <h2 class="hndle"><span>Site Identity</span></h2>
                         <div class="inside" style="padding: 20px;">
-                            
-                            <!-- Site Title -->
-                            <div style="margin-bottom: 20px;">
-                                <label for="site_title" style="display:block;font-weight:600;margin-bottom:5px;">Site Title</label>
-                                <input type="text" name="site_title" id="site_title" value="<?php echo htmlspecialchars($opt_title); ?>" class="regular-text" style="width:100%;">
-                                <p class="description">The name of your website.</p>
+
+                            <!-- Info: Site Title managed in General Settings -->
+                            <div style="background:#f0f6fc;border:1px solid #c2d4e8;border-radius:6px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+                                <span style="font-size:18px;">ℹ️</span>
+                                <span style="font-size:13px;color:#2271b1;">
+                                    <strong>Site Title</strong> and <strong>Tagline</strong> are managed in
+                                    <a href="settings-general.php"><strong>Settings → General</strong></a>.
+                                    Current title: <strong><?php echo htmlspecialchars($opt_title); ?></strong>
+                                </span>
                             </div>
-                            
-                            <!-- Tagline -->
-                            <div style="margin-bottom: 20px;">
-                                <label for="site_description" style="display:block;font-weight:600;margin-bottom:5px;">Tagline</label>
-                                <input type="text" name="site_description" id="site_description" value="<?php echo htmlspecialchars($opt_desc); ?>" class="regular-text" style="width:100%;">
-                                <p class="description">In a few words, explain what this site is about.</p>
-                            </div>
-                            
-                            <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-                            
+
+                            <hr style="border:0; border-top:1px solid #eee; margin:0 0 20px;">
+
                             <!-- Logo -->
                             <div style="margin-bottom: 20px;">
                                 <label style="display:block;font-weight:600;margin-bottom:5px;">Site Logo</label>
                                 <div style="display:flex; align-items:flex-start; gap:15px;">
                                     <div id="logo-preview-wrapper" style="width:100px; height:100px; background:#f0f0f1; border:1px dashed #ccc; display:flex; align-items:center; justify-center; overflow:hidden; position:relative;">
-                                        <?php if($opt_logo): ?>
+                                        <?php if ($opt_logo): ?>
                                             <img id="logo-preview" src="<?php echo htmlspecialchars($opt_logo); ?>" style="max-width:100%; max-height:100%;">
-                                        <?php else: ?>
+                                        <?php
+else: ?>
                                             <span id="logo-placeholder" style="color:#ccc; font-size:12px; text-align:center; width:100%;">No Logo</span>
-                                        <?php endif; ?>
+                                        <?php
+endif; ?>
                                     </div>
                                     <div>
                                         <input type="hidden" name="site_logo" id="site_logo" value="<?php echo htmlspecialchars($opt_logo); ?>">
@@ -91,17 +85,19 @@ require_once 'sidebar.php'; // Restore Sidebar
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Favicon -->
                             <div style="margin-bottom: 10px;">
                                 <label style="display:block;font-weight:600;margin-bottom:5px;">Site Icon (Favicon)</label>
                                 <div style="display:flex; align-items:flex-start; gap:15px;">
                                     <div id="favicon-preview-wrapper" style="width:64px; height:64px; background:#f0f0f1; border:1px dashed #ccc; display:flex; align-items:center; justify-center; overflow:hidden; position:relative;">
-                                        <?php if($opt_fav): ?>
+                                        <?php if ($opt_fav): ?>
                                             <img id="favicon-preview" src="<?php echo htmlspecialchars($opt_fav); ?>" style="max-width:100%; max-height:100%;">
-                                        <?php else: ?>
+                                        <?php
+else: ?>
                                             <span id="favicon-placeholder" style="color:#ccc; font-size:12px; text-align:center; width:100%;">No Icon</span>
-                                        <?php endif; ?>
+                                        <?php
+endif; ?>
                                     </div>
                                     <div>
                                         <input type="hidden" name="site_favicon" id="site_favicon" value="<?php echo htmlspecialchars($opt_fav); ?>">
@@ -179,60 +175,62 @@ require_once 'sidebar.php'; // Restore Sidebar
                                 <legend class="screen-reader-text"><span>Admin Color Scheme</span></legend>
                                 <div id="color-picker-container" style="padding: 10px;">
                                     <?php
-                                    $colors = [
-                                        'fresh' => [
-                                            'label' => 'Default',
-                                            'colors' => ['#222', '#333', '#0073aa', '#00a0d2']
-                                        ],
-                                        'light' => [
-                                            'label' => 'Light',
-                                            'colors' => ['#e5e5e5', '#999', '#d0d0d0', '#eee']
-                                        ],
-                                        'modern' => [
-                                            'label' => 'Modern',
-                                            'colors' => ['#1e1e1e', '#3858e9', '#33f078', '#2b2b2b']
-                                        ],
-                                        'blue' => [
-                                            'label' => 'Blue',
-                                            'colors' => ['#096484', '#4796b3', '#52accc', '#74B6CE']
-                                        ],
-                                        'coffee' => [
-                                            'label' => 'Coffee',
-                                            'colors' => ['#46403c', '#c7a589', '#9ea476', '#59524c']
-                                        ],
-                                        'ectoplasm' => [
-                                            'label' => 'Ectoplasm',
-                                            'colors' => ['#413256', '#a3b745', '#d46f15', '#523f6d']
-                                        ],
-                                        'midnight' => [
-                                            'label' => 'Midnight',
-                                            'colors' => ['#25282b', '#363b3f', '#69a8bb', '#e14d43']
-                                        ],
-                                        'ocean' => [
-                                            'label' => 'Ocean',
-                                            'colors' => ['#627c83', '#9ebaa0', '#aa9d88', '#738e96']
-                                        ],
-                                        'sunrise' => [
-                                            'label' => 'Sunrise',
-                                            'colors' => ['#cf4944', '#dd823b', '#ccaf0b', '#f3f1f1']
-                                        ]
-                                    ];
+$colors = [
+    'fresh' => [
+        'label' => 'Default',
+        'colors' => ['#222', '#333', '#0073aa', '#00a0d2']
+    ],
+    'light' => [
+        'label' => 'Light',
+        'colors' => ['#e5e5e5', '#999', '#d0d0d0', '#eee']
+    ],
+    'modern' => [
+        'label' => 'Modern',
+        'colors' => ['#1e1e1e', '#3858e9', '#33f078', '#2b2b2b']
+    ],
+    'blue' => [
+        'label' => 'Blue',
+        'colors' => ['#096484', '#4796b3', '#52accc', '#74B6CE']
+    ],
+    'coffee' => [
+        'label' => 'Coffee',
+        'colors' => ['#46403c', '#c7a589', '#9ea476', '#59524c']
+    ],
+    'ectoplasm' => [
+        'label' => 'Ectoplasm',
+        'colors' => ['#413256', '#a3b745', '#d46f15', '#523f6d']
+    ],
+    'midnight' => [
+        'label' => 'Midnight',
+        'colors' => ['#25282b', '#363b3f', '#69a8bb', '#e14d43']
+    ],
+    'ocean' => [
+        'label' => 'Ocean',
+        'colors' => ['#627c83', '#9ebaa0', '#aa9d88', '#738e96']
+    ],
+    'sunrise' => [
+        'label' => 'Sunrise',
+        'colors' => ['#cf4944', '#dd823b', '#ccaf0b', '#f3f1f1']
+    ]
+];
 
-                                    foreach ($colors as $value => $scheme) :
-                                        $is_checked = ($opt_color === $value);
-                                        $selected_class = $is_checked ? 'selected' : '';
-                                    ?>
+foreach ($colors as $value => $scheme):
+    $is_checked = ($opt_color === $value);
+    $selected_class = $is_checked ? 'selected' : '';
+?>
                                         <div class="color-option <?php echo $selected_class; ?>" onclick="selectColor('<?php echo $value; ?>', this)">
                                             <input type="radio" name="admin_color_scheme" id="color-<?php echo $value; ?>" value="<?php echo $value; ?>" <?php checked($opt_color, $value); ?>>
                                             <div class="color-palette">
-                                                <?php foreach ($scheme['colors'] as $color) : ?>
+                                                <?php foreach ($scheme['colors'] as $color): ?>
                                                     <div style="background-color: <?php echo $color; ?>;"></div>
-                                                <?php endforeach; ?>
+                                                <?php
+    endforeach; ?>
                                             </div>
                                             <span class="color-option-label"><?php echo $scheme['label']; ?></span>
                                             <span class="checkmark">✔</span>
                                         </div>
-                                    <?php endforeach; ?>
+                                    <?php
+endforeach; ?>
                                 </div>
                             </fieldset>
                             
