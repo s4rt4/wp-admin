@@ -11,7 +11,9 @@ $labels = [
         'appearance' => 'Tampilan',
         'users' => 'Pengguna',
         'tools' => 'Peralatan',
-        'settings' => 'Pengaturan'
+        'settings' => 'Pengaturan',
+        'form_builder' => 'Form Builder',
+        'kanban' => 'Kanban Board'
     ],
     'en' => [
         'back' => 'Back to Admin',
@@ -23,7 +25,9 @@ $labels = [
         'appearance' => 'Appearance',
         'users' => 'Users',
         'tools' => 'Tools',
-        'settings' => 'Settings'
+        'settings' => 'Settings',
+        'form_builder' => 'Form Builder',
+        'kanban' => 'Kanban Board'
     ]
 ];
 $l = $labels[$lang];
@@ -146,6 +150,8 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-health') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-health">Site Health</a></li>
                 <li class="<?php echo($topic === 'tools-snippets' || $topic === 'tools') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-snippets">Snippets</a></li>
                 <li class="<?php echo($topic === 'tools-tm') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-tm">Tag Manager</a></li>
+                <li class="<?php echo($topic === 'tools-form-builder') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-form-builder"><?php echo $l['form_builder']; ?></a></li>
+                <li class="<?php echo($topic === 'tools-kanban') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-kanban"><?php echo $l['kanban']; ?></a></li>
             </ul>
         </li>
 

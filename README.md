@@ -1,6 +1,6 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, and a built-in comprehensive documentation system.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, and a comprehensive built-in documentation system.
 
 ## Features
 
@@ -9,23 +9,39 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - **Editor.js:** For structured, block-based page building.
     - **Toast UI Editor:** A powerful Markdown and WYSIWYG editor for writing standard Posts and Articles.
     - **Monaco Editor:** A powerful IDE-like code editor for writing raw HTML, CSS, JavaScript, and PHP snippets.
+- **Form Builder:**
+    - Create fully custom forms (contact, survey, data collection) without writing code.
+    - 12 field types: Text, Email, Phone, Textarea, Dropdown, Checkbox, Number, Date, File Upload, Radio, URL, Hidden.
+    - Elementor-style widget tile picker for adding fields.
+    - Auto-generates a shortcode (`[contact_form id="X"]`) for embedding anywhere.
+    - **Submission Management:** View all form responses in a dedicated table.
+    - **Kanban Integration:** Each submission can automatically create a Kanban card.
+    - **Email Notification:** Receive an email copy of every new submission.
+- **Kanban Board:**
+    - Visual drag-and-drop project management board.
+    - Multiple boards with tab-style navigation.
+    - Fully customizable columns and cards (create, edit, delete).
+    - **Activity Log:** Every card movement is recorded — who moved it, from where, to where, and when.
+    - **Form Builder Integration:** Automatically create cards from form submissions.
 - **Powerful Shortcode & Snippet System:**
     - Create custom PHP, CSS, or JS snippets in the admin panel.
-    - Snippets automatically generate **Shortcodes** that can be embedded anywhere (in posts, pages, or even inside GrapesJS page builder).
+    - Snippets automatically generate **Shortcodes** that can be embedded anywhere.
     - Navigation Menus also act as shortcodes for flexible placement.
 - **Built-in Documentation System:**
     - Comprehensive manual accessible right inside the admin dashboard (`wp-admin/docs.php`).
     - **Bilingual Support** (English & Indonesian).
     - **Live Search** with keyboard navigation (`/` shortcut).
     - Sticky sidebar with an accordion-style hierarchy.
+    - Covers all features including Form Builder and Kanban Board.
 - **Admin Dashboard & Management:**
     - Visitor Statistics (Page Views, Daily Visitors).
     - Post, Page, and Media Library management.
     - Appearance & Menu builder.
-    - User Management & Roles.
+    - User Management, Roles & Capabilities Customizer.
 - **Security & Structure:**
     - Admin Authentication and Protected API endpoints.
-    - Dynamic routing (Pretty URLs) and SEO-friendly frontend.
+    - Brute-force login protection with lockout.
+    - Dynamic routing (Pretty URLs) and SEO-friendly frontend (Open Graph, Twitter Cards).
     - Database Backup & Restore interface.
     - Export / Import content tools.
 
@@ -66,7 +82,7 @@ Use the following credentials to access the admin panel:
 - **Backend:** Native PHP (No frameworks).
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript.
 - **Database:** MySQL.
-- **Libraries/Editors:** GrapesJS, Editor.js, Toast UI Editor, Monaco Editor, Chart.js.
+- **Libraries/Editors:** GrapesJS, Editor.js, Toast UI Editor, Monaco Editor, Chart.js, SortableJS, Font Awesome 6.
 
 ## Disclaimer
 
