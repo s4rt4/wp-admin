@@ -103,18 +103,18 @@ $kb_boards = $conn->query("SELECT * FROM kanban_boards ORDER BY name ASC");
     <a href="form-builder.php?view=edit" class="page-title-action">+ New Form</a>
 
     <?php if (isset($_GET['message']) && $_GET['message'] === 'deleted'): ?>
-    <div class="notice notice-success"><p>Form berhasil dihapus.</p></div>
+    <div class="notice notice-success"><p>Form deleted successfully.</p></div>
     <?php
     endif; ?>
 
     <table class="wp-list-table widefat fixed striped" style="margin-top:20px;">
         <thead>
             <tr>
-                <th>Nama Form</th>
+                <th>Form Name</th>
                 <th>Shortcode</th>
                 <th>Submissions</th>
-                <th>Dibuat</th>
-                <th>Aksi</th>
+                <th>Created</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -132,13 +132,13 @@ $kb_boards = $conn->query("SELECT * FROM kanban_boards ORDER BY name ASC");
                 <td><?php echo date('d M Y', strtotime($f['created_at'])); ?></td>
                 <td>
                     <a href="form-builder.php?view=edit&id=<?php echo $f['id']; ?>">Edit</a> |
-                    <a href="form-builder.php?action=delete&id=<?php echo $f['id']; ?>" onclick="return confirm('Hapus form ini dan semua submissionsnya?')" style="color:#cc1818;">Delete</a>
+                    <a href="form-builder.php?action=delete&id=<?php echo $f['id']; ?>" onclick="return confirm('Delete this form and all its submissions? This cannot be undone.')" style="color:#cc1818;">Delete</a>
                 </td>
             </tr>
             <?php
         endwhile;
     else: ?>
-            <tr><td colspan="5" style="text-align:center;padding:30px;color:#999;">Belum ada form. Klik <strong>+ New Form</strong> untuk mulai.</td></tr>
+            <tr><td colspan="5" style="text-align:center;padding:30px;color:#999;">No forms yet. Click <strong>+ New Form</strong> to get started.</td></tr>
             <?php
     endif; ?>
         </tbody>
@@ -147,12 +147,12 @@ $kb_boards = $conn->query("SELECT * FROM kanban_boards ORDER BY name ASC");
 <?php
 elseif ($view === 'edit'): ?>
     <h1 class="wp-heading-inline">
-        <?php echo $form_data ? 'Edit Form: ' . htmlspecialchars($form_data['name']) : 'Buat Form Baru'; ?>
+        <?php echo $form_data ? 'Edit Form: ' . htmlspecialchars($form_data['name']) : 'Create New Form'; ?>
     </h1>
-    <a href="form-builder.php" class="page-title-action">← Kembali ke Daftar</a>
+    <a href="form-builder.php" class="page-title-action">&larr; Back to List</a>
 
     <?php if (isset($_GET['message']) && $_GET['message'] === 'saved'): ?>
-    <div class="notice notice-success"><p>Form berhasil disimpan!</p></div>
+    <div class="notice notice-success"><p>Form saved successfully!</p></div>
     <?php
     endif; ?>
 
@@ -162,19 +162,19 @@ elseif ($view === 'edit'): ?>
             <div class="postbox">
                 <div class="hndle"><h2 style="margin:0;font-size:14px;">Form Fields Builder</h2></div>
                 <div class="inside">
-                    <p style="color:#646970;font-size:13px;margin-bottom:14px;">Klik tipe field di bawah untuk menambahkannya ke form. Drag untuk mengubah urutan.</p>
+                    <p style="color:#646970;font-size:13px;margin-bottom:14px;">Click a field type below to add it to the form. Drag to reorder.</p>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
                         <?php
     $field_types = [
-        ['type' => 'text', 'label' => '📝 Text'],
-        ['type' => 'email', 'label' => '📧 Email'],
-        ['type' => 'tel', 'label' => '📞 Phone'],
-        ['type' => 'textarea', 'label' => '💬 Textarea'],
-        ['type' => 'select', 'label' => '📋 Dropdown'],
-        ['type' => 'checkbox', 'label' => '☑️ Checkbox'],
-        ['type' => 'number', 'label' => '🔢 Number'],
-        ['type' => 'date', 'label' => '📅 Date'],
-        ['type' => 'file', 'label' => '📎 File Upload'],
+        ['type' => 'text', 'label' => 'Text'],
+        ['type' => 'email', 'label' => 'Email'],
+        ['type' => 'tel', 'label' => 'Phone'],
+        ['type' => 'textarea', 'label' => 'Textarea'],
+        ['type' => 'select', 'label' => 'Dropdown'],
+        ['type' => 'checkbox', 'label' => 'Checkbox'],
+        ['type' => 'number', 'label' => 'Number'],
+        ['type' => 'date', 'label' => 'Date'],
+        ['type' => 'file', 'label' => 'File Upload'],
     ];
     foreach ($field_types as $ft):
 ?>
@@ -188,7 +188,7 @@ elseif ($view === 'edit'): ?>
     endforeach; ?>
                     </div>
                     <div id="fields-container" style="min-height:80px;border:2px dashed #c3c4c7;border-radius:8px;padding:12px;">
-                        <p id="fields-empty-msg" style="color:#999;text-align:center;padding:20px 0;margin:0;">Belum ada field. Klik tombol di atas untuk menambahkan field.</p>
+                        <p id="fields-empty-msg" style="color:#999;text-align:center;padding:20px 0;margin:0;">No fields added yet. Click a button above to add a field.</p>
                     </div>
                 </div>
             </div>
@@ -204,13 +204,13 @@ elseif ($view === 'edit'): ?>
                 <div class="postbox" style="margin-bottom:16px;">
                     <div class="hndle"><h2 style="margin:0;font-size:14px;">Form Settings</h2></div>
                     <div class="inside">
-                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Nama Form *</label>
+                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Form Name *</label>
                         <input type="text" name="form_name" value="<?php echo htmlspecialchars($form_data['name'] ?? ''); ?>" required
                             style="width:100%;padding:8px;border:1px solid #8c8f94;border-radius:4px;font-size:13px;box-sizing:border-box;margin-bottom:12px;">
 
-                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Notifikasi Email</label>
+                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Notification Email</label>
                         <input type="email" name="notification_email" value="<?php echo htmlspecialchars($form_data['notification_email'] ?? ''); ?>"
-                            placeholder="email@contoh.com"
+                            placeholder="email@example.com"
                             style="width:100%;padding:8px;border:1px solid #8c8f94;border-radius:4px;font-size:13px;box-sizing:border-box;margin-bottom:12px;">
 
                         <?php if ($form_data): ?>
@@ -225,13 +225,13 @@ elseif ($view === 'edit'): ?>
                 </div>
 
                 <div class="postbox" style="margin-bottom:16px;">
-                    <div class="hndle"><h2 style="margin:0;font-size:14px;">Integrasi Kanban (opsional)</h2></div>
+                    <div class="hndle"><h2 style="margin:0;font-size:14px;">Kanban Integration (optional)</h2></div>
                     <div class="inside">
-                        <p style="font-size:12px;color:#646970;margin-top:0;">Jika diaktifkan, setiap submission akan otomatis membuat kartu baru di Kanban Board.</p>
+                        <p style="font-size:12px;color:#646970;margin-top:0;">If enabled, each submission will automatically create a new card on the Kanban Board.</p>
                         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Board</label>
                         <select name="kanban_board_id" id="sel-board" onchange="loadKanbanCols(this.value)"
                             style="width:100%;padding:7px;border:1px solid #8c8f94;border-radius:4px;font-size:13px;margin-bottom:10px;">
-                            <option value="">— Tidak ada integrasi —</option>
+                            <option value="">— No integration —</option>
                             <?php if ($kb_boards)
         while ($kb = $kb_boards->fetch_assoc()): ?>
                             <option value="<?php echo $kb['id']; ?>" <?php echo($form_data && $form_data['kanban_board_id'] == $kb['id']) ? 'selected' : ''; ?>>
@@ -240,16 +240,16 @@ elseif ($view === 'edit'): ?>
                             <?php
         endwhile; ?>
                         </select>
-                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Kolom Tujuan</label>
+                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Target Column</label>
                         <select name="kanban_column_id" id="sel-col"
                             style="width:100%;padding:7px;border:1px solid #8c8f94;border-radius:4px;font-size:13px;">
-                            <option value="">— Pilih kolom —</option>
+                            <option value="">— Select a column —</option>
                         </select>
                     </div>
                 </div>
 
                 <button type="submit" class="button button-primary" style="width:100%;padding:10px;font-size:14px;">
-                    💾 Simpan Form
+                    Save Form
                 </button>
             </form>
         </div>
@@ -258,12 +258,12 @@ elseif ($view === 'edit'): ?>
 <?php
 elseif ($view === 'submissions' && $sub_form): ?>
     <h1>Submissions: <?php echo htmlspecialchars($sub_form['name']); ?></h1>
-    <a href="form-builder.php" class="page-title-action">← Kembali</a>
+    <a href="form-builder.php" class="page-title-action">&larr; Back</a>
     <p style="color:#646970;margin-top:10px;">Total: <strong><?php echo count($submissions); ?></strong> submission(s)</p>
 
     <?php if (empty($submissions)): ?>
     <div style="text-align:center;padding:40px;color:#999;background:#f9f9f9;border-radius:8px;margin-top:16px;">
-        Belum ada submission untuk form ini.
+        No submissions yet for this form.
     </div>
     <?php
     else: ?>
@@ -306,7 +306,7 @@ function renderFields() {
     if (_fields.length === 0) {
         container.innerHTML = '';
         container.appendChild(emptyMsg || Object.assign(document.createElement('p'), {
-            id:'fields-empty-msg', textContent:'Belum ada field.', style:'color:#999;text-align:center;padding:20px 0;margin:0;'
+            id:'fields-empty-msg', textContent:'No fields added yet.', style:'color:#999;text-align:center;padding:20px 0;margin:0;'
         }));
         return;
     }
@@ -320,7 +320,7 @@ function renderFields() {
             </div>
             <div>
                 <span style="font-size:11px;text-transform:uppercase;color:#787c82;font-weight:700;">Placeholder</span>
-                <input type="text" value="${f.placeholder||''}" placeholder="Placeholder (opsional)"
+                <input type="text" value="${f.placeholder||''}" placeholder="Placeholder (optional)"
                     onchange="_fields[${i}].placeholder=this.value;syncFields();"
                     style="display:block;width:100%;padding:5px 8px;border:1px solid #c3c4c7;border-radius:4px;font-size:13px;margin-top:4px;box-sizing:border-box;">
                 <label style="font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px;margin-top:6px;">
@@ -352,7 +352,7 @@ function syncFields() {
 
 function loadKanbanCols(boardId) {
     var sel = document.getElementById('sel-col');
-    sel.innerHTML = '<option value="">— Pilih kolom —</option>';
+    sel.innerHTML = '<option value="">— Select a column —</option>';
     if (!boardId) return;
     fetch('api/kanban.php?action=get_board&board_id=' + boardId)
         .then(r=>r.json()).then(function(d){
