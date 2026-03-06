@@ -124,12 +124,12 @@ $admin_color = get_option('admin_color_scheme', 'fresh');
         <nav class="docs-breadcrumbs" aria-label="breadcrumb">
             <a href="docs.php"><?php echo $lang === 'en' ? 'Docs' : 'Dok'; ?></a>
             <?php if ($topic_section): ?>
-                <span class="sep">›</span>
+                <span class="sep">/</span>
                 <span><?php echo htmlspecialchars($topic_section); ?></span>
             <?php
 endif; ?>
             <?php if ($topic !== 'getting-started'): ?>
-                <span class="sep">›</span>
+                <span class="sep">/</span>
                 <span class="current-crumb"><?php echo htmlspecialchars($topic_label); ?></span>
             <?php
 endif; ?>

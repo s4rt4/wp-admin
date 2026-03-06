@@ -78,8 +78,10 @@ a.docs-topic-slug:hover {
 }
 
 .docs-topbar .docs-breadcrumbs .sep {
-    color: #ccc;
-    font-size: 10px;
+    color: #a7aaad;
+    font-size: 13px;
+    margin: 0 4px;
+    user-select: none;
 }
 
 .docs-topbar .docs-breadcrumbs .current-crumb {
@@ -291,11 +293,19 @@ a.docs-topic-slug:hover {
 }
 
 #adminmenumain.docs-sidebar .docs-sidebar-header .docs-back-link .dashicons {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    margin-right: -2px;
-    /* sesuaikan spacing ikon dengan teks */
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 1;
+    margin-right: 4px;
+    text-align: center;
+}
+
+#adminmenumain.docs-sidebar .docs-sidebar-header .docs-back-link .dashicons::before {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
 }
 
 #adminmenu.docs-menu {
