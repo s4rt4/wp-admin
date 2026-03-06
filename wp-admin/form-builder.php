@@ -163,27 +163,28 @@ elseif ($view === 'edit'): ?>
                 <div class="hndle"><h2 style="margin:0;font-size:14px;">Form Fields Builder</h2></div>
                 <div class="inside">
                     <p style="color:#646970;font-size:13px;margin-bottom:14px;">Click a field type below to add it to the form. Drag to reorder.</p>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+                    <div class="fb-widgets-grid">
                         <?php
     $field_types = [
-        ['type' => 'text', 'label' => 'Text'],
-        ['type' => 'email', 'label' => 'Email'],
-        ['type' => 'tel', 'label' => 'Phone'],
-        ['type' => 'textarea', 'label' => 'Textarea'],
-        ['type' => 'select', 'label' => 'Dropdown'],
-        ['type' => 'checkbox', 'label' => 'Checkbox'],
-        ['type' => 'number', 'label' => 'Number'],
-        ['type' => 'date', 'label' => 'Date'],
-        ['type' => 'file', 'label' => 'File Upload'],
+        ['type' => 'text', 'label' => 'Text', 'icon' => 'fa-solid fa-font'],
+        ['type' => 'email', 'label' => 'Email', 'icon' => 'fa-solid fa-envelope'],
+        ['type' => 'tel', 'label' => 'Phone', 'icon' => 'fa-solid fa-phone'],
+        ['type' => 'textarea', 'label' => 'Textarea', 'icon' => 'fa-solid fa-align-left'],
+        ['type' => 'select', 'label' => 'Dropdown', 'icon' => 'fa-solid fa-chevron-down'],
+        ['type' => 'checkbox', 'label' => 'Checkbox', 'icon' => 'fa-solid fa-square-check'],
+        ['type' => 'number', 'label' => 'Number', 'icon' => 'fa-solid fa-hashtag'],
+        ['type' => 'date', 'label' => 'Date', 'icon' => 'fa-solid fa-calendar-days'],
+        ['type' => 'file', 'label' => 'File Upload', 'icon' => 'fa-solid fa-paperclip'],
+        ['type' => 'radio', 'label' => 'Radio', 'icon' => 'fa-solid fa-circle-dot'],
+        ['type' => 'url', 'label' => 'URL', 'icon' => 'fa-solid fa-link'],
+        ['type' => 'hidden', 'label' => 'Hidden', 'icon' => 'fa-solid fa-eye-slash'],
     ];
     foreach ($field_types as $ft):
 ?>
-                        <button type="button" onclick="addField('<?php echo $ft['type']; ?>')"
-                            style="padding:7px 14px;border:1px solid #c3c4c7;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;transition:all .15s;"
-                            onmouseover="this.style.borderColor='#2271b1';this.style.color='#2271b1';"
-                            onmouseout="this.style.borderColor='#c3c4c7';this.style.color='inherit';">
-                            <?php echo $ft['label']; ?>
-                        </button>
+                        <div class="fb-widget-tile" onclick="addField('<?php echo $ft['type']; ?>')" title="Add <?php echo $ft['label']; ?> field">
+                            <i class="<?php echo $ft['icon']; ?>"></i>
+                            <span><?php echo $ft['label']; ?></span>
+                        </div>
                         <?php
     endforeach; ?>
                     </div>
@@ -296,6 +297,50 @@ endif; ?>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous">
+<style>
+/* ─── Widget Tile Grid ────────────────────────── */
+.fb-widgets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 8px;
+    margin-bottom: 18px;
+}
+.fb-widget-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 6px 10px;
+    background: #fff;
+    border: 1px solid #e2e4e7;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .18s;
+    text-align: center;
+    user-select: none;
+    color: #3c434a;
+}
+.fb-widget-tile:hover {
+    border-color: #2271b1;
+    background: #f0f6fc;
+    color: #2271b1;
+    box-shadow: 0 2px 8px rgba(34,113,177,.15);
+    transform: translateY(-1px);
+}
+.fb-widget-tile i {
+    font-size: 20px;
+    line-height: 1;
+}
+.fb-widget-tile span {
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+</style>
 <script>
 var _fields = [];
 try { _fields = JSON.parse(document.getElementById('fields_json_input')?.value || '[]'); } catch(e) {}
