@@ -125,6 +125,69 @@ if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
     exit;
 }
 
+// --- Image Optimizer ---
+if (in_array($ext, ['jpg', 'jpeg', 'png']) && function_exists('imagecreatefromjpeg')) {
+    try {
+        $pdo_opt  = getDBConnection();
+        $s = $pdo_opt->query("SELECT option_name, option_value FROM options WHERE option_name IN ('img_quality','img_webp_enabled','img_max_width')");
+        $opts = [];
+        foreach ($s->fetchAll(PDO::FETCH_ASSOC) as $r) { $opts[$r['option_name']] = $r['option_value']; }
+
+        $quality    = isset($opts['img_quality'])   ? intval($opts['img_quality'])   : 82;
+        $maxWidth   = isset($opts['img_max_width'])  ? intval($opts['img_max_width'])  : 2560;
+        $webpOn     = isset($opts['img_webp_enabled']) && $opts['img_webp_enabled'] == '1';
+
+        // Load image
+        $img = null;
+        if ($ext === 'png') {
+            $img = @imagecreatefrompng($targetPath);
+        } else {
+            $img = @imagecreatefromjpeg($targetPath);
+        }
+
+        if ($img) {
+            $origW = imagesx($img);
+            $origH = imagesy($img);
+
+            // Resize if needed
+            if ($maxWidth > 0 && $origW > $maxWidth) {
+                $newH = intval($origH * $maxWidth / $origW);
+                $resized = imagecreatetruecolor($maxWidth, $newH);
+                if ($ext === 'png') {
+                    imagealphablending($resized, false);
+                    imagesavealpha($resized, true);
+                }
+                imagecopyresampled($resized, $img, 0, 0, 0, 0, $maxWidth, $newH, $origW, $origH);
+                imagedestroy($img);
+                $img = $resized;
+            }
+
+            // Re-save with quality (overwrite original)
+            if ($ext === 'png') {
+                // PNG quality: 0 (no compress) to 9 — convert 1-100 scale
+                $pngQ = intval(round((100 - $quality) * 9 / 100));
+                imagepng($img, $targetPath, $pngQ);
+            } else {
+                imagejpeg($img, $targetPath, $quality);
+            }
+
+            // WebP copy
+            if ($webpOn && function_exists('imagewebp')) {
+                $webpPath = preg_replace('/\.(jpe?g|png)$/i', '.webp', $targetPath);
+                imagewebp($img, $webpPath, $quality);
+            }
+
+            imagedestroy($img);
+        }
+    } catch (Exception $e) {
+        // silently ignore optimizer errors — file was already saved
+    }
+}
+
+// Audit log
+require_once __DIR__ . '/includes/audit.php';
+audit_log('media_upload', 'media', 0, $safeName, null, $fileUrl);
+
 // Return response based on source
     if ($source === 'grapesjs') {
     // GrapesJS expects: { data: ['url1', 'url2'] }

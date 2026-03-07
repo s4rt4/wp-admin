@@ -16,8 +16,12 @@ $post = [
     'content' => '',
     'status' => 'draft',
     'visibility' => 'public',
-    'created_at' => date('Y-m-d H:i:s')
+    'created_at' => date('Y-m-d H:i:s'),
+    'scheduled_at' => null
 ];
+
+// Ensure scheduled_at column exists
+try { $conn->query("ALTER TABLE posts ADD COLUMN scheduled_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
 
 // Handle Post Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -26,23 +30,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Determine Status based on button clicked
     if (isset($_POST['publish'])) {
-        // If updating an existing post, trust the dropdown
         if ($post_id > 0) {
             $status = $_POST['post_status'];
+        } else {
+            $ps = $_POST['post_status'] ?? 'publish';
+            $status = $ps === 'scheduled' ? 'scheduled' : 'publish';
         }
-        else {
-            // If creating a new post, "Publish" button implies publish intent,
-            // unless they specifically chose something else? 
-            // Actually, simplified: If they click Publish on a new post, make it publish.
-            // If they wanted draft, they should click "Save Draft".
-            $status = 'publish';
-        }
-    }
-    elseif (isset($_POST['save'])) {
+    } elseif (isset($_POST['save'])) {
         $status = 'draft';
-    }
-    else {
+    } else {
         $status = $_POST['post_status']; // Fallback
+    }
+
+    // Handle scheduled_at
+    $scheduled_at = null;
+    if ($status === 'scheduled') {
+        $raw = trim($_POST['scheduled_at'] ?? '');
+        if ($raw) {
+            $dt = DateTime::createFromFormat('Y-m-d\TH:i', $raw);
+            if ($dt && $dt > new DateTime()) {
+                $scheduled_at = $dt->format('Y-m-d H:i:s');
+            } else {
+                $status = 'publish'; // Past date → publish immediately
+            }
+        } else {
+            $status = 'draft'; // No date set → save as draft
+        }
     }
 
     $visibility = $_POST['visibility'];
@@ -87,13 +100,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $meta_desc = trim($_POST['meta_desc'] ?? '');
     $focus_keyword = trim($_POST['focus_keyword'] ?? '');
 
+    $is_new_post = ($post_id === 0);
     if ($post_id > 0) {
-        $stmt = $conn->prepare("UPDATE posts SET title=?, slug=?, content=?, status=?, visibility=?, created_at=?, updated_at=NOW(), featured_image=?, meta_title=?, meta_desc=?, focus_keyword=? WHERE id=?");
-        $stmt->bind_param("ssssssssssi", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $meta_title, $meta_desc, $focus_keyword, $post_id);
+        $stmt = $conn->prepare("UPDATE posts SET title=?, slug=?, content=?, status=?, visibility=?, created_at=?, updated_at=NOW(), featured_image=?, meta_title=?, meta_desc=?, focus_keyword=?, scheduled_at=? WHERE id=?");
+        $stmt->bind_param("sssssssssssi", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $meta_title, $meta_desc, $focus_keyword, $scheduled_at, $post_id);
     }
     else {
-        $stmt = $conn->prepare("INSERT INTO posts (title, slug, content, status, visibility, created_at, updated_at, featured_image, author_id, meta_title, meta_desc, focus_keyword) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssssisss", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $author_id, $meta_title, $meta_desc, $focus_keyword);
+        $stmt = $conn->prepare("INSERT INTO posts (title, slug, content, status, visibility, created_at, updated_at, featured_image, author_id, meta_title, meta_desc, focus_keyword, scheduled_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssssissss", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $author_id, $meta_title, $meta_desc, $focus_keyword, $scheduled_at);
     }
 
     if ($stmt->execute()) {
@@ -146,6 +160,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Keep only last 20 revisions
         $conn->query("DELETE FROM post_revisions WHERE post_id=$post_id AND id NOT IN (SELECT id FROM (SELECT id FROM post_revisions WHERE post_id=$post_id ORDER BY revised_at DESC LIMIT 20) t)");
 
+        // Release lock — will be re-acquired on redirect
+        $conn->query("UPDATE posts SET locked_by=NULL, locked_at=NULL WHERE id=$post_id");
+
+        // Audit log
+        require_once __DIR__ . '/includes/audit.php';
+        audit_log($is_new_post ? 'post_create' : 'post_update', 'post', $post_id, $title);
+
         header("Location: post-new.php?id=$post_id&message=saved");
 
         exit;
@@ -172,6 +193,42 @@ if ($post_id > 0) {
         if ($post['author_id'] != $_SESSION['user_id'] && !current_user_can('edit_others_posts')) {
             die("Access denied. You cannot edit this post.");
         }
+    }
+}
+
+// ─── Content Lock ────────────────────────────────────────────────
+$locked_by_other = false;
+$locker_name     = '';
+$locker_since    = '';
+if ($post_id > 0) {
+    // Ensure lock columns exist
+    try { $conn->query("ALTER TABLE posts ADD COLUMN locked_by INT NULL DEFAULT NULL, ADD COLUMN locked_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
+
+    // Auto-release stale locks (> 5 min idle)
+    $conn->query("UPDATE posts SET locked_by=NULL, locked_at=NULL WHERE locked_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+
+    // Handle take-over redirect
+    if (isset($_GET['takeover']) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $uid = intval($_SESSION['user_id']);
+        $conn->query("UPDATE posts SET locked_by=$uid, locked_at=NOW() WHERE id=$post_id");
+        header("Location: post-new.php?id=$post_id");
+        exit;
+    }
+
+    // Check who holds the lock
+    $lock_res    = $conn->query("SELECT locked_by, locked_at FROM posts WHERE id=$post_id");
+    $lock_row    = $lock_res ? $lock_res->fetch_assoc() : [];
+    $cur_locker  = intval($lock_row['locked_by'] ?? 0);
+
+    if ($cur_locker && $cur_locker !== intval($_SESSION['user_id'])) {
+        $locked_by_other = true;
+        $user_res    = $conn->query("SELECT username FROM users WHERE id=$cur_locker");
+        $locker_name = $user_res ? ($user_res->fetch_assoc()['username'] ?? 'Someone') : 'Someone';
+        $locker_since = $lock_row['locked_at'];
+    } else {
+        // Acquire / refresh own lock
+        $uid = intval($_SESSION['user_id']);
+        $conn->query("UPDATE posts SET locked_by=$uid, locked_at=NOW() WHERE id=$post_id");
     }
 }
 
@@ -239,6 +296,24 @@ $month_names = [
         </script>
         <?php
 endif; ?>
+
+        <?php if ($locked_by_other): ?>
+        <div id="lock-notice" style="margin:0 0 16px;padding:14px 18px;background:#fff8e1;border-left:4px solid #f0ad4e;border-radius:4px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#3c434a;">
+                <span style="font-size:18px;">&#128274;</span>
+                <span><strong><?php echo htmlspecialchars($locker_name); ?></strong> is currently editing this post
+                <span style="color:#787c82;">(since <?php echo htmlspecialchars($locker_since); ?>)</span>.
+                The post is in <strong>read-only</strong> mode.</span>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <a href="posts.php" class="button">&larr; Back to Posts</a>
+                <a href="post-new.php?id=<?php echo $post_id; ?>&takeover=1" class="button button-primary"
+                   onclick="return confirm('Take over editing? <?php echo addslashes($locker_name); ?> may lose unsaved changes.')">
+                    Take Over Editing
+                </a>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <form method="post" action="" enctype="multipart/form-data">
             <div id="poststuff">
@@ -364,13 +439,25 @@ endif; ?>
                                             <span id="post-status-display"><strong><?php echo ucfirst($post['status']); ?></strong></span>
                                             <a href="#post_status" class="edit-visibility hide-if-no-js" onclick="toggleEdit('post-status-select'); return false;"><span aria-hidden="true">Edit</span></a>
                                             <div id="post-status-select" class="hide-if-js" style="display:none; margin-top: 5px;">
-                                                <select name="post_status" id="post_status">
+                                                <select name="post_status" id="post_status" onchange="onStatusChange(this.value)">
                                                     <option value="draft" <?php echo $post['status'] == 'draft' ? 'selected' : ''; ?>>Draft</option>
                                                     <option value="publish" <?php echo $post['status'] == 'publish' ? 'selected' : ''; ?>>Published</option>
+                                                    <option value="scheduled" <?php echo $post['status'] == 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
                                                 </select>
                                                 <a href="#post_status" class="save-post-status hide-if-no-js button" onclick="toggleEdit('post-status-select'); updateDisplay('post-status-display', 'post_status'); return false;">OK</a>
                                                 <a href="#post_status" class="cancel-post-status hide-if-no-js" onclick="toggleEdit('post-status-select'); return false;">Cancel</a>
                                             </div>
+                                        </div>
+
+                                        <div class="misc-pub-section misc-pub-scheduled" id="scheduled-date-section" style="<?php echo $post['status'] !== 'scheduled' ? 'display:none;' : ''; ?>">
+                                            <span>&#128197; Schedule for:</span>
+                                            <input type="datetime-local" id="scheduled_at" name="scheduled_at"
+                                                   value="<?php echo !empty($post['scheduled_at']) ? date('Y-m-d\TH:i', strtotime($post['scheduled_at'])) : ''; ?>"
+                                                   min="<?php echo date('Y-m-d\TH:i'); ?>"
+                                                   style="margin-top:5px;width:100%;font-size:12px;border:1px solid #8c8f94;border-radius:3px;padding:4px 6px;">
+                                            <?php if (!empty($post['scheduled_at'])): ?>
+                                            <p style="font-size:11px;color:#646970;margin:4px 0 0;">Scheduled: <strong><?php echo date('M j, Y @ H:i', strtotime($post['scheduled_at'])); ?></strong></p>
+                                            <?php endif; ?>
                                         </div>
 
                                         <div class="misc-pub-section misc-pub-visibility">
@@ -417,7 +504,7 @@ endif; ?>
                                         <div id="publishing-action">
                                         <span class="spinner"></span>
                                         <?php if (current_user_can('publish_posts')): ?>
-                                            <input type="submit" name="publish" id="publish" class="button button-primary button-large" value="<?php echo $post_id > 0 ? 'Update' : 'Publish'; ?>">
+                                            <input type="submit" name="publish" id="publish" class="button button-primary button-large" value="<?php echo $post['status'] === 'scheduled' ? 'Schedule' : ($post_id > 0 ? 'Update' : 'Publish'); ?>">
                                         <?php
 else: ?>
                                             <input type="submit" name="save" id="save-post" value="Save Draft" class="button button-primary button-large">
@@ -939,8 +1026,19 @@ document.addEventListener('keydown', function(e) {
 </script>
 
 <script>
+    // --- Scheduled Publishing ---
+    function onStatusChange(val) {
+        var section = document.getElementById('scheduled-date-section');
+        var btn     = document.getElementById('publish');
+        if (section) section.style.display = val === 'scheduled' ? '' : 'none';
+        if (btn) {
+            btn.value = val === 'scheduled' ? 'Schedule'
+                      : (<?php echo $post_id > 0 ? 'true' : 'false'; ?> ? 'Update' : 'Publish');
+        }
+    }
+
     // --- UI Interactions ---
-    
+
     function toggleEdit(id) {
         var el = document.getElementById(id);
         if (el.style.display === 'none') {
@@ -1253,6 +1351,30 @@ document.addEventListener('keydown', function(e) {
     
     /* Editor styling tweak */
     .sun-editor { border: 1px solid #ddd !important; }
+    .post-state.scheduled { background:#fff3cd; color:#856404; border:1px solid #ffc107; border-radius:3px; padding:1px 6px; font-size:11px; }
+
+    /* Content Lock — read-only overlay */
+    .lock-readonly #poststuff { pointer-events:none; opacity:.7; user-select:none; }
+    .lock-readonly #lock-notice { pointer-events:auto; opacity:1; }
 </style>
+
+<?php if ($post_id > 0): ?>
+<script>
+<?php if ($locked_by_other): ?>
+// Read-only mode: block form interaction
+document.documentElement.classList.add('lock-readonly');
+<?php else: ?>
+// Ping to keep lock fresh every 90 s
+var _lockPing = setInterval(function() {
+    fetch('post-lock.php?action=lock&post_id=<?php echo $post_id; ?>', { keepalive: true });
+}, 90000);
+// Release lock when leaving the page
+window.addEventListener('beforeunload', function() {
+    navigator.sendBeacon('post-lock.php?action=unlock&post_id=<?php echo $post_id; ?>');
+    clearInterval(_lockPing);
+});
+<?php endif; ?>
+</script>
+<?php endif; ?>
 
 <?php require_once 'footer.php'; ?>

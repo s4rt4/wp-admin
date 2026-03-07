@@ -6,7 +6,8 @@ if (!current_user_can('edit_posts'))
     die("Access denied");
 
 // --- Auto-install tables ---
-$conn->query("CREATE TABLE IF NOT EXISTS kanban_boards (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, created_by INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+$conn->query("CREATE TABLE IF NOT EXISTS kanban_boards (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, created_by INT NOT NULL, position INT DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+try { $conn->query("ALTER TABLE kanban_boards ADD COLUMN position INT DEFAULT 0"); } catch (Exception $e) { /* column already exists, ignore */ }
 $conn->query("CREATE TABLE IF NOT EXISTS kanban_columns (id INT AUTO_INCREMENT PRIMARY KEY, board_id INT NOT NULL, name VARCHAR(100) NOT NULL, position INT DEFAULT 0, color VARCHAR(20) DEFAULT '#e2e8f0')");
 $conn->query("CREATE TABLE IF NOT EXISTS kanban_cards (id INT AUTO_INCREMENT PRIMARY KEY, column_id INT NOT NULL, title VARCHAR(255) NOT NULL, description TEXT, priority ENUM('low','medium','high') DEFAULT 'medium', due_date DATE, position INT DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
 $conn->query("CREATE TABLE IF NOT EXISTS kanban_history (id INT AUTO_INCREMENT PRIMARY KEY, board_id INT NOT NULL, card_id INT NOT NULL, card_title VARCHAR(255), from_column_name VARCHAR(100), to_column_name VARCHAR(100), moved_by INT NOT NULL, moved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
@@ -16,7 +17,7 @@ require_once 'header.php';
 require_once 'sidebar.php';
 
 $boards_arr = [];
-$res = $conn->query("SELECT * FROM kanban_boards ORDER BY created_at DESC");
+$res = $conn->query("SELECT * FROM kanban_boards ORDER BY position ASC, id ASC");
 while ($b = $res->fetch_assoc())
     $boards_arr[] = $b;
 ?>
@@ -55,7 +56,7 @@ while ($b = $res->fetch_assoc())
                 <span class="kb-tab-name"><?php echo htmlspecialchars($board['name']); ?></span>
                 <?php if (current_user_can('manage_options')): ?>
                 <button class="kb-tab-del"
-                    onclick="deleteBoard(event, <?php echo $board['id']; ?>, '<?php echo addslashes(htmlspecialchars($board['name'])); ?>')"
+                    onclick="event.stopPropagation(); deleteBoard(event, <?php echo $board['id']; ?>, <?php echo htmlspecialchars(json_encode($board['name']), ENT_QUOTES, 'UTF-8'); ?>)"
                     title="Delete board">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -207,46 +208,88 @@ endif; ?>
 
 /* ─── Board Tabs ─────────────────────── */
 .kb-tabs-outer {
-    border-bottom: 2px solid #dcdcde;
     margin-top: 18px;
+    background: #1abc9c;
+    height: 3em; /* Match tab height */
+    position: relative;
+    /* Simulate border bottom for the active area */
+    box-shadow: 0 2px 0 0 #dcdcde; 
 }
 .kb-tabs {
     display: flex;
-    gap: 4px;
+    gap: 0; /* Tabs touch each other */
     flex-wrap: nowrap;
-    overflow: hidden;     /* NO scroll bar */
     max-width: 100%;
     flex-shrink: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    height: 100%;
 }
+.kb-tabs::-webkit-scrollbar {
+    display: none;
+}
+
 .kb-tab {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 14px 8px 16px;
+    padding: 0 1.618em;
+    height: 3em;
+    line-height: 2.75em;
     cursor: pointer;
-    border: 2px solid transparent; border-bottom: none;
-    border-radius: 6px 6px 0 0;
-    margin-bottom: -2px;
-    font-size: 13px; font-weight: 600; color: #646970;
-    background: #f6f7f7;
-    transition: background .15s, color .15s;
+    border: none;
+    border-right: 0.125rem solid #16a085; /* Teal separator */
+    border-radius: 0; /* Square corners */
+    margin-bottom: 0px;
+    font-size: 13px; font-weight: 600; 
+    color: #fff; /* White text on teal */
+    background: #1abc9c;
+    transition: all 0.25s;
     flex-shrink: 0;
     position: relative;
+    top: 0;
+    z-index: 1;
 }
-.kb-tab:hover:not(.active) { background: #e8e8e8; color: #1d2327; }
+
+/* Hover State */
+.kb-tab:hover:not(.active) {
+    top: -0.25rem;
+    background: #1abc9c; /* Keep background teal */
+    color: #fff;
+}
+
+/* Active State */
 .kb-tab.active {
-    background: #fff; color: #2271b1;
-    border-color: #dcdcde; border-bottom-color: #fff;
+    background: #f0f0f1; /* Match the body background representing the active content area */
+    color: #2c3e50; /* Dark blue/grey text */
+    border-bottom: 0;
+    border-right: 0.125rem solid #f0f0f1; /* Hide separator line */
+    transition: all 0.35s;
+    z-index: 2;
+    top: -0.0625rem; /* Slight pop up */
 }
 .kb-tab-del {
     display: inline-flex; align-items: center; justify-content: center;
     background: none; border: none; cursor: pointer; padding: 2px 4px;
-    border-radius: 3px; color: #a7aaad;
+    border-radius: 3px; 
+    color: rgba(255,255,255,0.6); /* Semi-transparent white for teal background */
     font-size: 13px; line-height: 1;
     transition: color .15s, background .15s;
     flex-shrink: 0;
+    position: relative;
+    z-index: 3;
 }
-.kb-tab-del:hover { background: #fce8e8; color: #cc1818; }
-.kb-tab.active .kb-tab-del { color: #a7aaad; }
-.kb-tabs-empty { padding: 10px 4px; color: #999; font-size: 13px; }
+.kb-tab-del:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+/* Active tab delete button */
+.kb-tab.active .kb-tab-del { 
+    color: #a7aaad; /* Default grey for active white background */
+}
+.kb-tab.active .kb-tab-del:hover { background: #fce8e8; color: #cc1818; }
+
+.kb-tabs-empty { padding: 10px 15px; color: rgba(255,255,255,0.8); font-size: 13px; line-height:3em; }
+.kb-tab { cursor: grab; }
+.kb-tab-ghost  { opacity: 0.35; }
+.kb-tab-chosen { cursor: grabbing !important; }
 
 /* ─── Columns ────────────────────────── */
 .kanban-wrap {
@@ -342,6 +385,28 @@ endif; ?>
 var _activeBoardId = null;
 var _historyVisible = false;
 
+// ─── Tab Drag to Reorder ──────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    new Sortable(document.getElementById('board-tabs'), {
+        animation: 150,
+        direction: 'horizontal',
+        filter: '.kb-tab-del',
+        preventOnFilter: false,
+        ghostClass: 'kb-tab-ghost',
+        chosenClass: 'kb-tab-chosen',
+        onEnd: function(evt) {
+            if (evt.oldIndex === evt.newIndex) return;
+            var order = [];
+            document.querySelectorAll('.kb-tab[data-board-id]').forEach(function(tab, i) {
+                order.push({ id: parseInt(tab.dataset.boardId), position: i });
+            });
+            apiFetch({ action: 'reorder_boards', order: order }, function(d) {
+                if (!d.success) console.error('Failed to reorder boards:', d.error);
+            });
+        }
+    });
+});
+
 // ─── Board ────────────────────────────────────
 function openNewBoardModal() {
     document.getElementById('inp-board-name').value = '';
@@ -367,6 +432,10 @@ function deleteBoard(e, boardId, boardName) {
     if (!confirm('Delete board "' + boardName + '" and all its columns and cards?\nThis cannot be undone.')) return;
     apiFetch({ action:'delete_board', board_id:boardId }, function(d){
         if (d.success) location.reload();
+        else alert('Failed to delete board: ' + (d.error || 'Unknown error'));
+    }, function(err){
+        alert('Failed to delete board. Please try again.');
+        console.error('deleteBoard error:', err);
     });
 }
 
@@ -588,11 +657,14 @@ function renderHistory() {
 }
 
 // ─── Utilities ────────────────────────────────
-function apiFetch(payload, cb) {
+function apiFetch(payload, cb, errCb) {
     fetch('api/kanban.php', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify(payload)
-    }).then(function(r){ return r.json(); }).then(cb);
+    }).then(function(r){ return r.json(); }).then(cb).catch(function(err){
+        console.error('apiFetch error:', err);
+        if (errCb) errCb(err);
+    });
 }
 
 function showModal(id) { document.getElementById(id).style.display = 'flex'; }

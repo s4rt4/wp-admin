@@ -81,6 +81,10 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $pages = $stmt->fetchAll();
 
+// Content Lock — add columns if missing, release stale locks
+try { $conn->query("ALTER TABLE pages ADD COLUMN locked_by INT NULL DEFAULT NULL, ADD COLUMN locked_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
+$conn->query("UPDATE pages SET locked_by=NULL, locked_at=NULL WHERE locked_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+
 // Counts
 $totalCount = $pdo->query("SELECT COUNT(*) FROM pages")->fetchColumn();
 $publishCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE status='publish'")->fetchColumn();
@@ -132,6 +136,14 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
                                     <a class="row-title" href="builder.php?id=<?php echo $page['id']; ?>">
                                         <?php echo htmlspecialchars($page['title']); ?>
                                     </a>
+                                    <?php if (!empty($page['locked_by']) && $page['locked_by'] != $_SESSION['user_id']):
+                                        $lr = $conn->query("SELECT username FROM users WHERE id=" . intval($page['locked_by']));
+                                        $ln = $lr ? ($lr->fetch_assoc()['username'] ?? 'Someone') : 'Someone';
+                                    ?>
+                                    <span title="Being edited by <?php echo htmlspecialchars($ln); ?>" style="display:inline-flex;align-items:center;gap:3px;margin-left:6px;font-size:11px;color:#a00;background:#fce8e8;padding:1px 7px;border-radius:20px;font-weight:600;vertical-align:middle;">
+                                        &#128274; <?php echo htmlspecialchars($ln); ?>
+                                    </span>
+                                    <?php endif; ?>
                                     <?php if ($page['status'] == 'draft'): ?>
                                         — <span class="post-state">Draft</span>
                                     <?php endif; ?>

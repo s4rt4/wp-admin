@@ -57,11 +57,33 @@ switch ($action) {
         break;
 
     case 'delete_board':
+        if (!current_user_can('manage_options')) {
+            echo json_encode(['success' => false, 'error' => 'Access denied (role: ' . (isset($_SESSION['user_role']) ? $_SESSION['user_role'] : 'not set') . ')']);
+            exit;
+        }
         $board_id = intval($input['board_id'] ?? 0);
+        if (!$board_id) {
+            echo json_encode(['success' => false, 'error' => 'Invalid board ID']);
+            exit;
+        }
         $conn->query("DELETE kc FROM kanban_cards kc JOIN kanban_columns kl ON kc.column_id=kl.id WHERE kl.board_id=$board_id");
+        if ($conn->errno) { echo json_encode(['success' => false, 'error' => 'cards: ' . $conn->error]); exit; }
         $conn->query("DELETE FROM kanban_history WHERE board_id=$board_id");
+        if ($conn->errno) { echo json_encode(['success' => false, 'error' => 'history: ' . $conn->error]); exit; }
         $conn->query("DELETE FROM kanban_columns WHERE board_id=$board_id");
+        if ($conn->errno) { echo json_encode(['success' => false, 'error' => 'columns: ' . $conn->error]); exit; }
         $conn->query("DELETE FROM kanban_boards WHERE id=$board_id");
+        if ($conn->errno) { echo json_encode(['success' => false, 'error' => 'board: ' . $conn->error]); exit; }
+        echo json_encode(['success' => true]);
+        break;
+
+    case 'reorder_boards':
+        $order = $input['order'] ?? [];
+        foreach ($order as $item) {
+            $id  = intval($item['id'] ?? 0);
+            $pos = intval($item['position'] ?? 0);
+            if ($id) $conn->query("UPDATE kanban_boards SET position=$pos WHERE id=$id");
+        }
         echo json_encode(['success' => true]);
         break;
 

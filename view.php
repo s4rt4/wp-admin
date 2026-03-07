@@ -367,6 +367,14 @@ endif; ?>
     <?php render_tags('head', ['page_id' => intval($page['id'])]); ?>
 </head>
 <body>
+<?php
+$admin_bar_context = [
+    'type' => 'page',
+    'id' => $page['id'],
+    'builder' => $page['builder_type']
+];
+include_once 'wp-admin/includes/frontend-bar.php';
+?>
 <?php render_tags('body_open', ['page_id' => intval($page['id'])]); ?>
     <header style="margin-bottom: 20px; border-bottom:1px solid #eee; padding:15px 20px; display:flex; align-items:center; justify-content:space-between; background:#fff;">
         <div style="display:flex; align-items:center;">

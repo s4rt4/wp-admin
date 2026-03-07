@@ -148,6 +148,7 @@ render_tags('head', ['category_ids' => $blog_cat_ids]);
 ?>
 </head>
 <body>
+<?php include_once 'wp-admin/includes/frontend-bar.php'; ?>
 <?php render_tags('body_open', ['category_ids' => $blog_cat_ids]); ?>
 <?php render_tags('body_open', ['category_ids' => $blog_cat_ids]); ?>
 

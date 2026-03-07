@@ -23,6 +23,8 @@ if ($pageId > 0) {
 } else {
     die("Page ID required");
 }
+
+require_once 'includes/page-lock-check.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -199,6 +201,38 @@ if ($pageId > 0) {
     </style>
 </head>
 <body>
+<?php if ($locked_by_other): ?>
+<div id="page-lock-overlay" style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:10px;padding:36px;max-width:460px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.35);">
+        <div style="font-size:42px;margin-bottom:12px;">&#128274;</div>
+        <h2 style="margin:0 0 8px;font-size:18px;font-family:sans-serif;color:#1d2327;">Page Locked</h2>
+        <p style="color:#646970;font-size:14px;font-family:sans-serif;margin:0 0 24px;line-height:1.6;">
+            <strong><?php echo htmlspecialchars($locker_name); ?></strong> is currently editing this page.<br>
+            <small style="color:#a7aaad;">Since <?php echo htmlspecialchars($locker_since); ?></small>
+        </p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <a href="pages.php" style="padding:9px 18px;border:1px solid #c3c4c7;border-radius:4px;text-decoration:none;color:#3c434a;font-size:13px;font-family:sans-serif;background:#f6f7f7;">&larr; Back to Pages</a>
+            <button onclick="takeoverPage()" style="padding:9px 18px;border:none;border-radius:4px;background:#2271b1;color:#fff;font-size:13px;font-family:sans-serif;cursor:pointer;font-weight:600;">Take Over Editing</button>
+        </div>
+    </div>
+</div>
+<script>
+function takeoverPage() {
+    fetch('post-lock.php?action=lock&post_id=<?php echo $pageId; ?>&type=page')
+        .then(r => r.json()).then(d => { if (d.success) document.getElementById('page-lock-overlay').remove(); });
+}
+</script>
+<?php else: ?>
+<script>
+var _lockPing = setInterval(function() {
+    fetch('post-lock.php?action=lock&post_id=<?php echo $pageId; ?>&type=page', {keepalive:true});
+}, 90000);
+window.addEventListener('beforeunload', function() {
+    navigator.sendBeacon('post-lock.php?action=unlock&post_id=<?php echo $pageId; ?>&type=page');
+    clearInterval(_lockPing);
+});
+</script>
+<?php endif; ?>
     <div id="grapesjs-editor"></div>
     
     <!-- GrapesJS Scripts (CDN) -->

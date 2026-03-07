@@ -91,10 +91,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
     $post_id = $post['id'];
 
     if ($author_name && $author_email && $content) {
-        $stmt = $conn->prepare("INSERT INTO comments (post_id, author_name, author_email, content, status) VALUES (?, ?, ?, ?, 'pending')");
-        $stmt->bind_param("isss", $post_id, $author_name, $author_email, $content);
+        // Determine comment status (spam filter + auto-approve)
+        $comment_status = 'pending';
+        try {
+            $pdo_c = getDBConnection();
+            $copts = $pdo_c->query("SELECT option_name, option_value FROM options WHERE option_name IN ('comment_blacklist','comment_auto_approve')")->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            // Spam blacklist check
+            $blacklist = $copts['comment_blacklist'] ?? '';
+            if ($blacklist) {
+                $keywords = array_filter(array_map('trim', explode("\n", strtolower($blacklist))));
+                $haystack = strtolower($content . ' ' . $author_name . ' ' . $author_email);
+                foreach ($keywords as $kw) {
+                    if ($kw !== '' && str_contains($haystack, $kw)) {
+                        $comment_status = 'spam';
+                        break;
+                    }
+                }
+            }
+
+            // Auto-approve: if email has prior approved comment
+            if ($comment_status === 'pending' && ($copts['comment_auto_approve'] ?? '0') === '1') {
+                $chk = $conn->prepare("SELECT id FROM comments WHERE author_email=? AND status='approved' LIMIT 1");
+                $chk->bind_param("s", $author_email);
+                $chk->execute();
+                if ($chk->get_result()->num_rows > 0) {
+                    $comment_status = 'approved';
+                }
+            }
+        } catch (Exception $e) { /* silently fall back to pending */ }
+
+        $stmt = $conn->prepare("INSERT INTO comments (post_id, author_name, author_email, content, status) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("issss", $post_id, $author_name, $author_email, $content, $comment_status);
         if ($stmt->execute()) {
-            $_SESSION['comment_msg'] = '<div style="color: green; margin-bottom: 20px;">Comment submitted! Waiting for approval.</div>';
+            if ($comment_status === 'spam') {
+                $_SESSION['comment_msg'] = '<div style="color: orange; margin-bottom: 20px;">Your comment was flagged as spam.</div>';
+            } elseif ($comment_status === 'approved') {
+                $_SESSION['comment_msg'] = '<div style="color: green; margin-bottom: 20px;">Comment posted!</div>';
+            } else {
+                $_SESSION['comment_msg'] = '<div style="color: green; margin-bottom: 20px;">Comment submitted! Waiting for approval.</div>';
+                // Notify admins/editors
+                try {
+                    require_once __DIR__ . '/wp-admin/includes/notify.php';
+                    notify_admins(
+                        'comment_pending',
+                        $author_name . ' commented on "' . mb_strimwidth($post['title'] ?? '', 0, 60, '…') . '"',
+                        'wp-admin/comments.php?status=pending'
+                    );
+                } catch (Throwable $e) {}
+            }
         }
         else {
             $_SESSION['comment_msg'] = '<div style="color: red; margin-bottom: 20px;">Error submitting comment.</div>';
@@ -360,6 +405,13 @@ render_tags('head', ['post_id' => intval($post['id']), 'category_ids' => $post_c
 </head>
 </head>
 <body>
+<?php
+$admin_bar_context = [
+    'type' => 'post',
+    'id' => $post['id']
+];
+include_once 'wp-admin/includes/frontend-bar.php';
+?>
 <?php render_tags('body_open', ['post_id' => intval($post['id']), 'category_ids' => $post_category_ids]); ?>
 
     <!-- Navbar (Blue) -->

@@ -71,6 +71,8 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'posts-drafts') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-drafts">Drafts</a></li>
                 <li class="<?php echo($topic === 'posts-categories') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-categories">Categories</a></li>
                 <li class="<?php echo($topic === 'posts-tags') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-tags">Tags</a></li>
+                <li class="<?php echo($topic === 'posts-scheduled') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-scheduled">Scheduled Publishing</a></li>
+                <li class="<?php echo($topic === 'posts-content-lock') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-content-lock">Content Lock</a></li>
             </ul>
         </li>
 
@@ -83,6 +85,7 @@ $l = $labels[$lang];
             <ul class="wp-submenu">
                 <li class="wp-first-item <?php echo($topic === 'media-library' || $topic === 'media') ? 'current' : ''; ?>"><a href="docs.php?topic=media-library">Library</a></li>
                 <li class="<?php echo($topic === 'media-new') ? 'current' : ''; ?>"><a href="docs.php?topic=media-new">Add New</a></li>
+                <li class="<?php echo($topic === 'media-image-optimizer') ? 'current' : ''; ?>"><a href="docs.php?topic=media-image-optimizer">Image Optimizer</a></li>
             </ul>
         </li>
 
@@ -109,6 +112,7 @@ $l = $labels[$lang];
             </a>
             <ul class="wp-submenu">
                 <li class="wp-first-item <?php echo($topic === 'comments-all' || $topic === 'comments') ? 'current' : ''; ?>"><a href="docs.php?topic=comments-all">All Comments</a></li>
+                <li class="<?php echo($topic === 'comments-moderation') ? 'current' : ''; ?>"><a href="docs.php?topic=comments-moderation">Moderation</a></li>
             </ul>
         </li>
 
@@ -153,6 +157,8 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-snippets' || $topic === 'tools') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-snippets">Snippets</a></li>
                 <li class="<?php echo($topic === 'tools-tm') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-tm">Tag Manager</a></li>
                 <li class="<?php echo($topic === 'tools-form-builder') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-form-builder"><?php echo $l['form_builder']; ?></a></li>
+                <li class="<?php echo($topic === 'tools-audit-log') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-audit-log">Audit Log</a></li>
+                <li class="<?php echo($topic === 'tools-notifications') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-notifications">Notification Center</a></li>
             </ul>
         </li>
 

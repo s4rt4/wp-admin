@@ -103,8 +103,8 @@ endif; ?>
         <?php
 endif; ?>
         <?php if (current_user_can('manage_options')): ?>
-        <li class="wp-has-submenu <?php echo(isset($page_title) && $page_title === 'Tools') ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
-            <a href="tools.php" class="<?php echo(isset($page_title) && $page_title === 'Tools') ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
+        <li class="wp-has-submenu <?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+            <a href="tools.php" class="<?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
                 <li class="wp-first-item"><a href="tools.php?tab=database">Database Backup</a></li>
@@ -118,6 +118,9 @@ endif; ?>
                 </li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Form Builder') ? 'current' : ''; ?>">
                     <a href="form-builder.php">Form Builder</a>
+                </li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Audit Log') ? 'current' : ''; ?>">
+                    <a href="audit-log.php">Audit Log</a>
                 </li>
             </ul>
         </li>

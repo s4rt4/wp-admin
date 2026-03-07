@@ -16,6 +16,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['file']
     $fullPath = realpath($mediaDir . $file);
     // Security: ensure file is within media directory
     if ($fullPath && strpos($fullPath, realpath($mediaDir)) === 0 && file_exists($fullPath)) {
+        require_once __DIR__ . '/includes/audit.php';
+        audit_log('media_delete', 'media', 0, $file);
         unlink($fullPath);
         echo "<script>window.location.href='media.php';</script>";
         exit;

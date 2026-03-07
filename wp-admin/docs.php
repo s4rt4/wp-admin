@@ -66,6 +66,12 @@ function topic_label(string $topic): string
         'tools-health' => 'Site Health',
         'tools-snippets' => 'Snippets',
         'tools-tm' => 'Tag Manager',
+        'tools-audit-log' => 'Audit Log',
+        'tools-notifications' => 'Notification Center',
+        'posts-scheduled' => 'Scheduled Publishing',
+        'posts-content-lock' => 'Content Lock',
+        'media-image-optimizer' => 'Image Optimizer',
+        'comments-moderation' => 'Comment Moderation',
     ];
     return $map[$topic] ?? ucwords(str_replace('-', ' ', $topic));
 }

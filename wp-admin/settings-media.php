@@ -18,7 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'thumbnail_size_w', 'thumbnail_size_h', 'thumbnail_crop',
         'medium_size_w', 'medium_size_h',
         'large_size_w', 'large_size_h',
-        'uploads_use_yearmonth_folders'
+        'uploads_use_yearmonth_folders',
+        'img_quality', 'img_webp_enabled', 'img_max_width',
     ];
 
     foreach ($allowed_options as $option) {
@@ -119,8 +120,42 @@ include 'sidebar.php';
                 </tbody>
             </table>
             
+            <h2 class="title">Image Optimizer</h2>
+            <p>Automatically compress and optionally convert images to WebP on upload.</p>
+            <table class="form-table" role="presentation">
+                <tbody>
+                    <tr>
+                        <th scope="row"><label for="img_quality">JPEG/PNG Quality</label></th>
+                        <td>
+                            <input name="img_quality" type="number" step="1" min="1" max="100" id="img_quality"
+                                value="<?php echo htmlspecialchars(get_option('img_quality', '82')); ?>" class="small-text">
+                            <span class="description">1–100. Default: 82. Lower = smaller file, less quality.</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="img_max_width">Max Width (px)</label></th>
+                        <td>
+                            <input name="img_max_width" type="number" step="1" min="0" id="img_max_width"
+                                value="<?php echo htmlspecialchars(get_option('img_max_width', '2560')); ?>" class="small-text">
+                            <span class="description">Resize uploaded images wider than this. 0 = no limit.</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="th-full">
+                            <label for="img_webp_enabled">
+                                <input name="img_webp_enabled" type="checkbox" id="img_webp_enabled" value="1"
+                                    <?php echo get_option('img_webp_enabled', '0') == '1' ? 'checked="checked"' : ''; ?>>
+                                Generate WebP copy for each uploaded JPEG/PNG
+                            </label>
+                        </th>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+
             <p class="submit">
                 <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                <a href="image-optimizer.php" class="button" style="margin-left:8px;">&#128247; Bulk Optimize Existing Images</a>
             </p>
         </form>
     </div>

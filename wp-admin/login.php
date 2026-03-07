@@ -121,17 +121,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         $_SESSION['username'] = $username;
                         $_SESSION['user_role'] = $role ?: 'subscriber';
 
+                        require_once __DIR__ . '/includes/audit.php';
+                        audit_log('login_success', 'user', $id, $username);
+
                         header("Location: index.php");
                         exit();
                     }
                     else {
                         record_login_attempt($username);
+                        require_once __DIR__ . '/includes/audit.php';
+                        audit_log('login_fail', 'user', 0, $username);
                         // ✅ Fix: Generic error — no username enumeration
                         $error = "Incorrect username or password.";
                     }
                 }
                 else {
                     record_login_attempt($username);
+                    require_once __DIR__ . '/includes/audit.php';
+                    audit_log('login_fail', 'user', 0, $username);
                     // Same generic message regardless of whether user exists
                     $error = "Incorrect username or password.";
                 }

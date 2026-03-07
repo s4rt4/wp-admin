@@ -46,6 +46,25 @@ if (isset($_SESSION['user_id'])) {
             </li>
         </ul>
         <ul class="ab-top-secondary">
+            <!-- Notification Bell -->
+            <li id="wp-admin-bar-notifications" class="menupop" style="position:relative;">
+                <a class="ab-item" href="notifications.php" id="notif-bell" style="position:relative; padding:0 10px;">
+                    <span style="font-size:17px; line-height:32px;">&#128276;</span>
+                    <span id="notif-badge" style="display:none; position:absolute; top:4px; right:4px; background:#d63638; color:#fff; font-size:10px; font-weight:700; min-width:16px; height:16px; border-radius:8px; line-height:16px; text-align:center; padding:0 3px;">0</span>
+                </a>
+                <div id="notif-dropdown" style="display:none; position:absolute; top:32px; right:0; width:340px; background:#fff; border:1px solid #c3c4c7; box-shadow:0 4px 16px rgba(0,0,0,.15); z-index:99999; border-radius:0 0 4px 4px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #eee; background:#f6f7f7;">
+                        <strong style="font-size:13px;">Notifications</strong>
+                        <div style="display:flex; gap:8px;">
+                            <a href="#" id="notif-mark-all" style="font-size:12px; color:#0073aa; text-decoration:none;">Mark all read</a>
+                            <a href="notifications.php" style="font-size:12px; color:#0073aa; text-decoration:none;">See all</a>
+                        </div>
+                    </div>
+                    <div id="notif-list" style="max-height:360px; overflow-y:auto;">
+                        <p style="text-align:center; color:#999; padding:20px; font-size:13px;">Loading...</p>
+                    </div>
+                </div>
+            </li>
             <li id="wp-admin-bar-my-account">
                 <a class="ab-item" href="profile.php">
                     Howdy, <?php echo htmlspecialchars($current_username); ?>
@@ -67,3 +86,105 @@ if (isset($_SESSION['user_id'])) {
         </ul>
     </div>
 </div>
+
+<script>
+(function() {
+    const API = 'api/notifications.php';
+    const bell    = document.getElementById('notif-bell');
+    const badge   = document.getElementById('notif-badge');
+    const dropdown= document.getElementById('notif-dropdown');
+    const list    = document.getElementById('notif-list');
+    const markAllBtn = document.getElementById('notif-mark-all');
+    let open = false;
+
+    const typeIcons = {
+        comment_pending:  '&#128172;', comment_approved: '&#10003;',
+        post_published:   '&#128240;', form_submission:  '&#128203;',
+        kanban_assigned:  '&#128204;', login_new_device: '&#128274;', system: '&#9881;'
+    };
+
+    function timeAgo(dateStr) {
+        const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+        if (diff < 60)    return diff + 's ago';
+        if (diff < 3600)  return Math.floor(diff/60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+        return Math.floor(diff/86400) + 'd ago';
+    }
+
+    function renderItems(items) {
+        if (!items.length) {
+            list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;font-size:13px;">No notifications.</p>';
+            return;
+        }
+        list.innerHTML = items.slice(0, 15).map(n => {
+            const icon = typeIcons[n.type] || '&#128276;';
+            const bg   = n.is_read ? '#fff' : '#f0f6fc';
+            const fw   = n.is_read ? 'normal' : '600';
+            const href = n.link || 'notifications.php';
+            return '<a href="' + escHtml(href) + '" onclick="notifMarkRead(' + n.id + ')" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid #f0f0f1;background:' + bg + ';text-decoration:none;color:#1d2327;">'
+                + '<span style="font-size:18px;flex-shrink:0;line-height:1.4;">' + icon + '</span>'
+                + '<span style="flex:1;min-width:0;">'
+                + '<span style="font-size:13px;font-weight:' + fw + ';display:block;line-height:1.4;">' + escHtml(n.message) + '</span>'
+                + '<span style="font-size:11px;color:#8c8f94;">' + timeAgo(n.created_at) + '</span>'
+                + '</span>'
+                + (!n.is_read ? '<span style="width:8px;height:8px;background:#2271b1;border-radius:50%;flex-shrink:0;margin-top:6px;"></span>' : '')
+                + '</a>';
+        }).join('');
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function fetchCount() {
+        fetch(API + '?action=count').then(r=>r.json()).then(d => {
+            if (d.success) updateBadge(d.unread);
+        }).catch(function(){});
+    }
+
+    function updateBadge(n) {
+        badge.textContent = n > 99 ? '99+' : n;
+        badge.style.display = n > 0 ? 'inline-block' : 'none';
+    }
+
+    function openDropdown() {
+        open = true;
+        dropdown.style.display = 'block';
+        list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;font-size:13px;">Loading...</p>';
+        fetch(API + '?action=list&limit=15').then(r=>r.json()).then(d => {
+            if (d.success) { renderItems(d.items); updateBadge(d.unread); }
+        }).catch(function(){});
+    }
+
+    function closeDropdown() {
+        open = false;
+        dropdown.style.display = 'none';
+    }
+
+    bell.addEventListener('click', function(e) {
+        e.preventDefault();
+        open ? closeDropdown() : openDropdown();
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!document.getElementById('wp-admin-bar-notifications').contains(e.target)) {
+            closeDropdown();
+        }
+    });
+
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            fetch(API, {method:'POST', body: new URLSearchParams({action:'mark_all_read'})})
+                .then(function(){ updateBadge(0); openDropdown(); });
+        });
+    }
+
+    window.notifMarkRead = function(id) {
+        fetch(API, {method:'POST', body: new URLSearchParams({action:'mark_read', id: id})});
+    };
+
+    fetchCount();
+    setInterval(fetchCount, 60000);
+})();
+</script>

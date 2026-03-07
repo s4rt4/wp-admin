@@ -17,7 +17,10 @@ if (!current_user_can('edit_posts')) {
 // Handle delete
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
+    $del_row = $conn->query("SELECT title FROM posts WHERE id=$id")->fetch_assoc();
     $conn->query("DELETE FROM posts WHERE id = $id");
+    require_once __DIR__ . '/includes/audit.php';
+    audit_log('post_delete', 'post', $id, $del_row['title'] ?? '');
     // Redirect to avoid resubmission
     echo "<script>window.location.href='posts.php';</script>";
 }
@@ -87,7 +90,15 @@ if (!current_user_can('edit_others_posts')) {
     $sql_where .= ($sql_where ? " AND " : "WHERE ") . "p.author_id = $author_id";
 }
 
-$result = $conn->query("SELECT p.*, u.username as author_name FROM posts p LEFT JOIN users u ON p.author_id = u.id $sql_where ORDER BY p.created_at DESC");
+// Add lock columns if missing, auto-release stale locks
+try { $conn->query("ALTER TABLE posts ADD COLUMN locked_by INT NULL DEFAULT NULL, ADD COLUMN locked_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
+$conn->query("UPDATE posts SET locked_by=NULL, locked_at=NULL WHERE locked_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+
+// Scheduled Publishing — auto-publish posts whose time has come
+try { $conn->query("ALTER TABLE posts ADD COLUMN scheduled_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
+$conn->query("UPDATE posts SET status='publish', scheduled_at=NULL WHERE status='scheduled' AND scheduled_at IS NOT NULL AND scheduled_at <= NOW()");
+
+$result = $conn->query("SELECT p.*, u.username as author_name, lu.username as locker_name FROM posts p LEFT JOIN users u ON p.author_id = u.id LEFT JOIN users lu ON p.locked_by = lu.id $sql_where ORDER BY p.created_at DESC");
 ?>
 
 <div id="wpcontent">
@@ -105,7 +116,8 @@ $result = $conn->query("SELECT p.*, u.username as author_name FROM posts p LEFT 
         <ul class="subsubsub">
             <li class="all"><a href="posts.php" class="<?php echo $status_filter == 'all' ? 'current' : ''; ?>">All <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts")->fetch_column(); ?>)</span></a> |</li>
             <li class="publish"><a href="posts.php?status=publish" class="<?php echo $status_filter == 'publish' ? 'current' : ''; ?>">Published <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts WHERE status='publish'")->fetch_column(); ?>)</span></a> |</li>
-            <li class="draft"><a href="posts.php?status=draft" class="<?php echo $status_filter == 'draft' ? 'current' : ''; ?>">Draft <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts WHERE status='draft'")->fetch_column(); ?>)</span></a></li>
+            <li class="draft"><a href="posts.php?status=draft" class="<?php echo $status_filter == 'draft' ? 'current' : ''; ?>">Draft <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts WHERE status='draft'")->fetch_column(); ?>)</span></a> |</li>
+            <li class="scheduled"><a href="posts.php?status=scheduled" class="<?php echo $status_filter == 'scheduled' ? 'current' : ''; ?>">Scheduled <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts WHERE status='scheduled'")->fetch_column(); ?>)</span></a></li>
         </ul>
 
         <table class="wp-list-table widefat fixed striped posts">
@@ -139,8 +151,15 @@ $result = $conn->query("SELECT p.*, u.username as author_name FROM posts p LEFT 
                                     <div style="width:50px; height:50px; background:#f0f0f1; border-radius:3px;"></div>
                                 <?php endif; ?>
                             </td>
-                            <td class="title column-title has-row-actions column-primary page-title" data-colname="Title">
-                                <strong><a class="row-title" href="post-new.php?id=<?php echo $row['id']; ?>" aria-label="Edit “<?php echo htmlspecialchars($row['title']); ?>”"><?php echo htmlspecialchars($row['title']); ?></a></strong>
+                            <td class=”title column-title has-row-actions column-primary page-title” data-colname=”Title”>
+                                <strong>
+                                    <a class=”row-title” href=”post-new.php?id=<?php echo $row['id']; ?>” aria-label=”Edit “<?php echo htmlspecialchars($row['title']); ?>””><?php echo htmlspecialchars($row['title']); ?></a>
+                                    <?php if (!empty($row['locked_by']) && $row['locked_by'] != $_SESSION['user_id']): ?>
+                                    <span title=”Being edited by <?php echo htmlspecialchars($row['locker_name'] ?? 'Someone'); ?>” style=”display:inline-flex;align-items:center;gap:3px;margin-left:6px;font-size:11px;color:#a00;background:#fce8e8;padding:1px 7px;border-radius:20px;font-weight:600;vertical-align:middle;”>
+                                        &#128274; <?php echo htmlspecialchars($row['locker_name'] ?? 'Someone'); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                </strong>
                                 <div class="row-actions">
                                     <span class="edit"><a href="post-new.php?id=<?php echo $row['id']; ?>" aria-label="Edit “<?php echo htmlspecialchars($row['title']); ?>”">Edit</a> | </span>
                                     <span class="quick-edit"><a href="#" class="quick-edit-btn" data-id="<?php echo $row['id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>" data-slug="<?php echo htmlspecialchars($row['slug']); ?>" data-status="<?php echo $row['status']; ?>">Quick Edit</a> | </span>
@@ -150,11 +169,18 @@ $result = $conn->query("SELECT p.*, u.username as author_name FROM posts p LEFT 
                                 </div>
                             </td>
                             <td class="status column-status" data-colname="Status">
-                                <?php 
-                                    $status_label = ucfirst($row['status']);
-                                    $status_class = $row['status'] == 'publish' ? 'published' : 'draft';
-                                    echo "<span class='post-state $status_class'>$status_label</span>"; 
-                                ?>
+                                <?php if ($row['status'] === 'scheduled'): ?>
+                                    <span class="post-state" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;border-radius:3px;padding:1px 6px;font-size:11px;">&#128197; Scheduled</span>
+                                    <?php if (!empty($row['scheduled_at'])): ?>
+                                    <br><small style="color:#787c82;font-size:11px;"><?php echo date('M j, Y @ H:i', strtotime($row['scheduled_at'])); ?></small>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <?php
+                                        $status_label = ucfirst($row['status']);
+                                        $status_class = $row['status'] == 'publish' ? 'published' : 'draft';
+                                        echo "<span class='post-state $status_class'>$status_label</span>";
+                                    ?>
+                                <?php endif; ?>
                             </td>
                             <td class="author column-author" data-colname="Author">
                                 <a href="posts.php?author=<?php echo $row['author_id']; ?>"><?php echo htmlspecialchars($row['author_name'] ?? 'Unknown'); ?></a>
