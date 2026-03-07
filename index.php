@@ -8,7 +8,7 @@ require_once 'wp-admin/db_config.php';
 // Parse Request
 $request_uri = $_SERVER['REQUEST_URI'];
 $script_name = $_SERVER['SCRIPT_NAME'];
-$script_dir = dirname($script_name);
+$script_dir = str_replace('\\', '/', dirname($script_name));
 
 // Clean path
 $path = parse_url($request_uri, PHP_URL_PATH);
@@ -22,7 +22,7 @@ $path = trim($path, '/');
 // 1. Homepage
 if ($path === '' || $path === 'index.php') {
     $show_on_front = get_option('show_on_front', 'posts');
-    
+
     if ($show_on_front === 'page') {
         $page_id = get_option('page_on_front');
         if ($page_id) {
@@ -42,7 +42,7 @@ if ($path === '' || $path === 'index.php') {
             }
         }
     }
-    
+
     // Default to blog
     require 'blog.php';
     exit;

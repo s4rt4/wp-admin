@@ -253,6 +253,7 @@ window.addEventListener('beforeunload', function() {
     <script src="https://unpkg.com/grapesjs-custom-code"></script>
     <script src="https://unpkg.com/grapesjs-typed"></script>
     
+    <script>window.WP_ADMIN_URL = '<?php echo rtrim(str_replace("\\", "/", dirname($_SERVER["SCRIPT_NAME"])), "/"); ?>';</script>
     <script src="assets/js/custom-blocks.js"></script>
     
     <script>

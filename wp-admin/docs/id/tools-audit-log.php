@@ -2,6 +2,11 @@
 <h1>Audit Log</h1>
 <p class="docs-lead">Audit Log mencatat setiap tindakan penting yang dilakukan di panel admin — siapa melakukan apa, kapan, dan dari mana. Penting untuk keamanan dan akuntabilitas tim.</p>
 
+<div class="docs-screenshot">
+    <img src="<?php echo get_docs_asset_url('audit-log.png'); ?>" alt="Audit Log" onerror="this.style.display='none'">
+    <p class="docs-caption">Halaman Audit Log menampilkan aksi admin terbaru dengan kontrol filter.</p>
+</div>
+
 <hr class="docs-divider">
 
 <h2>Mengakses Audit Log</h2>

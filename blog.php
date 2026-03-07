@@ -1,5 +1,8 @@
 <?php
 // Blog Index (Public)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Include config & DB connection
 require_once 'wp-admin/db_config.php';
@@ -47,9 +50,12 @@ $result = $conn->query($sql);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <?php
+$site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/theme.css?v=<?php echo time(); ?>">
-    <script src="js/theme.js?v=<?php echo time(); ?>" defer></script>
+    <link rel="stylesheet" href="<?php echo $site_url; ?>/css/theme.css?v=<?php echo time(); ?>">
+    <script src="<?php echo $site_url; ?>/js/theme.js?v=<?php echo time(); ?>" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php if (get_option('blog_public') === '0'): ?>
         <meta name="robots" content="noindex,nofollow">

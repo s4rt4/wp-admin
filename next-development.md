@@ -1,69 +1,96 @@
 # Roadmap Pengembangan Selanjutnya
 
-Fitur yang **sudah dieksekusi**: #11 Frontend Admin Bar, #9 Content Lock, #2 Scheduled Publishing, #4 Image Optimizer, #8 Audit Log, #6 Comment Moderation, #7 Notification Center.
+Semua fitur yang direncanakan telah **selesai dieksekusi**.
 
 ---
 
-## 1. Email System (SMTP)
-**Tujuan**: Memberikan kemampuan pengiriman email native dari dalam CMS — fondasi dari banyak fitur lainnya (2FA, notifikasi form, reset password, dll).
+## Status Seluruh Fitur
 
-- **Konfigurasi SMTP**: Panel di Settings untuk mengisi host, port, username, password, encryption (TLS/SSL), dan sender name/email.
-- **Send Test Email**: Tombol untuk mengirim email percobaan langsung dari panel konfigurasi.
-- **Template Email**: Template HTML yang bisa dikustomisasi untuk berbagai jenis email (welcome, reset password, notifikasi submission, dll).
-- **Use Cases yang diaktifkan**:
-  - Lupa password → kirim link reset via email.
-  - Notifikasi submission Form Builder ke admin.
-  - Notifikasi komentar baru ke author.
-  - 2FA OTP via email (lihat fitur #3).
-
----
-
-## 3. Two-Factor Authentication (2FA)
-**Tujuan**: Lapisan keamanan tambahan pada login admin — mencegah akses tidak sah meski password sudah diketahui.
-**Membutuhkan**: Fitur #1 Email System terlebih dahulu.
-
-- **Metode**: OTP (One-Time Password) via email.
-- **Alur Login**:
-  1. User masukkan username & password seperti biasa.
-  2. Jika 2FA aktif, redirect ke halaman verifikasi OTP.
-  3. Kode 6 digit dikirim ke email user — berlaku 5 menit.
-  4. Setelah kode dimasukkan dengan benar, baru masuk ke dashboard.
-- **Konfigurasi per-user**: Aktifkan/nonaktifkan 2FA dari halaman Profile masing-masing user.
-- **Admin Override**: Super admin bisa mewajibkan 2FA untuk role tertentu.
-- **Backup Code**: Generate 8 backup code single-use untuk situasi darurat.
+| # | Fitur | Status |
+|---|-------|--------|
+| 1 | Email System (SMTP) | Done |
+| 2 | Scheduled Publishing | Done |
+| 3 | Two-Factor Authentication (2FA) | Done |
+| 4 | Image Optimizer | Done |
+| 5 | Analytics Dashboard | Done |
+| 6 | Comment Moderation | Done |
+| 7 | Notification Center | Done |
+| 8 | Audit Log | Done |
+| 9 | Content Lock | Done |
+| 10 | Custom Dashboard Widgets | Done |
+| 11 | Frontend Admin Bar | Done |
 
 ---
 
-## 5. Analytics Dashboard Lanjutan
-**Tujuan**: Dashboard statistik yang lebih informatif — insight konten dan perilaku pengunjung.
+## Ringkasan Implementasi
 
-- **Traffic Overview**: Grafik visitor harian/mingguan/bulanan dengan perbandingan periode sebelumnya.
-- **Top Pages**: Daftar halaman/post yang paling banyak dikunjungi.
-- **Traffic Sources**: Breakdown referrer (langsung, search engine, sosial media) dari HTTP Referer header.
-- **Device Breakdown**: Persentase Desktop vs Mobile vs Tablet dari User-Agent.
-- **Reading Time Stats**: Rata-rata read time per post (dari `get_read_time()`).
-- **Form Conversion Rate**: % visitor yang mengisi form dibanding total pengunjung halaman tersebut.
-- **Kanban Throughput**: Berapa kartu selesai (masuk kolom "Done") per minggu.
+### 1. Email System (SMTP)
+- `wp-admin/includes/mailer.php` — SMTP client dari scratch (fsockopen, STARTTLS, AUTH LOGIN)
+- `wp-admin/settings-smtp.php` — UI konfigurasi SMTP dengan test email
+- `wp-admin/api/test-email.php` — endpoint test email
+- Fallback ke PHP `mail()` jika SMTP belum dikonfigurasi
+
+### 2. Scheduled Publishing
+- Kolom `publish_date` di tabel posts
+- Cron/background check untuk auto-publish
+
+### 3. Two-Factor Authentication (2FA)
+- `wp-admin/includes/two-fa.php` — OTP generation, verification, backup codes
+- `wp-admin/2fa-verify.php` — halaman verifikasi OTP
+- `wp-admin/login.php` — redirect ke 2FA jika aktif
+- `wp-admin/user-new.php` — toggle 2FA per-user + generate backup codes
+
+### 4. Image Optimizer
+- Kompresi otomatis saat upload media
+
+### 5. Analytics Dashboard
+- `wp-admin/includes/analytics.php` — tracking engine (device, referrer, page_analytics table)
+- `wp-admin/analytics.php` — dashboard dengan Chart.js (traffic, sources, devices, top posts, kanban throughput)
+- Tracking terintegrasi di `blog.php`, `read.php`, `view.php`
+
+### 6. Comment Moderation
+- Approve/reject/spam workflow
+- Bulk actions
+
+### 7. Notification Center
+- In-app notifikasi untuk event sistem
+
+### 8. Audit Log
+- `wp-admin/includes/audit.php` — pencatatan semua aksi admin
+- `wp-admin/audit-log.php` — UI dengan filter dan export
+
+### 9. Content Lock
+- Lock post/page agar tidak bisa diedit user lain
+
+### 10. Custom Dashboard Widgets
+- `wp-admin/includes/widgets.php` — registry 11 widget + per-user prefs
+- `wp-admin/index.php` — dashboard menggunakan widget system
+- `wp-admin/widgets.php` — widget manager dengan drag & drop (SortableJS)
+
+### 11. Frontend Admin Bar
+- `wp-admin/includes/frontend-bar.php` — bar edit/preview di halaman publik
 
 ---
 
-## 10. Custom Dashboard Widgets
-**Tujuan**: Dashboard admin yang bisa dipersonalisasi — setiap user bisa memilih dan mengatur widget mana yang ditampilkan.
+## Perbaikan Tambahan
 
-- **Widget yang Tersedia**:
-  - Statistik Pengunjung (grafik mini).
-  - Post Terbaru / Draft Tersimpan.
-  - Kanban Board Summary (kartu per kolom).
-  - Form Submissions terbaru.
-  - Komentar yang menunggu moderasi.
-  - Status Site Health.
-  - Quick Draft — buat draft post langsung dari dashboard.
-  - Aktivitas Terbaru (Audit Log ringkas).
-- **Drag & Drop Layout**: User bisa menggeser posisi widget.
-- **Show/Hide**: Toggle pada setiap widget tanpa menghapus preferensi.
-- **Per-user Preference**: Pengaturan dashboard tersimpan per-user di database.
+- **Virtualhost compatibility**: Semua path hardcoded `/word-press/` diganti dengan dynamic `dirname($_SERVER['SCRIPT_NAME'])`
+- **JS fetch URLs**: `window.WP_ADMIN_URL` diinjeksi dari PHP ke `custom-blocks.js`
+- **blog.php session warning**: `session_start()` dipindah ke atas sebelum output HTML
+- **read.php navbar link**: Link ke blog diperbaiki menggunakan `$site_url`
+- **Dokumentasi lengkap**: EN + ID untuk semua fitur utama
 
 ---
 
-**Status Roadmap**: 7 dari 11 fitur telah dieksekusi.
-**Prioritas Eksekusi**: #1 Email System → #3 2FA → #10 Dashboard Widgets → #5 Analytics Dashboard.
+## Ide Pengembangan Selanjutnya (Opsional)
+
+- Password Reset via Email (gunakan SMTP yang sudah ada)
+- User Activity Feed
+- Advanced Post Scheduling (recurring posts)
+- Multi-language / i18n support
+- Media Folder Organizer
+- Post Revision History
+- API Key Manager untuk akses eksternal
+- Role-based Menu Visibility
+- Dark Mode untuk admin panel
+- Export Analytics ke CSV/PDF

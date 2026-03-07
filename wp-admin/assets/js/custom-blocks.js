@@ -727,7 +727,7 @@ function addCustomBlocks(editor) {
                     if (!menuId) return;
 
                     // Fetch menu items
-                    fetch('/word-press/wp-admin/api/get-menu-items.php?menu_id=' + menuId)
+                    fetch((window.WP_ADMIN_URL || '/wp-admin') + '/api/get-menu-items.php?menu_id=' + menuId)
                         .then(res => res.json())
                         .then(data => {
                             if (data.success && data.data && data.data.length > 0) {
@@ -765,7 +765,7 @@ function addCustomBlocks(editor) {
                 console.log('Dynamic navbar component initialized');
 
                 // Fetch available menus and populate the select trait
-                fetch('/word-press/wp-admin/api/get-menus.php')
+                fetch((window.WP_ADMIN_URL || '/wp-admin') + '/api/get-menus.php')
                     .then(res => res.json())
                     .then(data => {
                         console.log('Menus loaded:', data);
@@ -808,7 +808,7 @@ function addCustomBlocks(editor) {
                 this.components('<div class="navbar-loading">Loading menu items...</div>');
 
                 // Fetch and render menu items
-                fetch('/word-press/wp-admin/api/get-menu-items.php?menu_id=' + menuId)
+                fetch((window.WP_ADMIN_URL || '/wp-admin') + '/api/get-menu-items.php?menu_id=' + menuId)
                     .then(res => res.json())
                     .then(data => {
                         if (data.success && data.data && data.data.length > 0) {

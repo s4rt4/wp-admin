@@ -1,6 +1,6 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, and a comprehensive built-in documentation system.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, and a comprehensive built-in documentation system.
 
 ## Features
 
@@ -16,13 +16,60 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - Auto-generates a shortcode (`[contact_form id="X"]`) for embedding anywhere.
     - **Submission Management:** View all form responses in a dedicated table.
     - **Kanban Integration:** Each submission can automatically create a Kanban card.
-    - **Email Notification:** Receive an email copy of every new submission.
+    - **Email Notification:** Receive an email copy of every new submission (via SMTP).
 - **Kanban Board:**
     - Visual drag-and-drop project management board.
     - Multiple boards with tab-style navigation.
     - Fully customizable columns and cards (create, edit, delete).
     - **Activity Log:** Every card movement is recorded — who moved it, from where, to where, and when.
     - **Form Builder Integration:** Automatically create cards from form submissions.
+- **Email System (SMTP):**
+    - Configure outgoing email via any SMTP provider (Gmail, Mailgun, SendGrid, etc.).
+    - Supports TLS and SSL encryption with STARTTLS negotiation.
+    - Branded HTML email template for all system emails.
+    - Send Test Email button for instant configuration verification.
+    - Falls back to PHP `mail()` if SMTP is not configured.
+- **Two-Factor Authentication (2FA):**
+    - OTP (One-Time Password) sent to the user's registered email on every login.
+    - 6-digit code with 5-minute expiry and auto-submit on input.
+    - 8 single-use backup codes in `XXXX-XXXX` format (SHA-256 hashed in database).
+    - Enable/disable 2FA per user from the profile or user edit page.
+    - Admins can manage 2FA for any user.
+- **Analytics Dashboard:**
+    - Traffic overview: daily visitors and page views with 7/30/90-day periods.
+    - Percentage change cards vs previous equivalent period.
+    - Traffic sources: direct, search, social, other (from HTTP Referrer).
+    - Device breakdown: desktop, mobile, tablet (from User-Agent).
+    - Top Posts table by view count.
+    - Reading Time estimates per post (word count ÷ 200 wpm).
+    - Form Conversion Rate (submissions ÷ page views).
+    - Kanban Throughput: cards completed per week.
+    - Powered by Chart.js, no external analytics service required.
+- **Custom Dashboard Widgets:**
+    - 11 built-in widgets: Stats Overview, Visitor Chart, Content Chart, Top Articles, Recent Posts, Pending Comments, Quick Draft, Kanban Summary, Form Submissions, Site Health, Recent Activity.
+    - Drag-and-drop reordering (SortableJS).
+    - Toggle individual widgets on or off.
+    - Per-user preferences saved in the database.
+    - Quick Draft widget: create a draft post directly from the dashboard.
+- **Scheduled Publishing:**
+    - Set a future publish date/time for any post.
+    - Post automatically goes live when the scheduled time arrives.
+- **Content Lock:**
+    - Lock posts and pages to prevent simultaneous editing by multiple users.
+- **Image Optimizer:**
+    - Automatic image compression and resizing on upload.
+- **Audit Log:**
+    - Records every significant admin action: login, post create/update/delete, media upload/delete, and more.
+    - Filter by user, action, module, and date range.
+    - Export to CSV. Purge old entries by time range.
+    - Before/after diff viewer for detailed change tracking.
+- **Notification Center:**
+    - In-app notifications for system events.
+- **Comment Moderation:**
+    - Approve, reject, and spam workflow for all comments.
+    - Bulk actions for efficient moderation.
+- **Frontend Admin Bar:**
+    - Contextual admin bar on public pages for logged-in users — quick edit and preview links.
 - **Powerful Shortcode & Snippet System:**
     - Create custom PHP, CSS, or JS snippets in the admin panel.
     - Snippets automatically generate **Shortcodes** that can be embedded anywhere.
@@ -32,18 +79,20 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - **Bilingual Support** (English & Indonesian).
     - **Live Search** with keyboard navigation (`/` shortcut).
     - Sticky sidebar with an accordion-style hierarchy.
-    - Covers all features including Form Builder and Kanban Board.
+    - Covers all features including Form Builder, Kanban, 2FA, Analytics, SMTP, and more.
 - **Admin Dashboard & Management:**
-    - Visitor Statistics (Page Views, Daily Visitors).
+    - Customisable widget dashboard (personalised per user).
     - Post, Page, and Media Library management.
     - Appearance & Menu builder.
-    - User Management, Roles & Capabilities Customizer.
+    - User Management, Roles & Capabilities Customiser.
 - **Security & Structure:**
     - Admin Authentication and Protected API endpoints.
     - Brute-force login protection with lockout.
+    - Two-Factor Authentication (OTP via email + backup codes).
     - Dynamic routing (Pretty URLs) and SEO-friendly frontend (Open Graph, Twitter Cards).
     - Database Backup & Restore interface.
     - Export / Import content tools.
+    - Audit Log for full admin action history.
 
 ## Installation
 
@@ -69,6 +118,7 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 4.  **Run:**
     - Serve the project via your preferred web server (Apache/Nginx) or use a local environment like Laragon/XAMPP.
     - Access the admin panel at `/wp-admin/`.
+    - Compatible with both subdirectory (`localhost/word-press/`) and virtualhost (`word-press.test/`) setups.
 
 ## Default Admin Login
 

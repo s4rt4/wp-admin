@@ -53,6 +53,7 @@ $l = $labels[$lang];
             </a>
             <ul class="wp-submenu">
                 <li class="wp-first-item <?php echo($topic === 'dashboard-home' || $topic === 'dashboard') ? 'current' : ''; ?>"><a href="docs.php?topic=dashboard-home">Home</a></li>
+                <li class="<?php echo($topic === 'dashboard-widgets') ? 'current' : ''; ?>"><a href="docs.php?topic=dashboard-widgets">Widgets</a></li>
                 <li class="<?php echo($topic === 'tools-kanban') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-kanban"><?php echo $l['kanban']; ?></a></li>
             </ul>
         </li>
@@ -141,6 +142,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'users-new') ? 'current' : ''; ?>"><a href="docs.php?topic=users-new">Add New</a></li>
                 <li class="<?php echo($topic === 'users-profile') ? 'current' : ''; ?>"><a href="docs.php?topic=users-profile">Profile</a></li>
                 <li class="<?php echo($topic === 'users-roles') ? 'current' : ''; ?>"><a href="docs.php?topic=users-roles">Roles</a></li>
+                <li class="<?php echo($topic === 'users-2fa') ? 'current' : ''; ?>"><a href="docs.php?topic=users-2fa">Two-Factor Auth (2FA)</a></li>
             </ul>
         </li>
 
@@ -159,6 +161,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-form-builder') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-form-builder"><?php echo $l['form_builder']; ?></a></li>
                 <li class="<?php echo($topic === 'tools-audit-log') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-audit-log">Audit Log</a></li>
                 <li class="<?php echo($topic === 'tools-notifications') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-notifications">Notification Center</a></li>
+                <li class="<?php echo($topic === 'tools-analytics') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-analytics">Analytics</a></li>
             </ul>
         </li>
 
@@ -174,6 +177,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'settings-reading') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-reading">Reading</a></li>
                 <li class="<?php echo($topic === 'settings-media') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-media">Media</a></li>
                 <li class="<?php echo($topic === 'settings-permalinks') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-permalinks">Permalinks</a></li>
+                <li class="<?php echo($topic === 'settings-smtp') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-smtp">SMTP Email</a></li>
             </ul>
         </li>
 

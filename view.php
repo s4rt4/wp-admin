@@ -68,6 +68,10 @@ if (!isset($_SESSION['visited_today'])) {
     $pdo->prepare("UPDATE daily_visitors SET visitor_count = visitor_count + 1 WHERE visit_date = ?")->execute([$today]);
 }
 
+// 3. Detailed analytics tracking (referrer + device)
+require_once __DIR__ . '/wp-admin/includes/analytics.php';
+analytics_track($pdo, 'page', (int)$page['id']);
+
 // Include shortcode processor
 require_once __DIR__ . '/wp-admin/shortcodes.php';
 

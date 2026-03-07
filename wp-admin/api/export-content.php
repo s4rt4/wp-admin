@@ -58,7 +58,7 @@ try {
     $export_data = [
         'export_date' => date('c'), // ISO 8601 format
         'version' => '1.0',
-        'site_url' => 'http://localhost/word-press',
+        'site_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . rtrim(str_replace('\\', '/', dirname(dirname(dirname($_SERVER['SCRIPT_NAME'])))), '/'),
         'total_pages' => count($pages),
         'total_posts' => count($posts),
         'pages' => $pages,

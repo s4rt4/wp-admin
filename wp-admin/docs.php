@@ -68,10 +68,15 @@ function topic_label(string $topic): string
         'tools-tm' => 'Tag Manager',
         'tools-audit-log' => 'Audit Log',
         'tools-notifications' => 'Notification Center',
+        'tools-analytics' => 'Analytics',
         'posts-scheduled' => 'Scheduled Publishing',
         'posts-content-lock' => 'Content Lock',
         'media-image-optimizer' => 'Image Optimizer',
         'comments-moderation' => 'Comment Moderation',
+        'settings-smtp' => 'SMTP Email',
+        'dashboard-widgets' => 'Dashboard Widgets',
+        'users-2fa' => 'Two-Factor Authentication',
+        'users-roles' => 'User Roles',
     ];
     return $map[$topic] ?? ucwords(str_replace('-', ' ', $topic));
 }
@@ -86,6 +91,7 @@ function topic_section(string $topic): string
         'posts' => 'Posts',
         'media' => 'Media',
         'pages' => 'Pages',
+        'comments' => 'Comments',
         'appearance' => 'Appearance',
         'settings' => 'Settings',
         'users' => 'Users',

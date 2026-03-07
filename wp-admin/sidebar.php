@@ -1,15 +1,16 @@
 <div id="adminmenumain">
     <ul id="adminmenu">
         
-        <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'Dashboard' || $page_title === 'Kanban Board')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"> 
-            <a href="index.php" class="<?php echo(isset($page_title) && ($page_title === 'Dashboard' || $page_title === 'Kanban Board')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"> 
+        <li class="wp-has-submenu <?php echo(isset($page_title) && in_array($page_title, ['Dashboard','Kanban Board','Dashboard Widgets'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+            <a href="index.php" class="<?php echo(isset($page_title) && in_array($page_title, ['Dashboard','Kanban Board','Dashboard Widgets'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
                 <div class="wp-menu-image dashicons-dashboard"></div>
                 <div class="wp-menu-name">Dashboard</div>
             </a>
-            <div class="wp-menu-arrow-active"></div> 
+            <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
                 <li class="wp-first-item <?php echo(isset($page_title) && $page_title === 'Dashboard') ? 'current' : ''; ?>"><a href="index.php" class="wp-first-item">Home</a></li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Kanban Board') ? 'current' : ''; ?>"><a href="kanban.php">Kanban Board</a></li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Dashboard Widgets') ? 'current' : ''; ?>"><a href="widgets.php">Widgets</a></li>
             </ul>
         </li>
         <li class="wp-menu-separator"></li>
@@ -103,8 +104,8 @@ endif; ?>
         <?php
 endif; ?>
         <?php if (current_user_can('manage_options')): ?>
-        <li class="wp-has-submenu <?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
-            <a href="tools.php" class="<?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
+        <li class="wp-has-submenu <?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+            <a href="tools.php" class="<?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
                 <li class="wp-first-item"><a href="tools.php?tab=database">Database Backup</a></li>
@@ -122,9 +123,12 @@ endif; ?>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Audit Log') ? 'current' : ''; ?>">
                     <a href="audit-log.php">Audit Log</a>
                 </li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Analytics') ? 'current' : ''; ?>">
+                    <a href="analytics.php">Analytics</a>
+                </li>
             </ul>
         </li>
-        <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+        <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings' || $page_title === 'SMTP Email')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
             <a href="settings-general.php"><div class="wp-menu-image dashicons-admin-settings"></div><div class="wp-menu-name">Settings</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
@@ -133,6 +137,7 @@ endif; ?>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Reading Settings') ? 'current' : ''; ?>"><a href="settings-reading.php">Reading</a></li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Media Settings') ? 'current' : ''; ?>"><a href="settings-media.php">Media</a></li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Permalink Settings') ? 'current' : ''; ?>"><a href="settings-permalinks.php">Permalinks</a></li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'SMTP Email') ? 'current' : ''; ?>"><a href="settings-smtp.php">SMTP Email</a></li>
             </ul>
         </li>
         <?php

@@ -73,6 +73,10 @@ if (!isset($_SESSION['visited_today'])) {
     $_SESSION['visited_today'] = true;
     $conn->query("UPDATE daily_visitors SET visitor_count = visitor_count + 1 WHERE visit_date = '$today'");
 }
+
+// 3. Detailed analytics tracking (referrer + device)
+require_once __DIR__ . '/wp-admin/includes/analytics.php';
+analytics_track($conn, 'post', (int)$post['id']);
 ?>
 <?php
 // 3. Handle Comment Submission
@@ -119,16 +123,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
                     $comment_status = 'approved';
                 }
             }
-        } catch (Exception $e) { /* silently fall back to pending */ }
+        }
+        catch (Exception $e) { /* silently fall back to pending */
+        }
 
         $stmt = $conn->prepare("INSERT INTO comments (post_id, author_name, author_email, content, status) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("issss", $post_id, $author_name, $author_email, $content, $comment_status);
         if ($stmt->execute()) {
             if ($comment_status === 'spam') {
                 $_SESSION['comment_msg'] = '<div style="color: orange; margin-bottom: 20px;">Your comment was flagged as spam.</div>';
-            } elseif ($comment_status === 'approved') {
+            }
+            elseif ($comment_status === 'approved') {
                 $_SESSION['comment_msg'] = '<div style="color: green; margin-bottom: 20px;">Comment posted!</div>';
-            } else {
+            }
+            else {
                 $_SESSION['comment_msg'] = '<div style="color: green; margin-bottom: 20px;">Comment submitted! Waiting for approval.</div>';
                 // Notify admins/editors
                 try {
@@ -138,7 +146,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
                         $author_name . ' commented on "' . mb_strimwidth($post['title'] ?? '', 0, 60, '…') . '"',
                         'wp-admin/comments.php?status=pending'
                     );
-                } catch (Throwable $e) {}
+                }
+                catch (Throwable $e) {
+                }
             }
         }
         else {
@@ -176,8 +186,8 @@ $site_desc_def = get_option('site_description', '');
 $site_logo = get_option('site_logo', '');
 $site_fav = get_option('site_favicon', '');
 
-$site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
-$current_url = $site_url . $_SERVER['REQUEST_URI'];
+$site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+$current_url = $site_url . '/' . ltrim($_SERVER['REQUEST_URI'], '/');
 
 $seo_title = !empty($post['meta_title']) ? $post['meta_title'] : $post['title'];
 $seo_desc = !empty($post['meta_desc']) ? $post['meta_desc'] : mb_substr(strip_tags($post['content']), 0, 155) . '...';
@@ -186,7 +196,7 @@ $seo_keyword = !empty($post['focus_keyword']) ? $post['focus_keyword'] : '';
 // Featured image absolute URL
 $og_image = '';
 if (!empty($post['featured_image'])) {
-    $og_image = $site_url . '/word-press/' . ltrim($post['featured_image'], '/');
+    $og_image = $site_url . '/' . ltrim($post['featured_image'], '/');
 }
 
 $full_title = htmlspecialchars($seo_title) . ' | ' . $site_name;
@@ -194,8 +204,10 @@ $full_title = htmlspecialchars($seo_title) . ' | ' . $site_name;
 
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/word-press/css/theme.css?v=<?php echo time(); ?>">
-    <script src="/word-press/js/theme.js?v=<?php echo time(); ?>" defer></script>
+    
+    <!-- Local Assets using Dynamic Base URL -->
+    <link rel="stylesheet" href="<?php echo $site_url; ?>/css/theme.css?v=<?php echo time(); ?>">
+    <script src="<?php echo $site_url; ?>/js/theme.js?v=<?php echo time(); ?>" defer></script>
     
     <!-- Standard SEO -->
     <title><?php echo $full_title; ?></title>
@@ -422,7 +434,7 @@ include_once 'wp-admin/includes/frontend-bar.php';
                     <img src="<?php echo htmlspecialchars($site_logo); ?>" alt="Logo" class="site-logo-circle">
                 <?php
 endif; ?>
-                <a href="/word-press/blog.php" class="site-title"><?php echo htmlspecialchars($site_name); ?></a>
+                <a href="<?php echo $site_url; ?>/blog.php" class="site-title"><?php echo htmlspecialchars($site_name); ?></a>
             </div>
 
             <!-- Mobile Toggle (Hamburger) -->
@@ -433,7 +445,7 @@ endif; ?>
                 <button class="close-menu theme-toggle-btn" id="closeMenuBtn" style="display:none;"><i class="fa fa-times"></i></button>
                 
                 <!-- Blog Link (Home Icon) -->
-                <a href="/word-press/blog.php" class="theme-toggle-btn" title="Back to Blog" style="text-decoration: none;">
+                <a href="<?php echo $site_url; ?>/blog.php" class="theme-toggle-btn" title="Back to Blog" style="text-decoration: none;">
                     <i class="fas fa-home"></i>
                 </a>
                 

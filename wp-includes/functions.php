@@ -194,7 +194,8 @@ function render_menu($menu_id, $ul_class = 'nav-menu') {
 
     // Determine URL for each item
     $site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
-              . '://' . $_SERVER['HTTP_HOST'];
+              . '://' . $_SERVER['HTTP_HOST']
+              . rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 
     foreach ($items as &$item) {
         if (!isset($item['parent_id'])) $item['parent_id'] = 0;
@@ -207,12 +208,12 @@ function render_menu($menu_id, $ul_class = 'nav-menu') {
             $pid = intval($item['object_id']);
             $pr = $conn->query("SELECT slug FROM pages WHERE id = $pid LIMIT 1");
             $pg = $pr ? $pr->fetch_assoc() : null;
-            $item['_url'] = $pg ? $site_url . '/word-press/view.php?slug=' . urlencode($pg['slug']) : '#';
+            $item['_url'] = $pg ? $site_url . '/view.php?slug=' . urlencode($pg['slug']) : '#';
         } elseif ($item['type'] === 'post' && !empty($item['object_id'])) {
             $pid = intval($item['object_id']);
             $pr = $conn->query("SELECT slug FROM posts WHERE id = $pid LIMIT 1");
             $pg = $pr ? $pr->fetch_assoc() : null;
-            $item['_url'] = $pg ? $site_url . '/word-press/read.php?slug=' . urlencode($pg['slug']) : '#';
+            $item['_url'] = $pg ? $site_url . '/read.php?slug=' . urlencode($pg['slug']) : '#';
         } else {
             $item['_url'] = !empty($item['url']) ? htmlspecialchars($item['url']) : '#';
         }

@@ -103,25 +103,49 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $error = "A server error occurred. Please try again later.";
             }
             else {
-                $stmt = $conn_login->prepare("SELECT id, password, role FROM users WHERE username = ?");
+                $stmt = $conn_login->prepare("SELECT id, password, role, email, two_fa_enabled FROM users WHERE username = ?");
                 $stmt->bind_param("s", $username);
                 $stmt->execute();
                 $stmt->store_result();
 
                 if ($stmt->num_rows > 0) {
-                    $stmt->bind_result($id, $hashed_password, $role);
+                    $stmt->bind_result($id, $hashed_password, $role, $email, $two_fa_enabled);
                     $stmt->fetch();
 
                     if (password_verify($password, $hashed_password)) {
-                        // ✅ Fix: Session fixation — regenerate ID on login
                         session_regenerate_id(true);
                         clear_login_attempts($username);
 
-                        $_SESSION['user_id'] = $id;
-                        $_SESSION['username'] = $username;
+                        require_once __DIR__ . '/includes/audit.php';
+
+                        // Check 2FA — column may not exist yet, treat error as disabled
+                        $tfa_active = !empty($two_fa_enabled);
+
+                        if ($tfa_active) {
+                            require_once __DIR__ . '/includes/two-fa.php';
+                            require_once __DIR__ . '/includes/mailer.php';
+
+                            twofa_ensure_columns($conn_login);
+                            $otp = twofa_generate_otp($conn_login, $id);
+                            twofa_send_otp($email ?? '', $username, $otp);
+
+                            $_SESSION['2fa_pending'] = [
+                                'user_id'  => $id,
+                                'username' => $username,
+                                'role'     => $role ?: 'subscriber',
+                                'email'    => $email ?? '',
+                                'expires'  => time() + 600,
+                            ];
+                            $_SESSION['2fa_csrf'] = bin2hex(random_bytes(32));
+
+                            header("Location: 2fa-verify.php");
+                            exit();
+                        }
+
+                        $_SESSION['user_id']   = $id;
+                        $_SESSION['username']  = $username;
                         $_SESSION['user_role'] = $role ?: 'subscriber';
 
-                        require_once __DIR__ . '/includes/audit.php';
                         audit_log('login_success', 'user', $id, $username);
 
                         header("Location: index.php");

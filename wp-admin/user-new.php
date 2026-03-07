@@ -200,6 +200,111 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </div>
 
+<?php
+// ── 2FA Section (only when editing an existing user) ──────────────────────
+if ($id > 0):
+    require_once 'includes/two-fa.php';
+    require_once 'includes/mailer.php';
+    $tfa_db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    twofa_ensure_columns($tfa_db);
+
+    $tfa_msg = '';
+    $tfa_err = '';
+    $new_backup_codes = [];
+
+    // Handle 2FA actions
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tfa_action'])) {
+        $action = $_POST['tfa_action'];
+        if ($action === 'enable') {
+            twofa_set_enabled($tfa_db, $id, true);
+            $tfa_msg = '2FA enabled for this account.';
+        } elseif ($action === 'disable') {
+            twofa_set_enabled($tfa_db, $id, false);
+            $tfa_msg = '2FA disabled.';
+        } elseif ($action === 'generate_backup') {
+            $new_backup_codes = twofa_generate_backup_codes($tfa_db, $id);
+            $tfa_msg = 'New backup codes generated. Save them now — they will not be shown again.';
+        }
+    }
+
+    $tfa_status = twofa_get_status($tfa_db, $id);
+    $is_own     = ($id === intval($_SESSION['user_id'] ?? 0));
+    $can_manage = $is_own || current_user_can('manage_options');
+?>
+<div id="wpcontent" style="margin-top:20px;">
+<div class="wrap" style="max-width:760px;">
+    <div class="postbox">
+        <div class="postbox-header">
+            <h2 class="hndle" style="display:flex;align-items:center;gap:8px;">
+                <span class="dashicons dashicons-shield-alt" style="font-size:18px;height:18px;width:18px;color:#0073aa;"></span>
+                Two-Factor Authentication
+            </h2>
+        </div>
+        <div class="inside">
+            <?php if ($tfa_msg): ?>
+                <div class="notice notice-success" style="margin:0 0 16px;"><p><?php echo htmlspecialchars($tfa_msg); ?></p></div>
+            <?php endif; ?>
+
+            <table class="form-table">
+                <tr>
+                    <th>Status</th>
+                    <td>
+                        <?php if ($tfa_status['enabled']): ?>
+                            <span style="color:#46b450;font-weight:700;">&#10003; Enabled</span>
+                            <?php if ($can_manage): ?>
+                            <form method="post" style="display:inline;margin-left:12px;">
+                                <input type="hidden" name="tfa_action" value="disable">
+                                <button type="submit" class="button button-secondary" onclick="return confirm('Disable 2FA for this account?')">Disable 2FA</button>
+                            </form>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span style="color:#888;">Disabled</span>
+                            <?php if ($can_manage): ?>
+                            <form method="post" style="display:inline;margin-left:12px;">
+                                <input type="hidden" name="tfa_action" value="enable">
+                                <button type="submit" class="button button-primary">Enable 2FA</button>
+                            </form>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                        <p class="description">When enabled, a verification code is sent to this account's email at every login.</p>
+                    </td>
+                </tr>
+                <?php if ($tfa_status['enabled']): ?>
+                <tr>
+                    <th>Backup Codes</th>
+                    <td>
+                        <?php if (!empty($new_backup_codes)): ?>
+                            <div style="background:#f0f6fc;border:1px solid #c3d4e6;padding:14px 18px;border-radius:4px;margin-bottom:12px;">
+                                <strong style="display:block;margin-bottom:8px;color:#d63638;">Save these codes now — they will not be shown again.</strong>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-family:monospace;font-size:15px;letter-spacing:2px;">
+                                    <?php foreach ($new_backup_codes as $bc): ?>
+                                        <code style="background:#fff;padding:4px 10px;border:1px solid #c3c4c7;border-radius:3px;"><?php echo htmlspecialchars($bc); ?></code>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <p style="margin:0 0 8px;"><?php echo $tfa_status['backup_count']; ?> backup code(s) remaining.</p>
+                        <?php endif; ?>
+                        <?php if ($can_manage): ?>
+                        <form method="post">
+                            <input type="hidden" name="tfa_action" value="generate_backup">
+                            <button type="submit" class="button button-secondary"
+                                onclick="return confirm('Generate 8 new backup codes? This will invalidate any existing codes.')">
+                                <?php echo $tfa_status['backup_count'] > 0 ? 'Regenerate Backup Codes' : 'Generate Backup Codes'; ?>
+                            </button>
+                        </form>
+                        <p class="description">Each backup code can only be used once. Use them if you lose access to your email.</p>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+<?php endif; ?>
+
 <style>
     .form-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .form-table th { width: 200px; padding: 20px 10px 20px 0; font-weight: 600; text-align: left; vertical-align: top; }

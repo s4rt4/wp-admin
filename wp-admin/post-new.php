@@ -363,7 +363,7 @@ endif; ?>
                                 <!-- Google Preview -->
                                 <div id="seo-preview" style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:12px 14px;margin-bottom:20px;font-family:arial,sans-serif;max-width:600px;">
                                     <div style="font-size:20px;color:#1a0dab;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;" id="seo-prev-title"><?php echo htmlspecialchars($post['meta_title'] ?: $post['title']); ?></div>
-                                    <div style="font-size:14px;color:#006621;margin-bottom:2px;line-height:1.3;">localhost/word-press/read.php?slug=<?php echo htmlspecialchars($post['slug'] ?? '...'); ?></div>
+                                    <div style="font-size:14px;color:#006621;margin-bottom:2px;line-height:1.3;"><?php echo $_SERVER['HTTP_HOST'] . rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME']))), '/'); ?>/read.php?slug=<?php echo htmlspecialchars($post['slug'] ?? '...'); ?></div>
                                     <div style="font-size:13px;color:#545454;line-height:1.4;" id="seo-prev-desc"><?php echo htmlspecialchars($post['meta_desc'] ?: 'No meta description set.'); ?></div>
                                 </div>
 

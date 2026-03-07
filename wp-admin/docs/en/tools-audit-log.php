@@ -2,6 +2,11 @@
 <h1>Audit Log</h1>
 <p class="docs-lead">The Audit Log records every significant action performed in the admin panel — who did what, when, and from where. Essential for security and team accountability.</p>
 
+<div class="docs-screenshot">
+    <img src="<?php echo get_docs_asset_url('audit-log.png'); ?>" alt="Audit Log" onerror="this.style.display='none'">
+    <p class="docs-caption">The Audit Log page showing recent admin actions with filter controls.</p>
+</div>
+
 <hr class="docs-divider">
 
 <h2>Accessing the Audit Log</h2>

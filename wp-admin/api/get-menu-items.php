@@ -28,17 +28,19 @@ try {
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Build URLs for page and post types
+    $base_path = rtrim(str_replace('\\', '/', dirname(dirname(dirname($_SERVER['SCRIPT_NAME'])))), '/');
+
     foreach ($items as &$item) {
         // Use navigation_label if set, otherwise use title
         $item['display_text'] = !empty($item['navigation_label']) ? $item['navigation_label'] : $item['title'];
-        
+
         if ($item['type'] === 'page' && $item['object_id']) {
             // Fetch page slug
             $pageStmt = $pdo->prepare("SELECT slug FROM pages WHERE id = ?");
             $pageStmt->execute([$item['object_id']]);
             $page = $pageStmt->fetch();
             if ($page) {
-                $item['url'] = '/word-press/view.php?slug=' . $page['slug'];
+                $item['url'] = $base_path . '/view.php?slug=' . $page['slug'];
             }
         } elseif ($item['type'] === 'post' && $item['object_id']) {
             // Fetch post slug
@@ -46,7 +48,7 @@ try {
             $postStmt->execute([$item['object_id']]);
             $post = $postStmt->fetch();
             if ($post) {
-                $item['url'] = '/word-press/read.php?slug=' . $post['slug'];
+                $item['url'] = $base_path . '/read.php?slug=' . $post['slug'];
             }
         }
         // For custom type, url is already set in the database
