@@ -4,7 +4,7 @@ Semua fitur yang direncanakan telah **selesai dieksekusi**.
 
 ---
 
-## Status Seluruh Fitur
+## Status Seluruh Fitur (Batch Pertama)
 
 | # | Fitur | Status |
 |---|-------|--------|
@@ -22,75 +22,75 @@ Semua fitur yang direncanakan telah **selesai dieksekusi**.
 
 ---
 
-## Ringkasan Implementasi
+## Plan Batch Kedua — Urut dari Termudah
 
-### 1. Email System (SMTP)
-- `wp-admin/includes/mailer.php` — SMTP client dari scratch (fsockopen, STARTTLS, AUTH LOGIN)
-- `wp-admin/settings-smtp.php` — UI konfigurasi SMTP dengan test email
-- `wp-admin/api/test-email.php` — endpoint test email
-- Fallback ke PHP `mail()` jika SMTP belum dikonfigurasi
+### Tier 1 — Sangat Mudah (Pure CSS/JS atau 1 query) ✅ DONE
 
-### 2. Scheduled Publishing
-- Kolom `publish_date` di tabel posts
-- Cron/background check untuk auto-publish
+| # | Fitur | Jenis | Status |
+|---|-------|-------|--------|
+| 1 | **Dark Mode** | Fitur Utama | ✅ Done |
+| 2 | **Widget: World Clock** | Widget | ✅ Done |
+| 3 | **Widget: Countdown** | Widget | ✅ Done |
+| 4 | **Widget: Database Size** | Widget | ✅ Done |
+| 5 | **Widget: Media Storage Usage** | Widget | ✅ Done |
+| 6 | **Widget: Backup Status** | Widget | ✅ Done |
+| 7 | **Widget: Top Tags & Categories** | Widget | ✅ Done |
+| 8 | **Widget: Upcoming Scheduled Posts** | Widget | ✅ Done |
+| 9 | **Widget: New Registrations** | Widget | ✅ Done |
+| 10 | **Widget: Active Users** | Widget | ✅ Done |
 
-### 3. Two-Factor Authentication (2FA)
-- `wp-admin/includes/two-fa.php` — OTP generation, verification, backup codes
-- `wp-admin/2fa-verify.php` — halaman verifikasi OTP
-- `wp-admin/login.php` — redirect ke 2FA jika aktif
-- `wp-admin/user-new.php` — toggle 2FA per-user + generate backup codes
+### Tier 2 — Mudah (Sedikit logika tambahan) ✅ DONE
 
-### 4. Image Optimizer
-- Kompresi otomatis saat upload media
+| # | Fitur | Jenis | Status |
+|---|-------|-------|--------|
+| 11 | **Widget: Last Error Log** | Widget | ✅ Done |
+| 12 | **Widget: Sticky Notes** | Widget | ✅ Done |
+| 13 | **Widget: Personal Todo List** | Widget | ✅ Done |
+| 14 | **Widget: Content Calendar** | Widget | ✅ Done |
+| 15 | **Widget: Broken Links Checker** | Widget | ✅ Done |
 
-### 5. Analytics Dashboard
-- `wp-admin/includes/analytics.php` — tracking engine (device, referrer, page_analytics table)
-- `wp-admin/analytics.php` — dashboard dengan Chart.js (traffic, sources, devices, top posts, kanban throughput)
-- Tracking terintegrasi di `blog.php`, `read.php`, `view.php`
+### Tier 3 — Sedang (Butuh API eksternal atau tabel baru) ✅ DONE
 
-### 6. Comment Moderation
-- Approve/reject/spam workflow
-- Bulk actions
+| # | Fitur | Jenis | Status |
+|---|-------|-------|--------|
+| 16 | **Widget: RSS Feed Reader** | Widget | ✅ Done |
+| 17 | **Widget: Weather** | Widget | ✅ Done |
+| 18 | **Widget: Traffic by Device** | Widget | ✅ Done (page_analytics tidak punya kolom IP, diganti device+source breakdown) |
+| 19 | **Password Reset via Email** | Fitur Utama | ✅ Done |
+| 20 | **Role-based Menu Visibility** | Fitur Utama | ✅ Done |
 
-### 7. Notification Center
-- In-app notifikasi untuk event sistem
+### Tier 4 — Kompleks (Arsitektur baru)
 
-### 8. Audit Log
-- `wp-admin/includes/audit.php` — pencatatan semua aksi admin
-- `wp-admin/audit-log.php` — UI dengan filter dan export
-
-### 9. Content Lock
-- Lock post/page agar tidak bisa diedit user lain
-
-### 10. Custom Dashboard Widgets
-- `wp-admin/includes/widgets.php` — registry 11 widget + per-user prefs
-- `wp-admin/index.php` — dashboard menggunakan widget system
-- `wp-admin/widgets.php` — widget manager dengan drag & drop (SortableJS)
-
-### 11. Frontend Admin Bar
-- `wp-admin/includes/frontend-bar.php` — bar edit/preview di halaman publik
+| # | Fitur | Jenis | Keterangan |
+|---|-------|-------|------------|
+| 21 | **Media Folder Organizer** | Fitur Utama | Folder virtual di DB + drag file antar folder |
+| 22 | **Multi-language / i18n** | Fitur Utama | Field `lang` + `translation_of` di posts/pages + language switcher frontend |
+| 23 | **Automation / Workflows** | Fitur Utama | Trigger → Condition → Action engine, tabel `automations`, builder UI, log eksekusi |
 
 ---
 
-## Perbaikan Tambahan
+## Catatan Multi-language
 
-- **Virtualhost compatibility**: Semua path hardcoded `/word-press/` diganti dengan dynamic `dirname($_SERVER['SCRIPT_NAME'])`
-- **JS fetch URLs**: `window.WP_ADMIN_URL` diinjeksi dari PHP ke `custom-blocks.js`
-- **blog.php session warning**: `session_start()` dipindah ke atas sebelum output HTML
-- **read.php navbar link**: Link ke blog diperbaiki menggunakan `$site_url`
-- **Dokumentasi lengkap**: EN + ID untuk semua fitur utama
+User **harus menulis konten secara manual** dalam setiap bahasa (standar industri: WordPress, Craft CMS, Statamic). CMS yang mengurus:
+- Routing (`/en/`, `/id/` atau query param `?lang=en`)
+- Menghubungkan post satu bahasa ke pasangannya (`translation_of`)
+- Language switcher di frontend
+- UI admin otomatis berubah bahasa (sudah ada fondasinya di `sidebar-docs.php`)
 
 ---
 
-## Ide Pengembangan Selanjutnya (Opsional)
+## Catatan Automation / Workflows
 
-- Password Reset via Email (gunakan SMTP yang sudah ada)
-- User Activity Feed
-- Advanced Post Scheduling (recurring posts)
-- Multi-language / i18n support
-- Media Folder Organizer
-- Post Revision History
-- API Key Manager untuk akses eksternal
-- Role-based Menu Visibility
-- Dark Mode untuk admin panel
-- Export Analytics ke CSV/PDF
+Strategi paling efisien: bangun **action type "Kirim ke Webhook URL"** lebih dulu.
+User arahkan ke Zapier / Make / n8n asli → CMS jadi trigger source, mereka jadi execution engine.
+Tidak perlu reimplementasi 6000+ integrasi Zapier dari nol.
+
+```
+table: automations
+- id, name
+- trigger_event  (form_submit / post_publish / user_register / kanban_card_moved / ...)
+- trigger_config JSON   -- { "form_id": 3 }
+- conditions JSON       -- [{ "field": "email", "op": "contains", "value": "@gmail" }]
+- actions JSON          -- [{ "type": "email", "to": "..." }, { "type": "webhook", "url": "..." }]
+- active TINYINT
+```

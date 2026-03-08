@@ -28,10 +28,11 @@ if ($id > 0) {
     }
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST['username']);
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['tfa_action'])) {
+    $username = trim($_POST['username'] ?? '');
     $role = $_POST['role'] ?? 'subscriber'; // Default to subscriber
-    $password = $_POST['password'];
+    $password = $_POST['password'] ?? '';
+    $email = trim($_POST['email'] ?? '');
     $is_edit = ($id > 0);
     $profile_picture = $user['profile_picture'] ?? null;
 
@@ -65,9 +66,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             if ($is_edit) {
                 // Update
-                $sql = "UPDATE users SET username = ?, profile_picture = ?";
-                $types = "ss";
-                $params = [$username, $profile_picture];
+                $sql = "UPDATE users SET username = ?, email = ?, profile_picture = ?";
+                $types = "sss";
+                $params = [$username, $email, $profile_picture];
                 
                 if (!empty($password)) {
                     $sql .= ", password = ?";
@@ -112,8 +113,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $error = "Username already exists.";
                     } else {
                         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                        $stmt = $conn->prepare("INSERT INTO users (username, password, profile_picture, role) VALUES (?, ?, ?, ?)");
-                        $stmt->bind_param("ssss", $username, $hashed_password, $profile_picture, $role);
+                        $stmt = $conn->prepare("INSERT INTO users (username, email, password, profile_picture, role) VALUES (?, ?, ?, ?, ?)");
+                        $stmt->bind_param("sssss", $username, $email, $hashed_password, $profile_picture, $role);
                         if ($stmt->execute()) {
                              echo "<script>window.location.href='users.php';</script>";
                              exit;
@@ -147,6 +148,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <tr class="form-field form-required">
                         <th scope="row"><label for="username">Username <span class="description">(required)</span></label></th>
                         <td><input name="username" type="text" id="username" value="<?php echo $user ? htmlspecialchars($user['username']) : ''; ?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60"></td>
+                    </tr>
+                    <tr class="form-field">
+                        <th scope="row"><label for="email">Email</label></th>
+                        <td>
+                            <input name="email" type="email" id="email" value="<?php echo $user ? htmlspecialchars($user['email'] ?? '') : ''; ?>" maxlength="255">
+                            <p class="description">Used for Two-Factor Authentication OTP codes.</p>
+                        </td>
                     </tr>
                     <tr class="form-field">
                         <th scope="row"><label for="password"><?php echo $id > 0 ? 'New Password' : 'Password'; ?></label></th>
@@ -212,12 +220,24 @@ if ($id > 0):
     $tfa_err = '';
     $new_backup_codes = [];
 
+    // Check SMTP is configured
+    $smtp_configured = !empty(get_option('smtp_host', '')) && !empty(get_option('smtp_username', ''));
+
+    // Check user has an email address set
+    $user_email = trim($user['email'] ?? '');
+
     // Handle 2FA actions
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tfa_action'])) {
         $action = $_POST['tfa_action'];
         if ($action === 'enable') {
-            twofa_set_enabled($tfa_db, $id, true);
-            $tfa_msg = '2FA enabled for this account.';
+            if (!$smtp_configured) {
+                $tfa_err = 'Cannot enable 2FA: SMTP is not configured. Go to Settings → SMTP Email and save valid credentials first.';
+            } elseif (empty($user_email)) {
+                $tfa_err = 'Cannot enable 2FA: this account has no email address. Add an email above and save first.';
+            } else {
+                twofa_set_enabled($tfa_db, $id, true);
+                $tfa_msg = '2FA enabled for this account.';
+            }
         } elseif ($action === 'disable') {
             twofa_set_enabled($tfa_db, $id, false);
             $tfa_msg = '2FA disabled.';
@@ -244,6 +264,9 @@ if ($id > 0):
             <?php if ($tfa_msg): ?>
                 <div class="notice notice-success" style="margin:0 0 16px;"><p><?php echo htmlspecialchars($tfa_msg); ?></p></div>
             <?php endif; ?>
+            <?php if ($tfa_err): ?>
+                <div class="notice notice-error" style="margin:0 0 16px;"><p><?php echo htmlspecialchars($tfa_err); ?></p></div>
+            <?php endif; ?>
 
             <table class="form-table">
                 <tr>
@@ -260,10 +283,18 @@ if ($id > 0):
                         <?php else: ?>
                             <span style="color:#888;">Disabled</span>
                             <?php if ($can_manage): ?>
-                            <form method="post" style="display:inline;margin-left:12px;">
-                                <input type="hidden" name="tfa_action" value="enable">
-                                <button type="submit" class="button button-primary">Enable 2FA</button>
-                            </form>
+                                <?php if (!$smtp_configured): ?>
+                                    <button class="button button-primary" disabled style="margin-left:12px;opacity:.5;cursor:not-allowed;" title="Configure SMTP first">Enable 2FA</button>
+                                    <p class="description" style="color:#d63638;">&#9888; SMTP is not configured. Go to <a href="settings-smtp.php">Settings &rarr; SMTP Email</a> first.</p>
+                                <?php elseif (empty($user_email)): ?>
+                                    <button class="button button-primary" disabled style="margin-left:12px;opacity:.5;cursor:not-allowed;" title="Add an email address first">Enable 2FA</button>
+                                    <p class="description" style="color:#d63638;">&#9888; This account has no email address. Add one above and save first.</p>
+                                <?php else: ?>
+                                    <form method="post" style="display:inline;margin-left:12px;">
+                                        <input type="hidden" name="tfa_action" value="enable">
+                                        <button type="submit" class="button button-primary">Enable 2FA</button>
+                                    </form>
+                                <?php endif; ?>
                             <?php endif; ?>
                         <?php endif; ?>
                         <p class="description">When enabled, a verification code is sent to this account's email at every login.</p>
@@ -309,7 +340,7 @@ if ($id > 0):
     .form-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .form-table th { width: 200px; padding: 20px 10px 20px 0; font-weight: 600; text-align: left; vertical-align: top; }
     .form-table td { padding: 15px 10px; vertical-align: top; }
-    .form-field input[type="text"], .form-field input[type="password"] { border: 1px solid #8c8f94; border-radius: 4px; padding: 0 8px; line-height: 2; min-height: 30px; width: 25em; box-shadow: 0 0 0 transparent; }
+    .form-field input[type="text"], .form-field input[type="password"], .form-field input[type="email"] { border: 1px solid #8c8f94; border-radius: 4px; padding: 0 8px; line-height: 2; min-height: 30px; width: 25em; box-shadow: 0 0 0 transparent; }
     .description { color: #646970; font-style: italic; font-size: 13px; margin-top: 4px; }
     .avatar { border-radius: 50%; margin-bottom: 10px; border: 1px solid #ccc; padding: 2px; background: #fff;}
     .notice { background: #fff; border-left: 4px solid #fff; box-shadow: 0 1px 1px 0 rgba(0,0,0,.1); padding: 1px 12px; margin: 5px 0 15px; }

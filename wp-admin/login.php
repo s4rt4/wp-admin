@@ -475,6 +475,8 @@ endif; ?>
     </div>
 
     <div id="login-footer">
+        <a href="forgot-password.php">Lost your password?</a>
+        <span style="color:#c3c4c7;margin:0 8px;">|</span>
         <a href="<?php echo htmlspecialchars($site_url_base); ?>">&larr; Back to <?php echo htmlspecialchars($site_title); ?></a>
     </div>
 

@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $allowed_options = [
         'blogname', 'blogdescription', 'siteurl', 'home', 'admin_email',
         'users_can_register', 'default_role', 'timezone_string',
-        'date_format', 'time_format', 'start_of_week'
+        'date_format', 'time_format', 'start_of_week', 'weather_api_key'
     ];
 
     foreach ($allowed_options as $option) {
@@ -189,7 +189,20 @@ include 'sidebar.php';
                                 </tr>
                             </tbody>
                         </table>
-                        
+
+                        <h2 class="title" id="weather" style="margin-top:24px;">Weather Widget</h2>
+                        <table class="form-table" role="presentation">
+                            <tbody>
+                                <tr>
+                                    <th scope="row"><label for="weather_api_key">OpenWeather API Key</label></th>
+                                    <td>
+                                        <input name="weather_api_key" type="text" id="weather_api_key" value="<?php echo htmlspecialchars(get_option('weather_api_key', '')); ?>" style="width:25em;font-family:monospace;">
+                                        <p class="description">Required for the Weather dashboard widget. Get a free key at <a href="https://openweathermap.org/api" target="_blank" rel="noopener">openweathermap.org/api</a>.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
             <p class="submit">
                 <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
             </p>

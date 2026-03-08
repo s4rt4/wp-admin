@@ -77,6 +77,9 @@ function topic_label(string $topic): string
         'dashboard-widgets' => 'Dashboard Widgets',
         'users-2fa' => 'Two-Factor Authentication',
         'users-roles' => 'User Roles',
+        'users-password-reset' => 'Password Reset',
+        'appearance-darkmode' => 'Dark Mode',
+        'settings-role-visibility' => 'Role Menu Visibility',
     ];
     return $map[$topic] ?? ucwords(str_replace('-', ' ', $topic));
 }
@@ -228,6 +231,6 @@ else {
     </div><!-- /.docs-body -->
 </div><!-- /.content-wrapper -->
 
-<script src="docs.js"></script>
+<script src="docs.js?v=<?php echo filemtime(__DIR__ . '/docs.js'); ?>"></script>
 </body>
 </html>

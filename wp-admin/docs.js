@@ -48,6 +48,30 @@
         { title: 'Site Health', section: 'Tools', topic: 'tools-health', keywords: 'site health kesehatan situs cek status performa keamanan' },
         { title: 'Snippets', section: 'Tools', topic: 'tools-snippets', keywords: 'snippets kode kustom php css js custom code' },
         { title: 'Tag Manager', section: 'Tools', topic: 'tools-tm', keywords: 'tag manager gtm google analytics facebook pixel tracking script' },
+        { title: 'Form Builder', section: 'Tools', topic: 'tools-form-builder', keywords: 'form builder formulir kontak hubungi contact us input field' },
+        { title: 'Audit Log', section: 'Tools', topic: 'tools-audit-log', keywords: 'audit log aktivitas history riwayat pengguna perubahan' },
+        { title: 'Notification Center', section: 'Tools', topic: 'tools-notifications', keywords: 'notifikasi notification center pesan alert' },
+        { title: 'Analytics', section: 'Tools', topic: 'tools-analytics', keywords: 'analytics statistik pengunjung traffic halaman views' },
+        // Comments
+        { title: 'All Comments', section: 'Comments', topic: 'comments-all', keywords: 'komentar semua daftar moderasi' },
+        { title: 'Comment Moderation', section: 'Comments', topic: 'comments-moderation', keywords: 'moderasi komentar approve reject spam pending' },
+        // Appearance (extended)
+        { title: 'Dark Mode', section: 'Appearance', topic: 'appearance-darkmode', keywords: 'dark mode gelap tema malam night mode toggle' },
+        // Settings (extended)
+        { title: 'SMTP Email', section: 'Settings', topic: 'settings-smtp', keywords: 'smtp email konfigurasi mail server kirim pengiriman gmail' },
+        { title: 'Role Menu Visibility', section: 'Settings', topic: 'settings-role-visibility', keywords: 'role visibility visibilitas menu role pengguna sembunyikan sidebar akses' },
+        // Users (extended)
+        { title: 'User Roles', section: 'Users', topic: 'users-roles', keywords: 'role pengguna permission izin kapabilitas editor author contributor subscriber' },
+        { title: 'Two-Factor Auth (2FA)', section: 'Users', topic: 'users-2fa', keywords: '2fa two factor auth otentikasi dua faktor otp kode keamanan' },
+        { title: 'Password Reset', section: 'Users', topic: 'users-password-reset', keywords: 'reset password lupa forgot email tautan link token' },
+        // Dashboard (extended)
+        { title: 'Dashboard Widgets', section: 'Dashboard', topic: 'dashboard-widgets', keywords: 'widget dashboard statistik world clock sticky notes todo rss cuaca weather kalender kanban' },
+        { title: 'Kanban Board', section: 'Dashboard', topic: 'tools-kanban', keywords: 'kanban board tugas task kolom drag drop project' },
+        // Posts (extended)
+        { title: 'Scheduled Publishing', section: 'Posts', topic: 'posts-scheduled', keywords: 'jadwal terbit scheduled publish posting otomatis waktu' },
+        { title: 'Content Lock', section: 'Posts', topic: 'posts-content-lock', keywords: 'content lock kunci konten password proteksi artikel' },
+        // Media (extended)
+        { title: 'Image Optimizer', section: 'Media', topic: 'media-image-optimizer', keywords: 'optimasi gambar compress kompresi resize image optimizer' },
     ];
 
     // ----------------------------------------------------------------

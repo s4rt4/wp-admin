@@ -128,6 +128,7 @@ $l = $labels[$lang];
             <ul class="wp-submenu">
                 <li class="wp-first-item <?php echo($topic === 'appearance-themes' || $topic === 'appearance') ? 'current' : ''; ?>"><a href="docs.php?topic=appearance-themes">Customize</a></li>
                 <li class="<?php echo($topic === 'appearance-menus') ? 'current' : ''; ?>"><a href="docs.php?topic=appearance-menus">Menus</a></li>
+                <li class="<?php echo($topic === 'appearance-darkmode') ? 'current' : ''; ?>"><a href="docs.php?topic=appearance-darkmode">Dark Mode</a></li>
             </ul>
         </li>
 
@@ -143,6 +144,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'users-profile') ? 'current' : ''; ?>"><a href="docs.php?topic=users-profile">Profile</a></li>
                 <li class="<?php echo($topic === 'users-roles') ? 'current' : ''; ?>"><a href="docs.php?topic=users-roles">Roles</a></li>
                 <li class="<?php echo($topic === 'users-2fa') ? 'current' : ''; ?>"><a href="docs.php?topic=users-2fa">Two-Factor Auth (2FA)</a></li>
+                <li class="<?php echo($topic === 'users-password-reset') ? 'current' : ''; ?>"><a href="docs.php?topic=users-password-reset">Password Reset</a></li>
             </ul>
         </li>
 
@@ -178,6 +180,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'settings-media') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-media">Media</a></li>
                 <li class="<?php echo($topic === 'settings-permalinks') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-permalinks">Permalinks</a></li>
                 <li class="<?php echo($topic === 'settings-smtp') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-smtp">SMTP Email</a></li>
+                <li class="<?php echo($topic === 'settings-role-visibility') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-role-visibility">Role Visibility</a></li>
             </ul>
         </li>
 

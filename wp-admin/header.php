@@ -14,6 +14,7 @@ if ($_fav): ?>
 endif; ?>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="colors.css">
+    <script>if(localStorage.getItem('wp_dark_mode')==='true')document.documentElement.classList.add('dark-mode');</script>
 </head>
 <?php
 // Get User Color Scheme, default to 'fresh'

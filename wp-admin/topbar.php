@@ -46,6 +46,12 @@ if (isset($_SESSION['user_id'])) {
             </li>
         </ul>
         <ul class="ab-top-secondary">
+            <!-- Dark Mode Toggle -->
+            <li id="wp-admin-bar-darkmode">
+                <button id="dark-mode-toggle" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
+                    <span id="dm-icon">🌙</span>
+                </button>
+            </li>
             <!-- Notification Bell -->
             <li id="wp-admin-bar-notifications" class="menupop" style="position:relative;">
                 <a class="ab-item" href="notifications.php" id="notif-bell" style="position:relative; padding:0 10px;">
@@ -186,5 +192,28 @@ if (isset($_SESSION['user_id'])) {
 
     fetchCount();
     setInterval(fetchCount, 60000);
+})();
+</script>
+
+<script>
+(function(){
+    const KEY    = 'wp_dark_mode';
+    const toggle = document.getElementById('dark-mode-toggle');
+    const icon   = document.getElementById('dm-icon');
+    const html   = document.documentElement;
+
+    function apply(dark) {
+        html.classList.toggle('dark-mode', dark);
+        icon.textContent = dark ? '☀️' : '🌙';
+    }
+
+    // Sync icon with current state (class may already be set by head script)
+    apply(html.classList.contains('dark-mode'));
+
+    toggle.addEventListener('click', function() {
+        const dark = !html.classList.contains('dark-mode');
+        localStorage.setItem(KEY, dark);
+        apply(dark);
+    });
 })();
 </script>

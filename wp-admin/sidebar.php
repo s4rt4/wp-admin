@@ -1,3 +1,16 @@
+<?php
+// Role-based menu visibility
+$_rmv_raw  = get_option('role_menu_visibility', '');
+$_rmv      = $_rmv_raw ? (json_decode($_rmv_raw, true) ?: []) : [];
+$_rmv_role = $_SESSION['user_role'] ?? 'subscriber';
+// Admin sees everything; for others check allowed slugs (default: all allowed)
+function rmv_can_see(string $slug): bool {
+    global $_rmv, $_rmv_role;
+    if ($_rmv_role === 'admin') return true;
+    if (empty($_rmv[$_rmv_role])) return true; // not configured = allow all
+    return in_array($slug, $_rmv[$_rmv_role]);
+}
+?>
 <div id="adminmenumain">
     <ul id="adminmenu">
         
@@ -15,7 +28,7 @@
         </li>
         <li class="wp-menu-separator"></li>
         
-        <?php if (current_user_can('edit_posts')): ?>
+        <?php if (current_user_can('edit_posts') && rmv_can_see('posts')): ?>
         <li class="wp-has-submenu">
             <a href="posts.php">
                 <div class="wp-menu-image dashicons-admin-post"></div>
@@ -34,7 +47,7 @@
         <?php
 endif; ?>
         
-        <?php if (current_user_can('upload_files')): ?>
+        <?php if (current_user_can('upload_files') && rmv_can_see('media')): ?>
         <li class="wp-has-submenu">
             <a href="media.php">
                 <div class="wp-menu-image dashicons-admin-media"></div>
@@ -48,7 +61,7 @@ endif; ?>
         <?php
 endif; ?>
         
-        <?php if (current_user_can('edit_others_posts')): ?>
+        <?php if (current_user_can('edit_others_posts') && rmv_can_see('pages')): ?>
         <li class="wp-has-submenu">
             <a href="pages.php">
                 <div class="wp-menu-image dashicons-admin-page"></div>
@@ -62,7 +75,7 @@ endif; ?>
         <?php
 endif; ?>
 
-        <?php if (current_user_can('edit_others_posts')): // Comments for Editor+ ?>
+        <?php if (current_user_can('edit_others_posts') && rmv_can_see('comments')): // Comments for Editor+ ?>
         <li class="wp-has-submenu <?php echo(isset($page_title) && $page_title === 'Comments') ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"> 
             <a href="comments.php" class="<?php echo(isset($page_title) && $page_title === 'Comments') ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
                 <div class="wp-menu-image dashicons-admin-comments"></div>
@@ -78,7 +91,7 @@ endif; ?>
 
         <li class="wp-menu-separator"></li>
         
-        <?php if (current_user_can('manage_options')): ?>
+        <?php if (current_user_can('manage_options') && rmv_can_see('appearance')): ?>
         <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'Themes')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
             <a href="#" class="<?php echo(isset($page_title) && ($page_title === 'Themes')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-appearance"></div><div class="wp-menu-name">Appearance</div></a>
             <div class="wp-menu-arrow-active"></div>
@@ -90,7 +103,7 @@ endif; ?>
         <?php
 endif; ?>
 
-        <?php if (current_user_can('edit_users')): ?>
+        <?php if (current_user_can('edit_users') && rmv_can_see('users')): ?>
         <li class="wp-has-submenu">
             <a href="users.php"><div class="wp-menu-image dashicons-admin-users"></div><div class="wp-menu-name">Users</div></a>
             <div class="wp-menu-arrow-active"></div>
@@ -103,7 +116,7 @@ endif; ?>
         </li>
         <?php
 endif; ?>
-        <?php if (current_user_can('manage_options')): ?>
+        <?php if (current_user_can('manage_options') && rmv_can_see('tools')): ?>
         <li class="wp-has-submenu <?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
             <a href="tools.php" class="<?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
             <div class="wp-menu-arrow-active"></div>
@@ -128,7 +141,8 @@ endif; ?>
                 </li>
             </ul>
         </li>
-        <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings' || $page_title === 'SMTP Email')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+        <?php if (rmv_can_see('settings')): ?>
+        <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings' || $page_title === 'SMTP Email' || $page_title === 'Role Menu Visibility')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
             <a href="settings-general.php"><div class="wp-menu-image dashicons-admin-settings"></div><div class="wp-menu-name">Settings</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
@@ -138,8 +152,12 @@ endif; ?>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Media Settings') ? 'current' : ''; ?>"><a href="settings-media.php">Media</a></li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Permalink Settings') ? 'current' : ''; ?>"><a href="settings-permalinks.php">Permalinks</a></li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'SMTP Email') ? 'current' : ''; ?>"><a href="settings-smtp.php">SMTP Email</a></li>
+                <?php if (current_user_can('manage_options')): ?>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Role Menu Visibility') ? 'current' : ''; ?>"><a href="settings-roles-menu.php">Role Visibility</a></li>
+                <?php endif; ?>
             </ul>
         </li>
+        <?php endif; ?>
         <?php
 endif; ?>
 
