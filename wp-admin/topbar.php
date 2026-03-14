@@ -49,13 +49,13 @@ if (isset($_SESSION['user_id'])) {
             <!-- Dark Mode Toggle -->
             <li id="wp-admin-bar-darkmode">
                 <button id="dark-mode-toggle" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
-                    <span id="dm-icon">🌙</span>
+                    <span id="dm-icon"><i class="fa-solid fa-moon"></i></span>
                 </button>
             </li>
             <!-- Notification Bell -->
             <li id="wp-admin-bar-notifications" class="menupop" style="position:relative;">
                 <a class="ab-item" href="notifications.php" id="notif-bell" style="position:relative; padding:0 10px;">
-                    <span style="font-size:17px; line-height:32px;">&#128276;</span>
+                    <i class="fa-solid fa-bell" style="font-size:15px;line-height:32px;"></i>
                     <span id="notif-badge" style="display:none; position:absolute; top:4px; right:4px; background:#d63638; color:#fff; font-size:10px; font-weight:700; min-width:16px; height:16px; border-radius:8px; line-height:16px; text-align:center; padding:0 3px;">0</span>
                 </a>
                 <div id="notif-dropdown" style="display:none; position:absolute; top:32px; right:0; width:340px; background:#fff; border:1px solid #c3c4c7; box-shadow:0 4px 16px rgba(0,0,0,.15); z-index:99999; border-radius:0 0 4px 4px;">
@@ -204,7 +204,7 @@ if (isset($_SESSION['user_id'])) {
 
     function apply(dark) {
         html.classList.toggle('dark-mode', dark);
-        icon.textContent = dark ? '☀️' : '🌙';
+        icon.innerHTML = dark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
     }
 
     // Sync icon with current state (class may already be set by head script)

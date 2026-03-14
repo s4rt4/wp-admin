@@ -77,7 +77,7 @@ include 'header.php';
 
 <div id="wpcontent">
 <div class="wrap cal-wrap">
-    <h1 style="margin-bottom:4px;">📅 Content Calendar</h1>
+    <h1 style="margin-bottom:4px;"><i class="fa-solid fa-calendar-days" style="font-size:20px;margin-right:6px;vertical-align:middle;color:#0073aa;"></i>Content Calendar</h1>
     <p style="color:#646970;font-size:13px;margin-bottom:20px;">Overview of published and scheduled posts.</p>
 
     <!-- Navigation -->
