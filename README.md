@@ -1,6 +1,6 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, and custom fields.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, custom fields, and a WordPress-like first-run installer.
 
 ## Features
 
@@ -142,24 +142,20 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     git clone https://github.com/s4rt4/wp-admin.git
     ```
 
-2. **Database Setup:**
-    - Create a new MySQL database named `wp-admin` (or adjust config).
-    - Import the provided SQL file: `wp-admin/wp-admin.sql`.
-
-3. **Configuration:**
-    - Open `wp-admin/db_config.php`.
-    - Adjust the database credentials if necessary:
-        ```php
-        define('DB_HOST', 'localhost');
-        define('DB_NAME', 'wp-admin');
-        define('DB_USER', 'root');
-        define('DB_PASS', '');
-        ```
-
-4. **Run:**
+2. **Run:**
     - Serve via Apache/Nginx or a local environment like Laragon/XAMPP.
     - Access the admin panel at `/wp-admin/`.
     - Compatible with both subdirectory (`localhost/word-press/`) and virtualhost (`word-press.test/`) setups.
+
+3. **First-run installer:**
+    - On first visit, you will be automatically redirected to the installer wizard (`/wp-admin/install.php`).
+    - **Step 1 — Language:** Choose Indonesian or English.
+    - **Step 2 — Database:** Enter your DB host, name, username, and password. Use the "Test Connection" button to verify before proceeding.
+    - **Step 3 — Site Info:** Set your site name, URL, and admin account (username, email, password).
+    - Click **Install** — the wizard creates all database tables, inserts default options and roles, and writes `wp-admin/wp-config.php` with your credentials.
+    - You will be redirected to the login page when done.
+
+> **Note:** `wp-admin/wp-config.php` is excluded from the repository (`.gitignore`) — credentials never leave your machine.
 
 ---
 
