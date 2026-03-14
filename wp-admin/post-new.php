@@ -17,11 +17,15 @@ $post = [
     'status' => 'draft',
     'visibility' => 'public',
     'created_at' => date('Y-m-d H:i:s'),
-    'scheduled_at' => null
+    'scheduled_at' => null,
+    'lang' => 'id',
+    'translation_of' => null,
 ];
 
-// Ensure scheduled_at column exists
+// Ensure columns exist
 try { $conn->query("ALTER TABLE posts ADD COLUMN scheduled_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
+try { $conn->query("ALTER TABLE posts ADD COLUMN lang VARCHAR(10) NOT NULL DEFAULT 'id'"); } catch (Exception $e) {}
+try { $conn->query("ALTER TABLE posts ADD COLUMN translation_of INT NULL DEFAULT NULL"); } catch (Exception $e) {}
 
 // Handle Post Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -58,9 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $visibility = $_POST['visibility'];
-    $created_at = $_POST['aa'] . '-' . $_POST['mm'] . '-' . $_POST['jj'] . ' ' . $_POST['hh'] . ':' . $_POST['mn'] . ':00'; // Simplified date assembly
-    $author_id = $_SESSION['user_id'];
+    $visibility     = $_POST['visibility'];
+    $created_at     = $_POST['aa'] . '-' . $_POST['mm'] . '-' . $_POST['jj'] . ' ' . $_POST['hh'] . ':' . $_POST['mn'] . ':00';
+    $author_id      = $_SESSION['user_id'];
+    $lang           = in_array($_POST['lang'] ?? '', ['id', 'en']) ? $_POST['lang'] : 'id';
+    $translation_of = intval($_POST['translation_of'] ?? 0) ?: null;
 
     // Generate Slug
     $slug = trim($_POST['post_name']);
@@ -102,12 +108,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $is_new_post = ($post_id === 0);
     if ($post_id > 0) {
-        $stmt = $conn->prepare("UPDATE posts SET title=?, slug=?, content=?, status=?, visibility=?, created_at=?, updated_at=NOW(), featured_image=?, meta_title=?, meta_desc=?, focus_keyword=?, scheduled_at=? WHERE id=?");
-        $stmt->bind_param("sssssssssssi", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $meta_title, $meta_desc, $focus_keyword, $scheduled_at, $post_id);
+        $stmt = $conn->prepare("UPDATE posts SET title=?, slug=?, content=?, status=?, visibility=?, created_at=?, updated_at=NOW(), featured_image=?, meta_title=?, meta_desc=?, focus_keyword=?, scheduled_at=?, lang=?, translation_of=? WHERE id=?");
+        $stmt->bind_param("sssssssssssssii", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $meta_title, $meta_desc, $focus_keyword, $scheduled_at, $lang, $translation_of, $post_id);
     }
     else {
-        $stmt = $conn->prepare("INSERT INTO posts (title, slug, content, status, visibility, created_at, updated_at, featured_image, author_id, meta_title, meta_desc, focus_keyword, scheduled_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssssissss", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $author_id, $meta_title, $meta_desc, $focus_keyword, $scheduled_at);
+        $stmt = $conn->prepare("INSERT INTO posts (title, slug, content, status, visibility, created_at, updated_at, featured_image, author_id, meta_title, meta_desc, focus_keyword, scheduled_at, lang, translation_of) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssssisssssi", $title, $slug, $content, $status, $visibility, $created_at, $featured_image, $author_id, $meta_title, $meta_desc, $focus_keyword, $scheduled_at, $lang, $translation_of);
     }
 
     if ($stmt->execute()) {
@@ -167,6 +173,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require_once __DIR__ . '/includes/audit.php';
         audit_log($is_new_post ? 'post_create' : 'post_update', 'post', $post_id, $title);
 
+        // Fire automation trigger when post is published
+        if ($status === 'publish') {
+            require_once __DIR__ . '/includes/automation-engine.php';
+            $author_res   = $conn->query("SELECT email, username FROM users WHERE id=" . intval($author_id));
+            $author_row   = $author_res ? $author_res->fetch_assoc() : [];
+            $base_url     = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+            run_automations('post_published', [
+                '_event'       => 'post_published',
+                'post_id'      => $post_id,
+                'title'        => $title,
+                'status'       => $status,
+                'author_email' => $author_row['email']    ?? '',
+                'author_name'  => $author_row['username'] ?? '',
+                'url'          => $base_url . '/post/' . $slug,
+            ]);
+        }
+
         header("Location: post-new.php?id=$post_id&message=saved");
 
         exit;
@@ -174,6 +197,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     else {
         $error = "Error saving post: " . $conn->error;
     }
+}
+
+// Pre-fill for "Add Translation" flow (?translation_of=X&lang=en)
+if ($post_id === 0 && isset($_GET['translation_of'], $_GET['lang'])) {
+    $post['translation_of'] = intval($_GET['translation_of']);
+    $post['lang']           = in_array($_GET['lang'], ['id','en']) ? $_GET['lang'] : 'id';
 }
 
 // Fetch existing post if ID is set
@@ -457,6 +486,22 @@ endif; ?>
                                                    style="margin-top:5px;width:100%;font-size:12px;border:1px solid #8c8f94;border-radius:3px;padding:4px 6px;">
                                             <?php if (!empty($post['scheduled_at'])): ?>
                                             <p style="font-size:11px;color:#646970;margin:4px 0 0;">Scheduled: <strong><?php echo date('M j, Y @ H:i', strtotime($post['scheduled_at'])); ?></strong></p>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <div class="misc-pub-section misc-pub-language">
+                                            Language:&nbsp;
+                                            <select name="lang" id="post_lang" style="font-size:12px;padding:2px 4px;border:1px solid #8c8f94;border-radius:3px;">
+                                                <option value="id" <?php echo ($post['lang'] ?? 'id') === 'id' ? 'selected' : ''; ?>>🇮🇩 Indonesian (ID)</option>
+                                                <option value="en" <?php echo ($post['lang'] ?? 'id') === 'en' ? 'selected' : ''; ?>>🇬🇧 English (EN)</option>
+                                            </select>
+                                            <?php if (!empty($post['translation_of'])): ?>
+                                                <input type="hidden" name="translation_of" value="<?php echo intval($post['translation_of']); ?>">
+                                                <p style="font-size:11px;color:#646970;margin:4px 0 0;">
+                                                    Translation of: <a href="post-new.php?id=<?php echo intval($post['translation_of']); ?>">#<?php echo intval($post['translation_of']); ?></a>
+                                                </p>
+                                            <?php else: ?>
+                                                <input type="hidden" name="translation_of" value="">
                                             <?php endif; ?>
                                         </div>
 

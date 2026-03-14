@@ -70,8 +70,12 @@
         // Posts (extended)
         { title: 'Scheduled Publishing', section: 'Posts', topic: 'posts-scheduled', keywords: 'jadwal terbit scheduled publish posting otomatis waktu' },
         { title: 'Content Lock', section: 'Posts', topic: 'posts-content-lock', keywords: 'content lock kunci konten password proteksi artikel' },
+        { title: 'Multi-language', section: 'Posts', topic: 'posts-multilang', keywords: 'multi language bahasa indonesia inggris terjemahan translation bilingual lang flag' },
         // Media (extended)
         { title: 'Image Optimizer', section: 'Media', topic: 'media-image-optimizer', keywords: 'optimasi gambar compress kompresi resize image optimizer' },
+        { title: 'Media Folders', section: 'Media', topic: 'media-folders', keywords: 'folder media virtual organisasi drag drop file library kelola' },
+        // Tools (Tier 4)
+        { title: 'Automations', section: 'Tools', topic: 'tools-automations', keywords: 'automation workflow trigger action email webhook otomatisasi alur kerja condition send' },
     ];
 
     // ----------------------------------------------------------------

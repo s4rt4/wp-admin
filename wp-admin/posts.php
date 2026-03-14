@@ -77,11 +77,25 @@ if (isset($_GET['action']) && $_GET['action'] == 'duplicate' && isset($_GET['id'
     }
 }
 
+// Ensure columns exist
+try { $conn->query("ALTER TABLE posts ADD COLUMN locked_by INT NULL DEFAULT NULL, ADD COLUMN locked_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
+try { $conn->query("ALTER TABLE posts ADD COLUMN scheduled_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
+try { $conn->query("ALTER TABLE posts ADD COLUMN lang VARCHAR(10) NOT NULL DEFAULT 'id'"); } catch (Exception $e) {}
+try { $conn->query("ALTER TABLE posts ADD COLUMN translation_of INT NULL DEFAULT NULL"); } catch (Exception $e) {}
+
+$conn->query("UPDATE posts SET locked_by=NULL, locked_at=NULL WHERE locked_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+$conn->query("UPDATE posts SET status='publish', scheduled_at=NULL WHERE status='scheduled' AND scheduled_at IS NOT NULL AND scheduled_at <= NOW()");
+
 // Check if 'status' filter is applied
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+$lang_filter   = isset($_GET['lang'])   ? $_GET['lang']   : 'all';
 $sql_where = "";
 if ($status_filter != 'all') {
-    $sql_where = "WHERE status = '$status_filter'";
+    $sql_where = "WHERE p.status = '" . $conn->real_escape_string($status_filter) . "'";
+}
+if ($lang_filter !== 'all') {
+    $lf = $conn->real_escape_string($lang_filter);
+    $sql_where .= ($sql_where ? " AND " : "WHERE ") . "p.lang = '{$lf}'";
 }
 
 // Filter by Author if not Editor/Admin
@@ -89,14 +103,6 @@ if (!current_user_can('edit_others_posts')) {
     $author_id = $_SESSION['user_id'];
     $sql_where .= ($sql_where ? " AND " : "WHERE ") . "p.author_id = $author_id";
 }
-
-// Add lock columns if missing, auto-release stale locks
-try { $conn->query("ALTER TABLE posts ADD COLUMN locked_by INT NULL DEFAULT NULL, ADD COLUMN locked_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
-$conn->query("UPDATE posts SET locked_by=NULL, locked_at=NULL WHERE locked_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
-
-// Scheduled Publishing — auto-publish posts whose time has come
-try { $conn->query("ALTER TABLE posts ADD COLUMN scheduled_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
-$conn->query("UPDATE posts SET status='publish', scheduled_at=NULL WHERE status='scheduled' AND scheduled_at IS NOT NULL AND scheduled_at <= NOW()");
 
 $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as locker_name FROM posts p LEFT JOIN users u ON p.author_id = u.id LEFT JOIN users lu ON p.locked_by = lu.id $sql_where ORDER BY p.created_at DESC");
 ?>
@@ -120,12 +126,29 @@ $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as lo
             <li class="scheduled"><a href="posts.php?status=scheduled" class="<?php echo $status_filter == 'scheduled' ? 'current' : ''; ?>">Scheduled <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts WHERE status='scheduled'")->fetch_column(); ?>)</span></a></li>
         </ul>
 
+        <!-- Language filter tabs -->
+        <div style="margin:8px 0 12px;display:flex;gap:6px;align-items:center;">
+            <span style="font-size:12px;color:#646970;">Language:</span>
+            <?php
+            $qs_status = $status_filter !== 'all' ? '&status=' . urlencode($status_filter) : '';
+            $count_id = $conn->query("SELECT COUNT(*) FROM posts WHERE lang='id' OR lang IS NULL OR lang=''")->fetch_column();
+            $count_en = $conn->query("SELECT COUNT(*) FROM posts WHERE lang='en'")->fetch_column();
+            ?>
+            <a href="posts.php?lang=all<?php echo $qs_status; ?>"
+               class="button button-small <?php echo $lang_filter === 'all' ? 'button-primary' : ''; ?>">All</a>
+            <a href="posts.php?lang=id<?php echo $qs_status; ?>"
+               class="button button-small <?php echo $lang_filter === 'id' ? 'button-primary' : ''; ?>">🇮🇩 ID (<?php echo $count_id; ?>)</a>
+            <a href="posts.php?lang=en<?php echo $qs_status; ?>"
+               class="button button-small <?php echo $lang_filter === 'en' ? 'button-primary' : ''; ?>">🇬🇧 EN (<?php echo $count_en; ?>)</a>
+        </div>
+
         <table class="wp-list-table widefat fixed striped posts">
             <thead>
                 <tr>
                     <td id="cb" class="manage-column column-cb check-column"><input id="cb-select-all-1" type="checkbox"></td>
                     <th scope="col" id="thumb" class="manage-column column-thumb" style="width: 60px;"><span>Image</span></th>
                     <th scope="col" id="title" class="manage-column column-title column-primary sortable desc"><span>Title</span></th>
+                    <th scope="col" id="lang" class="manage-column" style="width:50px;">Lang</th>
                     <th scope="col" id="status" class="manage-column column-status">Status</th>
                     <th scope="col" id="author" class="manage-column column-author">Author</th>
                     <th scope="col" id="categories" class="manage-column column-categories">Categories</th>
@@ -160,15 +183,27 @@ $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as lo
                                     </span>
                                     <?php endif; ?>
                                 </strong>
-                                <div class="row-actions">
-                                    <span class="edit"><a href="post-new.php?id=<?php echo $row['id']; ?>" aria-label="Edit “<?php echo htmlspecialchars($row['title']); ?>”">Edit</a> | </span>
-                                    <span class="quick-edit"><a href="#" class="quick-edit-btn" data-id="<?php echo $row['id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>" data-slug="<?php echo htmlspecialchars($row['slug']); ?>" data-status="<?php echo $row['status']; ?>">Quick Edit</a> | </span>
-                                    <span class="trash"><a href="posts.php?action=delete&id=<?php echo $row['id']; ?>" class="submitdelete" aria-label="Move “<?php echo htmlspecialchars($row['title']); ?>” to the Trash" onclick="return confirm('Are you sure?')">Trash</a> | </span>
-                                    <span class="view"><a href="../post/<?php echo $row['slug']; ?>" rel="bookmark" aria-label="View “<?php echo htmlspecialchars($row['title']); ?>”" target="_blank">View</a> | </span>
-                                    <span class="duplicate"><a href="posts.php?action=duplicate&id=<?php echo $row['id']; ?>" aria-label="Duplicate “<?php echo htmlspecialchars($row['title']); ?>”">Duplicate</a></span>
+                                <div class=”row-actions”>
+                                    <span class=”edit”><a href=”post-new.php?id=<?php echo $row['id']; ?>”>Edit</a> | </span>
+                                    <span class=”quick-edit”><a href=”#” class=”quick-edit-btn” data-id=”<?php echo $row['id']; ?>” data-title=”<?php echo htmlspecialchars($row['title']); ?>” data-slug=”<?php echo htmlspecialchars($row['slug']); ?>” data-status=”<?php echo $row['status']; ?>”>Quick Edit</a> | </span>
+                                    <span class=”trash”><a href=”posts.php?action=delete&id=<?php echo $row['id']; ?>” class=”submitdelete” onclick=”return confirm('Are you sure?')”>Trash</a> | </span>
+                                    <span class=”view”><a href=”../post/<?php echo $row['slug']; ?>” target=”_blank”>View</a> | </span>
+                                    <span class=”duplicate”><a href=”posts.php?action=duplicate&id=<?php echo $row['id']; ?>”>Duplicate</a> | </span>
+                                    <?php
+                                    $other_lang = ($row['lang'] ?? 'id') === 'id' ? 'en' : 'id';
+                                    $flag       = $other_lang === 'en' ? '🇬🇧' : '🇮🇩';
+                                    $origin_id  = empty($row['translation_of']) ? $row['id'] : $row['translation_of'];
+                                    ?>
+                                    <span class=”translate”><a href=”post-new.php?translation_of=<?php echo $origin_id; ?>&lang=<?php echo $other_lang; ?>”><?php echo $flag; ?> Add <?php echo strtoupper($other_lang); ?></a></span>
                                 </div>
                             </td>
-                            <td class="status column-status" data-colname="Status">
+                            <td data-colname=”Lang” style=”font-size:18px;text-align:center;”>
+                                <?php echo ($row['lang'] ?? 'id') === 'en' ? '🇬🇧' : '🇮🇩'; ?>
+                                <?php if (!empty($row['translation_of'])): ?>
+                                    <br><small style=”font-size:10px;color:#aaa;”>trans.</small>
+                                <?php endif; ?>
+                            </td>
+                            <td class=”status column-status” data-colname=”Status”>
                                 <?php if ($row['status'] === 'scheduled'): ?>
                                     <span class="post-state" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;border-radius:3px;padding:1px 6px;font-size:11px;">&#128197; Scheduled</span>
                                     <?php if (!empty($row['scheduled_at'])): ?>

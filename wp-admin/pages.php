@@ -55,9 +55,17 @@ if (isset($_GET['action']) && $_GET['action'] == 'duplicate' && isset($_GET['id'
     }
 }
 
-// Status filter
-$status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+// Ensure lang/translation_of columns exist
+try { $conn->query("ALTER TABLE pages ADD COLUMN lang VARCHAR(10) NOT NULL DEFAULT 'id'"); } catch (Exception $e) {}
+try { $conn->query("ALTER TABLE pages ADD COLUMN translation_of INT NULL DEFAULT NULL"); } catch (Exception $e) {}
+// Content Lock — add columns if missing, release stale locks
+try { $conn->query("ALTER TABLE pages ADD COLUMN locked_by INT NULL DEFAULT NULL, ADD COLUMN locked_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
+$conn->query("UPDATE pages SET locked_by=NULL, locked_at=NULL WHERE locked_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+
+// Filters
+$status_filter  = isset($_GET['status'])       ? $_GET['status']       : 'all';
 $builder_filter = isset($_GET['builder_type']) ? $_GET['builder_type'] : 'all';
+$lang_filter    = isset($_GET['lang'])         ? $_GET['lang']         : 'all';
 
 $sql = "SELECT * FROM pages";
 $conditions = [];
@@ -71,6 +79,10 @@ if ($builder_filter != 'all') {
     $conditions[] = "builder_type = ?";
     $params[] = $builder_filter;
 }
+if ($lang_filter !== 'all') {
+    $conditions[] = "lang = ?";
+    $params[] = $lang_filter;
+}
 
 if (!empty($conditions)) {
     $sql .= " WHERE " . implode(' AND ', $conditions);
@@ -80,10 +92,6 @@ $sql .= " ORDER BY updated_at DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $pages = $stmt->fetchAll();
-
-// Content Lock — add columns if missing, release stale locks
-try { $conn->query("ALTER TABLE pages ADD COLUMN locked_by INT NULL DEFAULT NULL, ADD COLUMN locked_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
-$conn->query("UPDATE pages SET locked_by=NULL, locked_at=NULL WHERE locked_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
 
 // Counts
 $totalCount = $pdo->query("SELECT COUNT(*) FROM pages")->fetchColumn();
@@ -114,6 +122,18 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
             <li class="editorjs"><a href="pages.php?builder_type=editorjs" class="<?php echo $builder_filter == 'editorjs' ? 'current' : ''; ?>">EditorJS <span class="count">(<?php echo $editorCount; ?>)</span></a> |</li>
             <li class="monaco"><a href="pages.php?builder_type=monaco" class="<?php echo $builder_filter == 'monaco' ? 'current' : ''; ?>">Monaco <span class="count">(<?php echo $monacoCount; ?>)</span></a></li>
         </ul>
+
+        <!-- Language filter -->
+        <div style="margin:8px 0 12px;display:flex;gap:6px;align-items:center;clear:both;">
+            <span style="font-size:12px;color:#646970;">Language:</span>
+            <?php
+            $pg_id_count = $pdo->query("SELECT COUNT(*) FROM pages WHERE lang='id' OR lang IS NULL OR lang=''")->fetchColumn();
+            $pg_en_count = $pdo->query("SELECT COUNT(*) FROM pages WHERE lang='en'")->fetchColumn();
+            ?>
+            <a href="pages.php?lang=all" class="button button-small <?php echo $lang_filter === 'all' ? 'button-primary' : ''; ?>">All</a>
+            <a href="pages.php?lang=id"  class="button button-small <?php echo $lang_filter === 'id'  ? 'button-primary' : ''; ?>">🇮🇩 ID (<?php echo $pg_id_count; ?>)</a>
+            <a href="pages.php?lang=en"  class="button button-small <?php echo $lang_filter === 'en'  ? 'button-primary' : ''; ?>">🇬🇧 EN (<?php echo $pg_en_count; ?>)</a>
+        </div>
 
         <table class="wp-list-table widefat fixed striped pages">
             <thead>

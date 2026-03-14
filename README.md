@@ -1,6 +1,6 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, and a fully personalised per-user dashboard.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, and a visual automation/workflow builder.
 
 ## Features
 
@@ -12,6 +12,11 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - **Monaco Editor:** IDE-like code editor for raw HTML, CSS, JavaScript, and PHP snippets.
 - **Scheduled Publishing:** Set a future publish date/time for any post; goes live automatically.
 - **Content Lock:** Prevents simultaneous editing by multiple users.
+- **Multi-language / i18n:**
+    - Per-post and per-page language field (`id` / `en`).
+    - Language filter tabs (🇮🇩 / 🇬🇧) in the Posts and Pages list.
+    - "Add Translation" row action links posts/pages to their translated counterpart via `translation_of`.
+    - Language selector in the publish sidebar when editing.
 
 ### Form Builder
 - Create fully custom forms (contact, survey, data collection) without writing code.
@@ -92,11 +97,23 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 
 ### Other Features
 - **Image Optimizer:** Automatic image compression and resizing on upload.
+- **Media Folder Organizer:**
+    - Virtual folders stored in the database (`media_folders` + `media_assignments`).
+    - Persistent folder tree sidebar alongside the media grid.
+    - Drag any media item onto a folder to assign it; drag onto "All Media" to unassign.
+    - Create, rename, and delete folders without touching the filesystem.
 - **Comment Moderation:** Approve, reject, and spam workflow with bulk actions.
 - **Notification Center:** In-app notifications for system events.
 - **Frontend Admin Bar:** Contextual bar on public pages for logged-in users — quick edit and preview links.
 - **Shortcode & Snippet System:** Create PHP/CSS/JS snippets and embed them anywhere via auto-generated shortcodes. Navigation Menus also act as shortcodes.
 - **Dark Mode:** Toggle between light and dark admin UI; preference saved per browser.
+- **Automation / Workflows:**
+    - Visual builder to create automations without writing code.
+    - **Triggers:** Post Published, Form Submitted, User Registered, Kanban Card Moved.
+    - **Conditions:** Optional field-level filters (equals, contains, starts with, gt/lt) — all conditions must match.
+    - **Actions:** Send Email (with `{{placeholder}}` interpolation) and Webhook (HTTP POST JSON to any URL).
+    - Enable/disable automations per-row without deleting them.
+    - Execution log with result status and error messages for every run.
 - **Appearance & Menu Builder:** Customise colours and navigation menus.
 - **Database Backup & Restore** interface.
 - **Export / Import** content tools.

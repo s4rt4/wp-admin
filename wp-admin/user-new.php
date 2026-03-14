@@ -116,6 +116,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['tfa_action'])) {
                         $stmt = $conn->prepare("INSERT INTO users (username, email, password, profile_picture, role) VALUES (?, ?, ?, ?, ?)");
                         $stmt->bind_param("sssss", $username, $email, $hashed_password, $profile_picture, $role);
                         if ($stmt->execute()) {
+                             $new_uid = $stmt->insert_id;
+                             // Automation trigger
+                             require_once __DIR__ . '/includes/automation-engine.php';
+                             run_automations('user_registered', [
+                                 '_event'   => 'user_registered',
+                                 'user_id'  => $new_uid,
+                                 'username' => $username,
+                                 'email'    => $email,
+                                 'role'     => $role,
+                             ]);
                              echo "<script>window.location.href='users.php';</script>";
                              exit;
                         } else {

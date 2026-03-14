@@ -59,13 +59,13 @@ Semua fitur yang direncanakan telah **selesai dieksekusi**.
 | 19 | **Password Reset via Email** | Fitur Utama | ✅ Done |
 | 20 | **Role-based Menu Visibility** | Fitur Utama | ✅ Done |
 
-### Tier 4 — Kompleks (Arsitektur baru)
+### Tier 4 — Kompleks (Arsitektur baru) ✅ DONE
 
-| # | Fitur | Jenis | Keterangan |
-|---|-------|-------|------------|
-| 21 | **Media Folder Organizer** | Fitur Utama | Folder virtual di DB + drag file antar folder |
-| 22 | **Multi-language / i18n** | Fitur Utama | Field `lang` + `translation_of` di posts/pages + language switcher frontend |
-| 23 | **Automation / Workflows** | Fitur Utama | Trigger → Condition → Action engine, tabel `automations`, builder UI, log eksekusi |
+| # | Fitur | Jenis | Status |
+|---|-------|-------|--------|
+| 21 | **Media Folder Organizer** | Fitur Utama | ✅ Done — folder virtual di DB (`media_folders` + `media_assignments`), sidebar kiri dengan tree, drag file ke folder, create/rename/delete folder |
+| 22 | **Multi-language / i18n** | Fitur Utama | ✅ Done — kolom `lang` + `translation_of` di posts & pages, filter tab bahasa, badge bendera, tombol "Add Translation" per baris |
+| 23 | **Automation / Workflows** | Fitur Utama | ✅ Done — engine trigger/condition/action, builder UI visual, log eksekusi, trigger: post_published/form_submitted/user_registered/kanban_moved, action: send_email/webhook |
 
 ---
 

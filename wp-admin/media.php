@@ -6,9 +6,35 @@ if (!current_user_can('upload_files')) {
 $page_title = 'Media Library';
 require_once 'header.php';
 require_once 'sidebar.php';
+require_once 'db_config.php';
 
 $mediaDir = __DIR__ . '/media/';
 $baseUrl = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/media/';
+
+// ── Ensure folder tables exist ────────────────────────────────────────────────
+try {
+    $pdo = getDBConnection();
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `media_folders` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `name` VARCHAR(255) NOT NULL,
+        `parent_id` INT NULL DEFAULT NULL,
+        `created_by` INT NOT NULL DEFAULT 1,
+        `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `media_assignments` (
+        `file_path` VARCHAR(500) NOT NULL,
+        `folder_id` INT NOT NULL,
+        `assigned_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`file_path`), KEY `idx_folder` (`folder_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+} catch (Exception $e) {}
+
+// ── Load folders & assignments ────────────────────────────────────────────────
+$folders = $pdo->query("SELECT id, name, parent_id FROM media_folders ORDER BY parent_id, name")->fetchAll(PDO::FETCH_ASSOC);
+$assignments = $pdo->query("SELECT file_path, folder_id FROM media_assignments")->fetchAll(PDO::FETCH_KEY_PAIR);
+
+// Active folder filter
+$active_folder_id = isset($_GET['folder']) ? intval($_GET['folder']) : 0; // 0 = All
 
 // Handle delete
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['file'])) {
@@ -76,11 +102,20 @@ function scanMediaDir($dir, $baseDir, $baseUrl) {
 
 $allFiles = scanMediaDir($mediaDir, $mediaDir, $baseUrl);
 
-// Filter
+// Filter by folder
 $typeFilter = isset($_GET['type']) ? $_GET['type'] : 'all';
 $files = $allFiles;
+
+// Apply folder filter first
+if ($active_folder_id > 0) {
+    $files = array_filter($files, function($f) use ($assignments, $active_folder_id) {
+        return isset($assignments[$f['path']]) && $assignments[$f['path']] == $active_folder_id;
+    });
+    $files = array_values($files);
+}
+
 if ($typeFilter !== 'all') {
-    $files = array_filter($allFiles, fn($f) => $f['type'] === $typeFilter);
+    $files = array_filter($files, fn($f) => $f['type'] === $typeFilter);
     $files = array_values($files);
 }
 
@@ -96,6 +131,63 @@ function formatFileSize($bytes) {
 ?>
 
 <div id="wpcontent">
+<div class="media-layout">
+
+    <!-- ── Folder Sidebar ───────────────────────────────────────── -->
+    <aside id="media-folder-sidebar">
+        <div class="mfs-header">
+            <span class="dashicons dashicons-category" style="font-size:14px;height:14px;width:14px;color:#0073aa;"></span>
+            <strong>Folders</strong>
+            <button type="button" id="mfs-new-root-btn" title="New top-level folder" class="mfs-icon-btn">
+                <span class="dashicons dashicons-plus-alt2"></span>
+            </button>
+        </div>
+        <ul class="mfs-tree" id="mfs-tree">
+            <li class="mfs-folder <?php echo $active_folder_id === 0 ? 'active' : ''; ?>" data-id="0"
+                ondragover="event.preventDefault();" ondrop="onDropToFolder(event, 0)">
+                <a href="media.php" class="mfs-link">
+                    <span class="dashicons dashicons-admin-home"></span> All Media
+                    <span class="mfs-count">(<?php echo count($allFiles); ?>)</span>
+                </a>
+            </li>
+            <?php
+            // Build folder tree recursively
+            function render_folder_tree(array $folders, ?int $parent_id, int $active, array $assignments_inv): void {
+                foreach ($folders as $f) {
+                    if ($f['parent_id'] != $parent_id) continue;
+                    $fid   = intval($f['id']);
+                    $count = count(array_keys($assignments_inv, $fid));
+                    $link  = 'media.php?folder=' . $fid;
+                    $cls   = ($active === $fid) ? 'active' : '';
+                    echo "<li class='mfs-folder {$cls}' data-id='{$fid}'
+                              ondragover=\"event.preventDefault();this.classList.add('drag-over');\"
+                              ondragleave=\"this.classList.remove('drag-over');\"
+                              ondrop=\"onDropToFolder(event, {$fid});this.classList.remove('drag-over');\">";
+                    echo "<div class='mfs-row'>";
+                    echo "  <a href='{$link}' class='mfs-link'><span class='dashicons dashicons-portfolio'></span> " . htmlspecialchars($f['name']) . " <span class='mfs-count'>({$count})</span></a>";
+                    echo "  <span class='mfs-actions'>";
+                    echo "    <button class='mfs-icon-btn' onclick=\"renameFolderPrompt({$fid}, '" . addslashes($f['name']) . "')\" title='Rename'><span class='dashicons dashicons-edit'></span></button>";
+                    echo "    <button class='mfs-icon-btn mfs-del' onclick=\"deleteFolder({$fid})\" title='Delete'><span class='dashicons dashicons-trash'></span></button>";
+                    echo "  </span>";
+                    echo "</div>";
+                    // Children
+                    $has_children = count(array_filter($folders, fn($c) => $c['parent_id'] == $fid)) > 0;
+                    if ($has_children) {
+                        echo "<ul class='mfs-subtree'>";
+                        render_folder_tree($folders, $fid, $active, $assignments_inv);
+                        echo "</ul>";
+                    }
+                    echo "</li>";
+                }
+            }
+            $assignments_inv = array_values($assignments); // values = folder_ids
+            render_folder_tree($folders, null, $active_folder_id, $assignments);
+            ?>
+        </ul>
+    </aside>
+
+    <!-- ── Main Media Content ───────────────────────────────────── -->
+    <div class="media-main-content">
     <div class="wrap">
         <h1 class="wp-heading-inline">Media Library <button type="button" class="page-title-action" id="upload-btn">Add New</button></h1>
         <hr class="wp-header-end">
@@ -266,9 +358,54 @@ function formatFileSize($bytes) {
         </div>
         <?php endif; ?>
     </div>
-</div>
+    </div><!-- /.media-main-content -->
+</div><!-- /.media-layout -->
+</div><!-- /#wpcontent -->
 
 <style>
+    /* ── Media + Folder layout ── */
+    .media-layout { display:flex; align-items:flex-start; gap:0; }
+
+    #media-folder-sidebar {
+        width:210px; min-width:210px; background:#fff; border-right:1px solid #c3c4c7;
+        min-height:calc(100vh - 60px); padding:0; flex-shrink:0;
+        position:sticky; top:0; overflow-y:auto; max-height:calc(100vh - 60px);
+    }
+    .mfs-header {
+        display:flex; align-items:center; gap:6px; padding:10px 12px;
+        border-bottom:1px solid #e5e5e5; background:#f6f7f7; font-size:12px; font-weight:600; color:#1d2327;
+    }
+    .mfs-header strong { flex:1; }
+    .mfs-icon-btn { background:none; border:none; cursor:pointer; padding:2px; color:#aaa; line-height:1; border-radius:3px; }
+    .mfs-icon-btn:hover { color:#0073aa; background:#e7f4ff; }
+    .mfs-icon-btn .dashicons { font-size:14px; width:14px; height:14px; }
+    .mfs-del:hover { color:#d63638 !important; background:#fef2f2 !important; }
+
+    .mfs-tree, .mfs-subtree { list-style:none; margin:0; padding:0; }
+    .mfs-subtree { padding-left:16px; }
+    .mfs-folder { }
+    .mfs-row { display:flex; align-items:center; }
+    .mfs-link {
+        flex:1; display:flex; align-items:center; gap:5px; padding:7px 12px;
+        font-size:12px; color:#3c434a; text-decoration:none; border-left:3px solid transparent;
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .mfs-link .dashicons { font-size:14px; width:14px; height:14px; color:#646970; flex-shrink:0; }
+    .mfs-link:hover { background:#f0f6fc; color:#0073aa; }
+    .mfs-folder.active > .mfs-row > .mfs-link,
+    .mfs-folder.active > .mfs-link {
+        border-left-color:#0073aa; background:#f0f6fc; color:#0073aa; font-weight:600;
+    }
+    .mfs-folder.active > .mfs-row > .mfs-link .dashicons,
+    .mfs-folder.active > .mfs-link .dashicons { color:#0073aa; }
+    .mfs-count { color:#aaa; font-weight:400; font-size:11px; margin-left:2px; }
+    .mfs-actions { display:none; gap:2px; padding-right:6px; }
+    .mfs-row:hover .mfs-actions { display:flex; }
+    .mfs-folder.drag-over > .mfs-row > .mfs-link,
+    .mfs-folder.drag-over > .mfs-link { background:#ddf4ff !important; border-left-color:#0073aa !important; }
+
+    .media-main-content { flex:1; min-width:0; }
+
     /* Header */
     .wp-heading-inline { display: inline-block; margin-right: 5px; vertical-align: middle; }
     .page-title-action {
@@ -635,6 +772,71 @@ function copyToClipboard(text) {
     document.body.removeChild(tmp);
     alert('URL copied!');
 }
+</script>
+
+<script>
+// ── Media Folder JS ────────────────────────────────────────────────────────────
+(function () {
+    const API = 'api/media-folders.php';
+
+    function post(params) {
+        return fetch(API, { method: 'POST', body: new URLSearchParams(params) }).then(r => r.json());
+    }
+
+    // Make media items draggable
+    document.querySelectorAll('.media-item, .media-list-row').forEach(el => {
+        el.setAttribute('draggable', 'true');
+        el.addEventListener('dragstart', e => {
+            const path = el.dataset.path;
+            e.dataTransfer.setData('text/plain', path);
+            e.dataTransfer.effectAllowed = 'move';
+        });
+    });
+
+    // Drop handler (called from inline ondrop on <li>)
+    window.onDropToFolder = function (e, folderId) {
+        e.preventDefault();
+        const path = e.dataTransfer.getData('text/plain');
+        if (!path) return;
+        const action = folderId === 0 ? 'unassign_file' : 'assign_file';
+        const params = action === 'assign_file'
+            ? { action, file_path: path, folder_id: folderId }
+            : { action: 'unassign_file', file_path: path };
+        post(params).then(d => {
+            if (d.ok) location.reload();
+            else alert('Error: ' + (d.msg || 'unknown'));
+        });
+    };
+
+    // ── New root folder ────────────────────────────────────────
+    document.getElementById('mfs-new-root-btn').addEventListener('click', () => {
+        const name = prompt('Folder name:');
+        if (!name) return;
+        post({ action: 'create_folder', name, parent_id: 0 }).then(d => {
+            if (d.ok) location.reload();
+            else alert('Error: ' + d.msg);
+        });
+    });
+
+    // ── Rename folder ──────────────────────────────────────────
+    window.renameFolderPrompt = function (id, current) {
+        const name = prompt('Rename folder:', current);
+        if (!name || name === current) return;
+        post({ action: 'rename_folder', id, name }).then(d => {
+            if (d.ok) location.reload();
+            else alert('Error: ' + d.msg);
+        });
+    };
+
+    // ── Delete folder ──────────────────────────────────────────
+    window.deleteFolder = function (id) {
+        if (!confirm('Delete this folder? Files inside will be moved to root.')) return;
+        post({ action: 'delete_folder', id }).then(d => {
+            if (d.ok) location.reload();
+            else alert('Error: ' + d.msg);
+        });
+    };
+})();
 </script>
 
 <?php require_once 'footer.php'; ?>

@@ -74,6 +74,16 @@ switch ($action) {
             @mail($to, $subject, $body, 'From: noreply@' . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
         }
 
+        // Automation trigger
+        require_once dirname(__DIR__) . '/includes/automation-engine.php';
+        run_automations('form_submitted', array_merge($safe_data, [
+            '_event'          => 'form_submitted',
+            'form_id'         => $form_id,
+            'form_name'       => $form['name'],
+            'submitter_email' => $safe_data['email'] ?? ($safe_data['Email'] ?? ''),
+            'submitter_name'  => $safe_data['name']  ?? ($safe_data['Name']  ?? ''),
+        ]));
+
         echo json_encode(['success' => true, 'submission_id' => $submission_id]);
         break;
 

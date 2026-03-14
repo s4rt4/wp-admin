@@ -74,6 +74,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'posts-tags') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-tags">Tags</a></li>
                 <li class="<?php echo($topic === 'posts-scheduled') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-scheduled">Scheduled Publishing</a></li>
                 <li class="<?php echo($topic === 'posts-content-lock') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-content-lock">Content Lock</a></li>
+                <li class="<?php echo($topic === 'posts-multilang') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-multilang">Multi-language</a></li>
             </ul>
         </li>
 
@@ -87,6 +88,7 @@ $l = $labels[$lang];
                 <li class="wp-first-item <?php echo($topic === 'media-library' || $topic === 'media') ? 'current' : ''; ?>"><a href="docs.php?topic=media-library">Library</a></li>
                 <li class="<?php echo($topic === 'media-new') ? 'current' : ''; ?>"><a href="docs.php?topic=media-new">Add New</a></li>
                 <li class="<?php echo($topic === 'media-image-optimizer') ? 'current' : ''; ?>"><a href="docs.php?topic=media-image-optimizer">Image Optimizer</a></li>
+                <li class="<?php echo($topic === 'media-folders') ? 'current' : ''; ?>"><a href="docs.php?topic=media-folders">Folders</a></li>
             </ul>
         </li>
 
@@ -164,6 +166,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-audit-log') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-audit-log">Audit Log</a></li>
                 <li class="<?php echo($topic === 'tools-notifications') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-notifications">Notification Center</a></li>
                 <li class="<?php echo($topic === 'tools-analytics') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-analytics">Analytics</a></li>
+                <li class="<?php echo($topic === 'tools-automations') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-automations">Automations</a></li>
             </ul>
         </li>
 
