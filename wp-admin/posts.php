@@ -160,7 +160,7 @@ $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as lo
                 <?php if ($result->num_rows > 0): ?>
                     <?php while($row = $result->fetch_assoc()): ?>
                         <tr class="iedit author-self level-0 post-<?php echo $row['id']; ?> type-post status-publish format-standard hentry category-uncategorized">
-                            <th scope="row" class="check-column"><input id="cb-select-<?php echo $row['id']; ?>" type="checkbox" name="post[]" value="<?php echo $row['id']; ?>"></th>
+                            <td class="check-column"><input id="cb-select-<?php echo $row['id']; ?>" type="checkbox" name="post[]" value="<?php echo $row['id']; ?>"></td>
                             <td class="thumb column-thumb" data-colname="Image">
                                 <?php if (!empty($row['featured_image'])): 
                                     $img_url = $row['featured_image'];

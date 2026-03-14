@@ -11,15 +11,23 @@ if (!current_user_can('edit_posts')) {
 
 $post_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $post = [
-    'title' => '',
-    'slug' => '',
-    'content' => '',
-    'status' => 'draft',
-    'visibility' => 'public',
-    'created_at' => date('Y-m-d H:i:s'),
-    'scheduled_at' => null,
-    'lang' => 'id',
+    'title'          => '',
+    'slug'           => '',
+    'content'        => '',
+    'status'         => 'draft',
+    'visibility'     => 'public',
+    'created_at'     => date('Y-m-d H:i:s'),
+    'scheduled_at'   => null,
+    'lang'           => 'id',
     'translation_of' => null,
+    'featured_image' => '',
+    'meta_title'     => '',
+    'meta_desc'      => '',
+    'focus_keyword'  => '',
+    'author_id'      => $_SESSION['user_id'] ?? 0,
+    'is_featured'    => 0,
+    'locked_by'      => null,
+    'locked_at'      => null,
 ];
 
 // Ensure columns exist
@@ -491,7 +499,7 @@ endif; ?>
 
                                         <div class="misc-pub-section misc-pub-language">
                                             Language:&nbsp;
-                                            <select name="lang" id="post_lang" style="font-size:12px;padding:2px 4px;border:1px solid #8c8f94;border-radius:3px;">
+                                            <select name="lang" id="post_lang" style="font-size:12px;padding:2px 24px 2px 4px;border:1px solid #8c8f94;border-radius:3px;min-width:180px;">
                                                 <option value="id" <?php echo ($post['lang'] ?? 'id') === 'id' ? 'selected' : ''; ?>>🇮🇩 Indonesian (ID)</option>
                                                 <option value="en" <?php echo ($post['lang'] ?? 'id') === 'en' ? 'selected' : ''; ?>>🇬🇧 English (EN)</option>
                                             </select>

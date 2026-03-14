@@ -10,6 +10,27 @@ require_once 'includes/automation-engine.php';
 
 $pdo = getDBConnection();
 
+// ── Ensure tables exist ────────────────────────────────────────────────────────
+$pdo->exec("CREATE TABLE IF NOT EXISTS `automations` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `trigger_event` VARCHAR(64) NOT NULL,
+    `trigger_config` JSON,
+    `conditions` JSON,
+    `actions` JSON NOT NULL,
+    `active` TINYINT(1) NOT NULL DEFAULT 1,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+$pdo->exec("CREATE TABLE IF NOT EXISTS `automation_logs` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `automation_id` INT NOT NULL,
+    `trigger_data` JSON,
+    `result` VARCHAR(32) NOT NULL DEFAULT 'ok',
+    `message` TEXT,
+    `ran_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY `idx_auto` (`automation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
 // ── Actions ────────────────────────────────────────────────────────────────────
 $msg = '';
 

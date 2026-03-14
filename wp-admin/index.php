@@ -102,7 +102,7 @@ include 'header.php';
                 <!-- Add Widget dropdown -->
                 <div id="dw-add-widget-wrap">
                     <button type="button" id="dw-add-widget-btn" class="button button-secondary">
-                        <span class="dashicons dashicons-plus-alt2" style="font-size:14px;height:14px;width:14px;vertical-align:middle;margin-right:2px;"></span>
+                        <i class="fa-solid fa-plus" style="font-size:12px;margin-right:3px;"></i>
                         Add Widget
                     </button>
                     <div id="dw-add-widget-panel">
@@ -120,7 +120,7 @@ include 'header.php';
                 </div>
 
                 <a href="widgets.php" class="button button-secondary" style="display:inline-flex;align-items:center;gap:4px;">
-                    <span class="dashicons dashicons-editor-ul" style="font-size:14px;height:14px;width:14px;vertical-align:middle;"></span>
+                    <i class="fa-solid fa-sliders" style="font-size:12px;margin-right:3px;"></i>
                     Manage All
                 </a>
 

@@ -14,6 +14,7 @@ if ($_fav): ?>
 endif; ?>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="colors.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous">
     <script>if(localStorage.getItem('wp_dark_mode')==='true')document.documentElement.classList.add('dark-mode');</script>
 </head>
 <?php

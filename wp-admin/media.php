@@ -139,7 +139,7 @@ function formatFileSize($bytes) {
             <span class="dashicons dashicons-category" style="font-size:14px;height:14px;width:14px;color:#0073aa;"></span>
             <strong>Folders</strong>
             <button type="button" id="mfs-new-root-btn" title="New top-level folder" class="mfs-icon-btn">
-                <span class="dashicons dashicons-plus-alt2"></span>
+                <i class="fa-solid fa-folder-plus"></i>
             </button>
         </div>
         <ul class="mfs-tree" id="mfs-tree">
@@ -166,8 +166,8 @@ function formatFileSize($bytes) {
                     echo "<div class='mfs-row'>";
                     echo "  <a href='{$link}' class='mfs-link'><span class='dashicons dashicons-portfolio'></span> " . htmlspecialchars($f['name']) . " <span class='mfs-count'>({$count})</span></a>";
                     echo "  <span class='mfs-actions'>";
-                    echo "    <button class='mfs-icon-btn' onclick=\"renameFolderPrompt({$fid}, '" . addslashes($f['name']) . "')\" title='Rename'><span class='dashicons dashicons-edit'></span></button>";
-                    echo "    <button class='mfs-icon-btn mfs-del' onclick=\"deleteFolder({$fid})\" title='Delete'><span class='dashicons dashicons-trash'></span></button>";
+                    echo "    <button class='mfs-icon-btn' onclick=\"renameFolderPrompt({$fid}, '" . addslashes($f['name']) . "')\" title='Rename'><i class='fa-solid fa-pen' style='font-size:11px;'></i></button>";
+                    echo "    <button class='mfs-icon-btn mfs-del' onclick=\"deleteFolder({$fid})\" title='Delete'><i class='fa-solid fa-trash' style='font-size:11px;'></i></button>";
                     echo "  </span>";
                     echo "</div>";
                     // Children
@@ -376,9 +376,8 @@ function formatFileSize($bytes) {
         border-bottom:1px solid #e5e5e5; background:#f6f7f7; font-size:12px; font-weight:600; color:#1d2327;
     }
     .mfs-header strong { flex:1; }
-    .mfs-icon-btn { background:none; border:none; cursor:pointer; padding:2px; color:#aaa; line-height:1; border-radius:3px; }
+    .mfs-icon-btn { background:none; border:none; cursor:pointer; padding:2px 4px; color:#aaa; line-height:1; border-radius:3px; }
     .mfs-icon-btn:hover { color:#0073aa; background:#e7f4ff; }
-    .mfs-icon-btn .dashicons { font-size:14px; width:14px; height:14px; }
     .mfs-del:hover { color:#d63638 !important; background:#fef2f2 !important; }
 
     .mfs-tree, .mfs-subtree { list-style:none; margin:0; padding:0; }
