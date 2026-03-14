@@ -75,6 +75,9 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'posts-scheduled') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-scheduled">Scheduled Publishing</a></li>
                 <li class="<?php echo($topic === 'posts-content-lock') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-content-lock">Content Lock</a></li>
                 <li class="<?php echo($topic === 'posts-multilang') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-multilang">Multi-language</a></li>
+                <li class="<?php echo($topic === 'posts-seo') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-seo">SEO Settings</a></li>
+                <li class="<?php echo($topic === 'posts-calendar') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-calendar">Content Calendar</a></li>
+                <li class="<?php echo($topic === 'posts-custom-fields') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-custom-fields">Custom Fields</a></li>
             </ul>
         </li>
 

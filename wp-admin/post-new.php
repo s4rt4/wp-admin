@@ -156,6 +156,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // --- Save Custom Fields ---
+        $conn->query("CREATE TABLE IF NOT EXISTS post_meta (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            post_id INT NOT NULL,
+            meta_key VARCHAR(255) NOT NULL,
+            meta_value LONGTEXT,
+            INDEX idx_post (post_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $conn->query("DELETE FROM post_meta WHERE post_id=$post_id");
+        if (isset($_POST['cf_keys']) && is_array($_POST['cf_keys'])) {
+            $stmt_cf  = $conn->prepare("INSERT INTO post_meta (post_id, meta_key, meta_value) VALUES (?, ?, ?)");
+            $cf_vals  = $_POST['cf_values'] ?? [];
+            foreach ($_POST['cf_keys'] as $i => $cf_key) {
+                $cf_key = trim($cf_key);
+                if ($cf_key === '') continue;
+                $cf_val = trim($cf_vals[$i] ?? '');
+                $stmt_cf->bind_param("iss", $post_id, $cf_key, $cf_val);
+                $stmt_cf->execute();
+            }
+        }
+
         // Redirect to edit page
         // --- Save Revision Snapshot ---
         $conn->query("CREATE TABLE IF NOT EXISTS post_revisions (
@@ -231,6 +252,20 @@ if ($post_id > 0) {
             die("Access denied. You cannot edit this post.");
         }
     }
+}
+
+// Load Custom Fields
+$custom_fields = [];
+if ($post_id > 0) {
+    $conn->query("CREATE TABLE IF NOT EXISTS post_meta (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        post_id INT NOT NULL,
+        meta_key VARCHAR(255) NOT NULL,
+        meta_value LONGTEXT,
+        INDEX idx_post (post_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $cf_res = $conn->query("SELECT meta_key, meta_value FROM post_meta WHERE post_id=$post_id ORDER BY id");
+    if ($cf_res) { while ($cf_row = $cf_res->fetch_assoc()) { $custom_fields[] = $cf_row; } }
 }
 
 // ─── Content Lock ────────────────────────────────────────────────
@@ -390,25 +425,56 @@ endif; ?>
                         </div>
                         <div id="word-count" style="margin-top: 5px; color: #666; font-size: 13px;">Word count: 0</div>
                         
-                        <!-- SEO Meta Box (Moved below editor) -->
-                        <div id="seo-metabox" class="postbox" style="margin-top: 20px; background:#fff; border:1px solid #ccd0d4; box-shadow:0 1px 1px rgba(0,0,0,.04);">
-                            <div class="hndle" style="cursor:pointer; padding:10px 15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                                <h2 style="margin:0; font-size:14px; font-weight:600;"><span>🔍 SEO Settings</span></h2>
+                        <!-- SEO Meta Box -->
+                        <?php
+                        $_seo_host = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+                        $_seo_slug = $post['slug'] ?? '';
+                        $_seo_sitename = htmlspecialchars(get_option('blogname', get_option('site_title', $_SERVER['HTTP_HOST'])));
+                        ?>
+                        <div id="seo-metabox" class="postbox" style="margin-top:20px;background:#fff;border:1px solid #ccd0d4;box-shadow:0 1px 1px rgba(0,0,0,.04);">
+                            <div class="hndle" style="cursor:pointer;padding:10px 15px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
+                                <h2 style="margin:0;font-size:14px;font-weight:600;"><span>🔍 SEO Settings</span></h2>
                                 <span class="toggle-indicator" style="color:#72777c;">▼</span>
                             </div>
                             <div class="inside" style="padding:15px;">
-                                <!-- Google Preview -->
-                                <div id="seo-preview" style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:12px 14px;margin-bottom:20px;font-family:arial,sans-serif;max-width:600px;">
-                                    <div style="font-size:20px;color:#1a0dab;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;" id="seo-prev-title"><?php echo htmlspecialchars($post['meta_title'] ?: $post['title']); ?></div>
-                                    <div style="font-size:14px;color:#006621;margin-bottom:2px;line-height:1.3;"><?php echo $_SERVER['HTTP_HOST'] . rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME']))), '/'); ?>/read.php?slug=<?php echo htmlspecialchars($post['slug'] ?? '...'); ?></div>
-                                    <div style="font-size:13px;color:#545454;line-height:1.4;" id="seo-prev-desc"><?php echo htmlspecialchars($post['meta_desc'] ?: 'No meta description set.'); ?></div>
+
+                                <!-- Preview Tabs -->
+                                <div style="display:flex;gap:6px;margin-bottom:12px;">
+                                    <button type="button" class="seo-tab-btn" data-tab="desktop" style="font-size:12px;padding:4px 12px;border-radius:4px;cursor:pointer;background:#f0f6fc;color:#1d2327;border:1px solid #2271b1;font-weight:600;">🖥 Desktop</button>
+                                    <button type="button" class="seo-tab-btn" data-tab="mobile"  style="font-size:12px;padding:4px 12px;border-radius:4px;cursor:pointer;background:none;color:#646970;border:1px solid transparent;">📱 Mobile</button>
+                                </div>
+
+                                <!-- Desktop Google Preview -->
+                                <div id="seo-preview-desktop" style="background:#fff;border:1px solid #dadce0;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-family:arial,sans-serif;max-width:600px;">
+                                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                                        <div style="width:26px;height:26px;background:#e8f0fe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🌐</div>
+                                        <div style="overflow:hidden;">
+                                            <div style="font-size:14px;line-height:1.3;color:#202124;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="seo-prev-sitename"><?php echo $_seo_sitename; ?></div>
+                                            <div style="font-size:12px;color:#4d5156;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="seo-prev-url"><?php echo htmlspecialchars($_seo_host . ($_seo_slug ? ' › ' . $_seo_slug : '')); ?></div>
+                                        </div>
+                                        <div style="margin-left:auto;color:#4d5156;font-size:18px;flex-shrink:0;cursor:default;">⋮</div>
+                                    </div>
+                                    <div style="font-size:20px;color:#1a0dab;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;cursor:pointer;" id="seo-prev-title"><?php echo htmlspecialchars($post['meta_title'] ?: $post['title']); ?></div>
+                                    <div style="font-size:14px;color:#4d5156;line-height:1.58;" id="seo-prev-desc"><?php echo htmlspecialchars($post['meta_desc'] ?: 'No meta description set.'); ?></div>
+                                </div>
+
+                                <!-- Mobile Google Preview (hidden) -->
+                                <div id="seo-preview-mobile" style="display:none;background:#fff;border:1px solid #dadce0;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-family:arial,sans-serif;max-width:360px;">
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                                        <div style="width:20px;height:20px;background:#e8f0fe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🌐</div>
+                                        <div style="overflow:hidden;">
+                                            <div style="font-size:12px;color:#202124;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="seo-prev-sitename-m"><?php echo $_seo_sitename; ?></div>
+                                            <div style="font-size:11px;color:#4d5156;" id="seo-prev-url-m"><?php echo htmlspecialchars($_seo_host); ?></div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size:18px;color:#1a0dab;margin-bottom:4px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="seo-prev-title-m"><?php echo htmlspecialchars($post['meta_title'] ?: $post['title']); ?></div>
+                                    <div style="font-size:13px;color:#4d5156;line-height:1.5;" id="seo-prev-desc-m"><?php echo htmlspecialchars($post['meta_desc'] ?: 'No meta description set.'); ?></div>
                                 </div>
 
                                 <!-- SEO Title -->
                                 <div style="margin-bottom:15px;">
                                     <label for="meta_title" style="display:block;font-size:13px;font-weight:600;margin-bottom:5px;">
-                                        SEO Title
-                                        <span id="meta_title_count" style="font-weight:normal;color:#888;margin-left:6px;">0/60</span>
+                                        SEO Title <span id="meta_title_count" style="font-weight:normal;color:#888;margin-left:6px;">0/60</span>
                                     </label>
                                     <input type="text" id="meta_title" name="meta_title" maxlength="80"
                                         value="<?php echo htmlspecialchars($post['meta_title'] ?? ''); ?>"
@@ -420,8 +486,7 @@ endif; ?>
                                 <!-- Meta Description -->
                                 <div style="margin-bottom:15px;">
                                     <label for="meta_desc" style="display:block;font-size:13px;font-weight:600;margin-bottom:4px;">
-                                        Meta Description
-                                        <span id="meta_desc_count" style="font-weight:normal;color:#888;margin-left:6px;">0/160</span>
+                                        Meta Description <span id="meta_desc_count" style="font-weight:normal;color:#888;margin-left:6px;">0/160</span>
                                     </label>
                                     <textarea id="meta_desc" name="meta_desc" maxlength="200" rows="3"
                                         placeholder="Brief description for search engines..."
@@ -430,13 +495,27 @@ endif; ?>
                                 </div>
 
                                 <!-- Focus Keyword -->
-                                <div style="margin-bottom:5px;">
+                                <div style="margin-bottom:16px;">
                                     <label for="focus_keyword" style="display:block;font-size:13px;font-weight:600;margin-bottom:4px;">Focus Keyword</label>
                                     <input type="text" id="focus_keyword" name="focus_keyword"
                                         value="<?php echo htmlspecialchars($post['focus_keyword'] ?? ''); ?>"
                                         placeholder="e.g. react hooks tutorial"
                                         style="width:100%;padding:8px 10px;border:1px solid #8c8f94;border-radius:4px;font-size:14px;box-sizing:border-box;">
-                                    <p style="font-size:12px;color:#646970;margin:4px 0 0;">Used to analyze keyword usage in your content.</p>
+                                </div>
+
+                                <!-- SEO Analysis -->
+                                <div id="seo-analysis-section" style="background:#f8f9fa;border:1px solid #e0e0e0;border-radius:6px;padding:12px 14px;">
+                                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                                        <strong style="font-size:13px;color:#1d2327;">SEO Analysis</strong>
+                                        <div style="display:flex;align-items:center;gap:8px;">
+                                            <div style="height:8px;width:80px;background:#e0e0e0;border-radius:4px;overflow:hidden;">
+                                                <div id="seo-score-fill" style="height:100%;width:0%;background:#d63638;border-radius:4px;transition:width .3s,background .3s;"></div>
+                                            </div>
+                                            <span id="seo-score-label" style="font-size:12px;font-weight:600;color:#d63638;min-width:28px;">0/8</span>
+                                        </div>
+                                    </div>
+                                    <div id="seo-checklist" style="display:flex;flex-direction:column;gap:5px;font-size:12px;"></div>
+                                    <p id="seo-kw-hint" style="font-size:11px;color:#888;margin:8px 0 0;">Enter a Focus Keyword above to run full analysis.</p>
                                 </div>
 
                             </div>
@@ -801,6 +880,47 @@ $img_src = $has_img ? '../' . htmlspecialchars($post['featured_image']) : '';
                         </script>
                         <?php
 endif; ?>
+
+                        <!-- Custom Fields Meta Box -->
+                        <div id="custom-fields-metabox" class="postbox">
+                            <div class="hndle" style="cursor:pointer;padding:10px 12px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
+                                <h2 style="margin:0;font-size:14px;font-weight:600;">🔧 Custom Fields</h2>
+                                <span class="toggle-indicator" style="color:#72777c;">▼</span>
+                            </div>
+                            <div class="inside" style="padding:12px 14px;">
+                                <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:left;padding:3px 4px;color:#646970;font-weight:600;border-bottom:1px solid #e0e0e0;width:42%;">Key</th>
+                                            <th style="text-align:left;padding:3px 4px;color:#646970;font-weight:600;border-bottom:1px solid #e0e0e0;">Value</th>
+                                            <th style="width:24px;border-bottom:1px solid #e0e0e0;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cf-rows">
+                                        <?php foreach ($custom_fields as $cf): ?>
+                                        <tr class="cf-row">
+                                            <td style="padding:3px 4px 3px 0;"><input type="text" name="cf_keys[]" value="<?php echo htmlspecialchars($cf['meta_key']); ?>" placeholder="key" style="width:100%;padding:4px 6px;border:1px solid #8c8f94;border-radius:3px;font-size:12px;box-sizing:border-box;"></td>
+                                            <td style="padding:3px 3px;"><input type="text" name="cf_values[]" value="<?php echo htmlspecialchars($cf['meta_value']); ?>" placeholder="value" style="width:100%;padding:4px 6px;border:1px solid #8c8f94;border-radius:3px;font-size:12px;box-sizing:border-box;"></td>
+                                            <td style="padding:3px 0 3px 3px;text-align:center;"><button type="button" onclick="this.closest('.cf-row').remove()" style="background:none;border:none;color:#d63638;cursor:pointer;font-size:16px;line-height:1;padding:1px 3px;">×</button></td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                                <button type="button" onclick="cfAddRow()" style="margin-top:10px;width:100%;padding:5px;border:1px dashed #8c8f94;background:#f8f9fa;border-radius:3px;cursor:pointer;font-size:12px;color:#3c434a;">+ Add Field</button>
+                            </div>
+                        </div>
+                        <script>
+                        function cfAddRow() {
+                            var tbody = document.getElementById('cf-rows');
+                            var tr = document.createElement('tr');
+                            tr.className = 'cf-row';
+                            tr.innerHTML = '<td style="padding:3px 4px 3px 0;"><input type="text" name="cf_keys[]" placeholder="key" style="width:100%;padding:4px 6px;border:1px solid #8c8f94;border-radius:3px;font-size:12px;box-sizing:border-box;"></td>'
+                                + '<td style="padding:3px 3px;"><input type="text" name="cf_values[]" placeholder="value" style="width:100%;padding:4px 6px;border:1px solid #8c8f94;border-radius:3px;font-size:12px;box-sizing:border-box;"></td>'
+                                + '<td style="padding:3px 0 3px 3px;text-align:center;"><button type="button" onclick="this.closest(\'.cf-row\').remove()" style="background:none;border:none;color:#d63638;cursor:pointer;font-size:16px;line-height:1;padding:1px 3px;">×</button></td>';
+                            tbody.appendChild(tr);
+                            tr.querySelector('input').focus();
+                        }
+                        </script>
 
                         </div>
 
@@ -1183,53 +1303,127 @@ document.addEventListener('keydown', function(e) {
             var count = document.getElementById(countId);
             var bar   = document.getElementById(barId);
             if (!input || !count || !bar) return;
-
             function update() {
                 var len = input.value.length;
                 count.textContent = len + '/' + max;
                 var pct = Math.min((len / max) * 100, 100);
                 bar.style.width = pct + '%';
-                if (len === 0) {
-                    bar.style.background = '#ddd';
-                    count.style.color = '#888';
-                } else if (len <= goodMax) {
-                    bar.style.background = '#00c853';
-                    count.style.color = '#00c853';
-                } else {
-                    bar.style.background = '#ff6d00';
-                    count.style.color = '#ff6d00';
-                }
+                if (len === 0)          { bar.style.background = '#ddd';     count.style.color = '#888'; }
+                else if (len <= goodMax){ bar.style.background = '#00c853';  count.style.color = '#00c853'; }
+                else                    { bar.style.background = '#ff6d00';  count.style.color = '#ff6d00'; }
             }
             input.addEventListener('input', update);
-            update(); // init
+            update();
         }
-
         seoCounter('meta_title', 'meta_title_count', 'meta_title_bar', 60, 60);
         seoCounter('meta_desc',  'meta_desc_count',  'meta_desc_bar',  160, 155);
 
-        // Live Google preview
         var metaTitleInput = document.getElementById('meta_title');
         var metaDescInput  = document.getElementById('meta_desc');
         var postTitleInput = document.getElementById('title');
-        var prevTitle = document.getElementById('seo-prev-title');
-        var prevDesc  = document.getElementById('seo-prev-desc');
+        var postSlugInput  = document.getElementById('slug');
+        var focusKwInput   = document.getElementById('focus_keyword');
+
+        function getEditorText() {
+            var html = '';
+            if (window._toastEditor) { try { html = window._toastEditor.getHTML(); } catch(e){} }
+            if (!html) { var ct = document.getElementById('content'); if (ct) html = ct.value; }
+            return html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+        }
 
         function updatePreview() {
-            if (prevTitle) {
-                var t = (metaTitleInput && metaTitleInput.value.trim()) ||
-                        (postTitleInput && postTitleInput.value.trim()) || '(No title)';
-                prevTitle.textContent = t;
+            var t = (metaTitleInput && metaTitleInput.value.trim()) ||
+                    (postTitleInput && postTitleInput.value.trim()) || '(No title)';
+            var d = (metaDescInput && metaDescInput.value.trim()) || 'No meta description set.';
+            var slug = postSlugInput ? postSlugInput.value.trim() : '';
+            ['seo-prev-title','seo-prev-title-m'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=t; });
+            ['seo-prev-desc', 'seo-prev-desc-m' ].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=d; });
+            // Update URL slug in previews
+            var urlEl  = document.getElementById('seo-prev-url');
+            var urlElM = document.getElementById('seo-prev-url-m');
+            if (urlEl && slug) {
+                var base = urlEl.textContent.split(' › ')[0] || urlEl.textContent;
+                urlEl.textContent = base + (slug ? ' › ' + slug : '');
             }
-            if (prevDesc) {
-                var d = (metaDescInput && metaDescInput.value.trim()) || 'No meta description set.';
-                prevDesc.textContent = d;
+            if (urlElM && slug) {
+                var baseM = urlElM.textContent.replace(/\/[^\/]*$/, '');
+                urlElM.textContent = baseM + '/' + slug;
+            }
+            updateAnalysis();
+        }
+
+        function updateAnalysis() {
+            var kw       = focusKwInput ? focusKwInput.value.trim().toLowerCase() : '';
+            var seoTitle = (metaTitleInput ? metaTitleInput.value : '').toLowerCase();
+            var title    = (postTitleInput ? postTitleInput.value : '').toLowerCase();
+            var desc     = (metaDescInput  ? metaDescInput.value  : '').toLowerCase();
+            var slug     = (postSlugInput  ? postSlugInput.value  : '').toLowerCase();
+            var content  = getEditorText().toLowerCase();
+            var words    = content.split(/\s+/).filter(Boolean).length;
+            var titleLen = metaTitleInput ? metaTitleInput.value.length : 0;
+            var descLen  = metaDescInput  ? metaDescInput.value.length  : 0;
+
+            var checks = [];
+            if (kw) {
+                var kwSlug = kw.replace(/\s+/g, '-');
+                checks.push({ ok: seoTitle.includes(kw),  text: 'Keyword in SEO title' });
+                checks.push({ ok: desc.includes(kw),      text: 'Keyword in meta description' });
+                checks.push({ ok: title.includes(kw),     text: 'Keyword in post title' });
+                checks.push({ ok: slug.includes(kwSlug),  text: 'Keyword in URL slug' });
+                checks.push({ ok: content.includes(kw),   text: 'Keyword in content' });
+            }
+            var titleOk   = titleLen >= 30 && titleLen <= 60;
+            var titleWarn = titleLen > 0 && !titleOk;
+            var descOk    = descLen  >= 120 && descLen  <= 160;
+            var descWarn  = descLen  > 0 && !descOk;
+            checks.push({ ok: titleOk, warn: titleWarn, text: 'SEO title length (30–60 chars, now: ' + titleLen + ')' });
+            checks.push({ ok: descOk,  warn: descWarn,  text: 'Meta description length (120–160 chars, now: ' + descLen + ')' });
+            checks.push({ ok: words >= 300,              text: 'Content length (≥300 words, now: ' + words + ')' });
+
+            var score = checks.filter(function(c){ return c.ok; }).length;
+            var total = checks.length;
+            var pct   = total > 0 ? Math.round((score / total) * 100) : 0;
+            var color = pct >= 75 ? '#00a32a' : pct >= 45 ? '#dba617' : '#d63638';
+
+            var fill  = document.getElementById('seo-score-fill');
+            var label = document.getElementById('seo-score-label');
+            var list  = document.getElementById('seo-checklist');
+            var hint  = document.getElementById('seo-kw-hint');
+
+            if (fill)  { fill.style.width = pct + '%'; fill.style.background = color; }
+            if (label) { label.textContent = score + '/' + total; label.style.color = color; }
+            if (hint)  { hint.style.display = kw ? 'none' : ''; }
+            if (list)  {
+                list.innerHTML = checks.map(function(c) {
+                    var icon = c.ok ? '✅' : (c.warn ? '⚠️' : '❌');
+                    var col  = c.ok ? '#00a32a' : (c.warn ? '#b45309' : '#d63638');
+                    return '<div style="display:flex;align-items:center;gap:6px;"><span>' + icon + '</span>'
+                         + '<span style="color:' + col + ';">' + c.text + '</span></div>';
+                }).join('');
             }
         }
 
         if (metaTitleInput) metaTitleInput.addEventListener('input', updatePreview);
         if (metaDescInput)  metaDescInput.addEventListener('input', updatePreview);
         if (postTitleInput) postTitleInput.addEventListener('input', updatePreview);
+        if (postSlugInput)  postSlugInput.addEventListener('input', updatePreview);
+        if (focusKwInput)   focusKwInput.addEventListener('input', updatePreview);
         updatePreview();
+
+        // SEO Preview tab toggle
+        document.querySelectorAll('.seo-tab-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.seo-tab-btn').forEach(function(b) {
+                    b.style.background = 'none'; b.style.color = '#646970';
+                    b.style.border = '1px solid transparent'; b.style.fontWeight = 'normal';
+                });
+                this.style.background = '#f0f6fc'; this.style.color = '#1d2327';
+                this.style.border = '1px solid #2271b1'; this.style.fontWeight = '600';
+                var tab = this.dataset.tab;
+                document.getElementById('seo-preview-desktop').style.display = tab === 'desktop' ? '' : 'none';
+                document.getElementById('seo-preview-mobile').style.display  = tab === 'mobile'  ? '' : 'none';
+            });
+        });
 
         // Toggle Postboxes
         document.querySelectorAll('.postbox .hndle').forEach(function(h) {

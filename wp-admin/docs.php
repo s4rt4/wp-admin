@@ -82,6 +82,9 @@ function topic_label(string $topic): string
         'settings-role-visibility' => 'Role Menu Visibility',
         'media-folders' => 'Media Folders',
         'posts-multilang' => 'Multi-language',
+        'posts-seo' => 'SEO Settings',
+        'posts-calendar' => 'Content Calendar',
+        'posts-custom-fields' => 'Custom Fields',
         'tools-automations' => 'Automations',
     ];
     return $map[$topic] ?? ucwords(str_replace('-', ' ', $topic));

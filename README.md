@@ -1,6 +1,6 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, and a visual automation/workflow builder.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, and custom fields.
 
 ## Features
 
@@ -12,6 +12,13 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - **Monaco Editor:** IDE-like code editor for raw HTML, CSS, JavaScript, and PHP snippets.
 - **Scheduled Publishing:** Set a future publish date/time for any post; goes live automatically.
 - **Content Lock:** Prevents simultaneous editing by multiple users.
+- **SEO Settings:**
+    - Live Google snippet preview (desktop & mobile tabs) that updates as you type.
+    - Character-length progress bars for SEO title (30–60 chars) and meta description (120–160 chars).
+    - **SEO Analysis checklist** with 8 checks: keyword in SEO title, meta description, post title, URL slug, and content body; plus title length, description length, and content word count.
+    - Score bar (0–8) with green/yellow/red threshold colours.
+- **Content Calendar:** Monthly calendar view of published (green) and scheduled (orange) posts with ← / → month navigation, today highlight, click-to-edit events, and per-month stats.
+- **Custom Fields:** Free-form key/value metadata on any post, stored in `post_meta`. Add, edit, and delete rows inline in the sidebar; saved automatically with the post.
 - **Multi-language / i18n:**
     - Per-post and per-page language field (`id` / `en`).
     - Language filter tabs (🇮🇩 / 🇬🇧) in the Posts and Pages list.

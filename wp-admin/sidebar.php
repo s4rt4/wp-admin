@@ -42,6 +42,7 @@ function rmv_can_see(string $slug): bool {
                 <li><a href="posts.php?status=draft">Drafts</a></li>
                 <li><a href="categories.php">Categories</a></li>
                 <li><a href="tags.php">Tags</a></li>
+                <li><a href="calendar.php">📅 Calendar</a></li>
             </ul>
         </li>
         <?php
