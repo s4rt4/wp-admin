@@ -1,4 +1,10 @@
 <?php
+// Redirect to installer if CMS has not been set up yet
+if (!file_exists(__DIR__ . '/wp-config.php')) {
+    header('Location: install.php');
+    exit;
+}
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

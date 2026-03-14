@@ -1,9 +1,14 @@
 <?php
-// Database configuration
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'wp-admin');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// Load installer-generated config if present (created by install.php)
+$_wpc = __DIR__ . '/wp-config.php';
+if (file_exists($_wpc)) { require_once $_wpc; }
+unset($_wpc);
+
+// Database configuration (defaults — overridden by wp-config.php above)
+if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
+if (!defined('DB_NAME')) define('DB_NAME', 'wp-admin');
+if (!defined('DB_USER')) define('DB_USER', 'root');
+if (!defined('DB_PASS')) define('DB_PASS', '');
 
 // Create database connection
 function getDBConnection() {

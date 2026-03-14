@@ -1,0 +1,17 @@
+# Installer-generated config (contains DB credentials — never commit)
+wp-admin/wp-config.php
+
+# Uploads / user-generated files
+uploads/
+wp-admin/media/
+
+# Backups
+backups/
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
