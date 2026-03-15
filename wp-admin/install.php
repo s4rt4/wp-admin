@@ -788,11 +788,11 @@ $db = $_SESSION['install_db'] ?? ['host' => 'localhost', 'name' => '', 'user' =>
                 </div>
                 <div class="form-group">
                     <label><?php echo $t['db_user']; ?></label>
-                    <input type="text" name="db_user" id="db_user" value="<?php echo htmlspecialchars($db['user']); ?>" placeholder="root" required>
+                    <input type="text" name="db_user" id="db_user" value="<?php echo htmlspecialchars($db['user']); ?>" placeholder="root" autocomplete="off" required>
                 </div>
                 <div class="form-group">
                     <label><?php echo $t['db_pass']; ?></label>
-                    <input type="password" name="db_pass" id="db_pass" value="">
+                    <input type="password" name="db_pass" id="db_pass" value="" autocomplete="off">
                 </div>
 
                 <div id="db-test-result"></div>
@@ -844,19 +844,19 @@ $db = $_SESSION['install_db'] ?? ['host' => 'localhost', 'name' => '', 'user' =>
                 </div>
                 <div class="form-group">
                     <label><?php echo $t['admin_user']; ?></label>
-                    <input type="text" name="admin_user" value="<?php echo htmlspecialchars($_POST['admin_user'] ?? 'admin'); ?>" required>
+                    <input type="text" name="admin_user" value="<?php echo htmlspecialchars($_POST['admin_user'] ?? 'admin'); ?>" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label><?php echo $t['admin_email']; ?></label>
-                    <input type="email" name="admin_email" value="<?php echo htmlspecialchars($_POST['admin_email'] ?? ''); ?>" required>
+                    <input type="email" name="admin_email" value="<?php echo htmlspecialchars($_POST['admin_email'] ?? ''); ?>" autocomplete="email" required>
                 </div>
                 <div class="form-group">
                     <label><?php echo $t['admin_pass']; ?></label>
-                    <input type="password" name="admin_pass" required>
+                    <input type="password" name="admin_pass" autocomplete="new-password" required>
                 </div>
                 <div class="form-group">
                     <label><?php echo $t['admin_pass2']; ?></label>
-                    <input type="password" name="admin_pass2" required>
+                    <input type="password" name="admin_pass2" autocomplete="new-password" required>
                 </div>
 
                 <div class="form-actions">
