@@ -3,7 +3,13 @@
  * Front Controller & Router
  */
 
-require_once 'wp-admin/db_config.php';
+// Redirect to installer if CMS has not been set up yet
+if (!file_exists(__DIR__ . '/wp-admin/wp-config.php')) {
+    header('Location: wp-admin/install.php');
+    exit;
+}
+
+require_once __DIR__ . '/wp-admin/db_config.php';
 
 // Parse Request
 $request_uri = $_SERVER['REQUEST_URI'];

@@ -201,6 +201,9 @@ function run_installation(array $db, string $site_name, string $site_url,
 
         // 4. Write wp-config.php
         write_wp_config($db['host'], $dbname, $db['user'], $db['pass']);
+        if (!file_exists(__DIR__ . '/wp-config.php')) {
+            throw new Exception('Cannot write wp-config.php — directory is not writable by the web server. Run: sudo chown www-data:www-data ' . __DIR__);
+        }
         $log[] = 'config_saved';
 
         return ['ok' => true, 'log' => $log, 'admin_user' => $admin_user];

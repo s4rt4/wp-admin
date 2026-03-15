@@ -1,4 +1,10 @@
 <?php
+// Redirect to installer if CMS has not been set up yet
+if (!file_exists(__DIR__ . '/wp-config.php') && php_sapi_name() !== 'cli') {
+    header('Location: install.php');
+    exit;
+}
+
 // Load installer-generated config if present (created by install.php)
 $_wpc = __DIR__ . '/wp-config.php';
 if (file_exists($_wpc)) { require_once $_wpc; }
