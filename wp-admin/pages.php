@@ -150,7 +150,7 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
                 <?php if (count($pages) > 0): ?>
                     <?php foreach ($pages as $page): ?>
                         <tr class="iedit level-0 page-<?php echo $page['id']; ?> type-page status-<?php echo $page['status']; ?>">
-                            <th scope="row" class="check-column"><input type="checkbox" name="page[]" value="<?php echo $page['id']; ?>"></th>
+                            <td class="check-column"><input type="checkbox" name="page[]" value="<?php echo $page['id']; ?>"></td>
                             <td class="title column-title has-row-actions column-primary page-title" data-colname="Title">
                                 <strong>
                                     <a class="row-title" href="builder.php?id=<?php echo $page['id']; ?>">
