@@ -176,7 +176,7 @@ $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as lo
         </ul>
 
         <!-- Language filter tabs -->
-        <div style="margin:8px 0 12px;display:flex;gap:6px;align-items:center;">
+        <div style="clear:both;margin:8px 0 12px;display:flex;gap:6px;align-items:center;">
             <span style="font-size:12px;color:#646970;">Language:</span>
             <?php
             $qs_status = $status_filter !== 'all' ? '&status=' . urlencode($status_filter) : '';
