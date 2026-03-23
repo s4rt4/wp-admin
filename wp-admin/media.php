@@ -227,12 +227,12 @@ function formatFileSize($bytes) {
                     <li><a href="media.php?type=video" class="<?php echo $typeFilter == 'video' ? 'current' : ''; ?>">Videos <span class="count">(<?php echo $videoCount; ?>)</span></a></li>
                 </ul>
             </div>
-            <div class="media-toolbar-right">
+            <div class="media-toolbar-right view-switch">
                 <button type="button" class="view-switch-btn active" data-view="grid" title="Grid view">
-                    <span class="dashicons dashicons-grid-view"></span>
+                    <i class="fa-solid fa-table-cells"></i>
                 </button>
                 <button type="button" class="view-switch-btn" data-view="list" title="List view">
-                    <span class="dashicons dashicons-list-view"></span>
+                    <i class="fa-solid fa-list"></i>
                 </button>
             </div>
         </div>
@@ -424,14 +424,29 @@ function formatFileSize($bytes) {
     ul.subsubsub li a { color: #0073aa; text-decoration: none; padding: 0.2em; }
     ul.subsubsub li a.current { color: #000; font-weight: 600; }
 
-    .view-switch-btn {
-        background: #f0f0f1; border: 1px solid #c3c4c7; padding: 4px 8px; cursor: pointer;
-        color: #999; border-radius: 0; line-height: 1;
+    .view-switch {
+        display: inline-flex;
+        border: 1px solid #c3c4c7;
+        border-radius: 4px;
+        overflow: hidden;
     }
-    .view-switch-btn:first-child { border-radius: 3px 0 0 3px; }
-    .view-switch-btn:last-child { border-radius: 0 3px 3px 0; margin-left: -1px; }
-    .view-switch-btn.active { background: #fff; color: #0073aa; border-color: #0073aa; z-index: 1; position: relative; }
-    .view-switch-btn .dashicons { font-size: 18px; width: 18px; height: 18px; }
+    .view-switch-btn {
+        background: #f6f7f7;
+        border: none;
+        padding: 7px 12px;
+        cursor: pointer;
+        color: #787c82;
+        line-height: 1;
+        font-size: 14px;
+        transition: background .15s, color .15s;
+        display: flex;
+        align-items: center;
+        gap: 0;
+    }
+    .view-switch-btn + .view-switch-btn { border-left: 1px solid #c3c4c7; }
+    .view-switch-btn:hover { background: #f0f0f1; color: #2271b1; }
+    .view-switch-btn.active { background: #2271b1; color: #fff; }
+    .view-switch-btn i { font-size: 14px; }
 
     /* Upload Modal */
     .upload-modal-backdrop {
