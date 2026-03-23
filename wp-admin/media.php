@@ -1120,12 +1120,19 @@ function openTuiEditor() {
     }
     document.getElementById('tui-editor-container').innerHTML = '';
 
-    // Init TUI Image Editor
+    // Build absolute URL
+    var absUrl = window._editImgUrl;
+    if (absUrl && absUrl.indexOf('http') !== 0) {
+        absUrl = window.location.origin + (absUrl.charAt(0) === '/' ? '' : '/') + absUrl;
+    }
+    absUrl += (absUrl.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+
+    // Init TUI Image Editor with a blank 1x1 placeholder first
     _tuiInstance = new tui.ImageEditor('#tui-editor-container', {
         includeUI: {
             loadImage: {
-                path: window._editImgUrl + '?t=' + Date.now(),
-                name: 'current'
+                path: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                name: 'blank'
             },
             theme: {
                 'common.bi.image': '',
@@ -1151,10 +1158,17 @@ function openTuiEditor() {
         usageStatistics: false
     });
 
-    // Fix canvas size after render
+    // Load the actual image after editor is ready
     setTimeout(function() {
-        if (_tuiInstance) _tuiInstance.ui.resizeEditor();
-    }, 300);
+        if (!_tuiInstance) return;
+        _tuiInstance.loadImageFromURL(absUrl, 'current').then(function() {
+            _tuiInstance.ui.resizeEditor();
+            _tuiInstance.ui.activeMenuEvent();
+        }).catch(function(err) {
+            console.error('TUI loadImage failed:', err);
+            alert('Failed to load image. The file may be too large or inaccessible.');
+        });
+    }, 500);
 }
 
 function closeTuiEditor() {
