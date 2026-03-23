@@ -1,6 +1,6 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, custom fields, a WordPress-like first-run installer, trash/recycle bin, CSV import/export, maintenance mode, and user activity tracking.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, custom fields, a WordPress-like first-run installer, trash/recycle bin, CSV import/export, maintenance mode, user activity tracking, a redirects manager, revision diff viewer, and related posts.
 
 ## Features
 
@@ -23,6 +23,9 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 - **CSV Import/Export:**
     - Export posts to CSV with status and language filters. Includes title, content, categories, tags, SEO fields, and more.
     - Import posts from CSV with duplicate handling (skip, overwrite, or rename). Categories and tags are auto-created if they don't exist.
+- **Revision Diff Viewer:** Side-by-side comparison of any two revisions, with red (removed) and green (added) highlighting. Compare button on every revision entry in the sidebar.
+- **Related Posts:** Select related articles from a sidebar metabox in the post editor. Stored in `post_relations` table, displayed as suggestions on the frontend.
+- **Duplicate Post/Page:** One-click clone of any post or page, including content and settings, created as a draft with a unique slug.
 - **Multi-language / i18n:**
     - Per-post and per-page language field (`id` / `en`).
     - Language filter tabs (🇮🇩 / 🇬🇧) in the Posts and Pages list.
@@ -128,6 +131,7 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - Execution log with result status and error messages for every run.
 - **Appearance & Menu Builder:** Customise colours and navigation menus.
 - **Maintenance Mode:** Toggle on/off from General Settings — frontend displays a branded "Under Maintenance" page (503) while admin panel remains accessible. Custom message support.
+- **Redirects Manager:** Create and manage 301/302 URL redirects from the admin panel. Hit counter, enable/disable toggle, edit modal. Processed by the front controller before routing.
 - **Database Backup & Restore** interface.
 - **Export / Import** content tools (JSON and CSV).
 

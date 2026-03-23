@@ -80,14 +80,14 @@ Batch 1–2 telah **selesai dieksekusi**. Batch Ketiga sedang direncanakan.
 | 3 | **Maintenance Mode** | Toggle di General Settings — frontend tampilkan halaman 503 "Under Maintenance" dengan custom message. Admin tetap bisa akses. | ✅ Done |
 | 4 | **User Activity Log** | Halaman user-activity.php — lihat siapa online (green dot), last login, last activity. Summary cards: online now, logged in today, total users. | ✅ Done |
 
-### Tier 2 — Sedang (logika tambahan)
+### Tier 2 — Sedang (logika tambahan) ✅ DONE
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 5 | **Redirects Manager** | Kelola 301/302 redirect dari admin panel — berguna untuk SEO saat URL berubah. | Pending |
-| 6 | **Content Versioning / Diff Viewer** | Bandingkan 2 versi revisi post side-by-side dengan highlight diff (sudah ada revisi, tinggal tambah visual diff). | Pending |
-| 7 | **Duplicate Post/Page** | Tombol 1 klik untuk clone post/page beserta custom fields-nya. | Pending |
-| 8 | **Related Posts** | Pilih manual atau auto-suggest berdasarkan kategori/tag yang sama. | Pending |
+| 5 | **Redirects Manager** | Halaman redirects.php — kelola 301/302 redirect, hit counter, enable/disable toggle, edit modal. Diproses oleh front controller sebelum routing. | ✅ Done |
+| 6 | **Content Versioning / Diff Viewer** | Tombol Compare di setiap revisi — buka modal side-by-side diff dengan highlight merah (hapus) dan hijau (tambah). | ✅ Done |
+| 7 | **Duplicate Post/Page** | Sudah ada sejak batch sebelumnya — tombol Duplicate di row actions posts.php dan pages.php. | ✅ Done (existing) |
+| 8 | **Related Posts** | Metabox Related Posts di sidebar post editor — pilih dari dropdown, simpan ke tabel post_relations, tampil sebagai saran di frontend. | ✅ Done |
 
 ### Tier 3 — Besar (arsitektur baru)
 

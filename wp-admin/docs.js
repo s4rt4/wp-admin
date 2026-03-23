@@ -75,8 +75,11 @@
         { title: 'Content Calendar', section: 'Posts', topic: 'posts-calendar', keywords: 'calendar kalender bulan jadwal scheduled published konten rencana plan' },
         { title: 'Custom Fields', section: 'Posts', topic: 'posts-custom-fields', keywords: 'custom fields metadata post meta key value field tambahan data ekstra' },
         { title: 'Trash / Recycle Bin', section: 'Posts', topic: 'posts-trash', keywords: 'trash recycle bin hapus sampah restore pulihkan permanent delete kosongkan' },
+        { title: 'Revision Diff Viewer', section: 'Posts', topic: 'posts-diff', keywords: 'revision diff viewer compare bandingkan versi perbandingan side by side riwayat perubahan' },
+        { title: 'Related Posts', section: 'Posts', topic: 'posts-related', keywords: 'related posts terkait hubungan relasi artikel saran suggestion link' },
         // Tools (extended - Tier 1 Batch 3)
         { title: 'CSV Import/Export', section: 'Tools', topic: 'tools-csv', keywords: 'csv import export bulk massal post artikel download upload spreadsheet excel' },
+        { title: 'Redirects Manager', section: 'Tools', topic: 'tools-redirects', keywords: 'redirect 301 302 url pindah seo alihkan alamat forward rewrite manager' },
         { title: 'Maintenance Mode', section: 'Settings', topic: 'settings-maintenance', keywords: 'maintenance mode pemeliharaan offline 503 under construction tutup sementara' },
         // Users (extended - Tier 1 Batch 3)
         { title: 'User Activity', section: 'Users', topic: 'users-activity', keywords: 'user activity aktivitas online offline last login terakhir aktif status pengguna' },

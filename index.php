@@ -42,6 +42,17 @@ if ($script_dir !== '/' && strpos($path, $script_dir) === 0) {
 }
 $path = trim($path, '/');
 
+// Check custom redirects
+$_redir_path = '/' . $path;
+try {
+    $__rs = $conn->query("SELECT target_url, type FROM redirects WHERE source_url = '" . $conn->real_escape_string($_redir_path) . "' AND active = 1 LIMIT 1");
+    if ($__rs && $__rr = $__rs->fetch_assoc()) {
+        $conn->query("UPDATE redirects SET hits = hits + 1 WHERE source_url = '" . $conn->real_escape_string($_redir_path) . "'");
+        header('Location: ' . $__rr['target_url'], true, intval($__rr['type']));
+        exit;
+    }
+} catch (\Exception $e) {}
+
 // Router Logic
 
 // 1. Homepage

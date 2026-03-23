@@ -177,6 +177,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // --- Save Related Posts ---
+        $conn->query("CREATE TABLE IF NOT EXISTS post_relations (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            post_id INT NOT NULL,
+            related_post_id INT NOT NULL,
+            sort_order INT DEFAULT 0,
+            INDEX idx_post (post_id),
+            UNIQUE KEY uq_rel (post_id, related_post_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $conn->query("DELETE FROM post_relations WHERE post_id=$post_id");
+        if (isset($_POST['related_posts']) && is_array($_POST['related_posts'])) {
+            $stmt_rp = $conn->prepare("INSERT IGNORE INTO post_relations (post_id, related_post_id, sort_order) VALUES (?, ?, ?)");
+            $sort = 0;
+            foreach ($_POST['related_posts'] as $rp_id) {
+                $rp_id = intval($rp_id);
+                if ($rp_id > 0 && $rp_id != $post_id) {
+                    $stmt_rp->bind_param("iii", $post_id, $rp_id, $sort);
+                    $stmt_rp->execute();
+                    $sort++;
+                }
+            }
+        }
+
         // Redirect to edit page
         // --- Save Revision Snapshot ---
         $conn->query("CREATE TABLE IF NOT EXISTS post_revisions (
@@ -267,6 +290,25 @@ if ($post_id > 0) {
     $cf_res = $conn->query("SELECT meta_key, meta_value FROM post_meta WHERE post_id=$post_id ORDER BY id");
     if ($cf_res) { while ($cf_row = $cf_res->fetch_assoc()) { $custom_fields[] = $cf_row; } }
 }
+
+// Load Related Posts
+$related_posts = [];
+$all_posts_for_rel = [];
+if ($post_id > 0) {
+    $conn->query("CREATE TABLE IF NOT EXISTS post_relations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        post_id INT NOT NULL,
+        related_post_id INT NOT NULL,
+        sort_order INT DEFAULT 0,
+        INDEX idx_post (post_id),
+        UNIQUE KEY uq_rel (post_id, related_post_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $rp_res = $conn->query("SELECT related_post_id FROM post_relations WHERE post_id=$post_id ORDER BY sort_order");
+    if ($rp_res) { while ($rp_row = $rp_res->fetch_assoc()) { $related_posts[] = intval($rp_row['related_post_id']); } }
+}
+// Get all published posts for the dropdown (exclude current)
+$_ap_res = $conn->query("SELECT id, title FROM posts WHERE status != 'trash'" . ($post_id > 0 ? " AND id != $post_id" : '') . " ORDER BY title ASC");
+if ($_ap_res) { while ($_ap = $_ap_res->fetch_assoc()) { $all_posts_for_rel[] = $_ap; } }
 
 // ─── Content Lock ────────────────────────────────────────────────
 $locked_by_other = false;
@@ -847,6 +889,7 @@ $img_src = $has_img ? '../' . htmlspecialchars($post['featured_image']) : '';
                             if (el.style.display === 'none') { el.style.display = ''; icon.textContent = '▼'; }
                             else { el.style.display = 'none'; icon.textContent = '▶'; }
                         }
+                        var _revData = [];
                         function loadRevisions() {
                             fetch('api/revisions.php?action=list&post_id=<?php echo $post_id; ?>')
                                 .then(r=>r.json()).then(function(d){
@@ -855,12 +898,18 @@ $img_src = $has_img ? '../' . htmlspecialchars($post['featured_image']) : '';
                                         el.innerHTML = '<p style="color:#999;font-size:12px;text-align:center;padding:10px 0;">No revisions yet.</p>';
                                         return;
                                     }
-                                    el.innerHTML = d.data.map(function(r){
-                                        return '<div style="border-bottom:1px solid #f0f0f0;padding:8px 0;display:flex;justify-content:space-between;align-items:center;">'
-                                            + '<div><div style="font-size:12px;font-weight:600;">' + r.title + '</div>'
+                                    _revData = d.data;
+                                    el.innerHTML = d.data.map(function(r, i){
+                                        var compareBtn = (i < d.data.length - 1)
+                                            ? '<button onclick="compareRevisions('+r.id+','+d.data[i+1].id+')" style="padding:3px 8px;border:1px solid #8c8f94;border-radius:3px;background:#fff;color:#646970;cursor:pointer;font-size:11px;white-space:nowrap;" title="Compare with previous"><i class="fa-solid fa-code-compare"></i></button> '
+                                            : '';
+                                        return '<div style="border-bottom:1px solid #f0f0f0;padding:8px 0;display:flex;justify-content:space-between;align-items:center;gap:6px;">'
+                                            + '<div style="min-width:0;flex:1;"><div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (r.title||'(no title)') + '</div>'
                                             + '<div style="font-size:11px;color:#787c82;">' + r.revised_at + ' by ' + r.author + '</div></div>'
+                                            + '<div style="display:flex;gap:4px;flex-shrink:0;">'
+                                            + compareBtn
                                             + '<button onclick="restoreRevision('+r.id+')" style="padding:3px 10px;border:1px solid #2271b1;border-radius:3px;background:#fff;color:#2271b1;cursor:pointer;font-size:11px;white-space:nowrap;">Restore</button>'
-                                            + '</div>';
+                                            + '</div></div>';
                                     }).join('');
                                 });
                         }
@@ -876,8 +925,78 @@ $img_src = $has_img ? '../' . htmlspecialchars($post['featured_image']) : '';
                                     }
                                 });
                         }
+                        function compareRevisions(newId, oldId) {
+                            Promise.all([
+                                fetch('api/revisions.php?action=get&revision_id=' + newId).then(r=>r.json()),
+                                fetch('api/revisions.php?action=get&revision_id=' + oldId).then(r=>r.json())
+                            ]).then(function(arr){
+                                if (!arr[0].success || !arr[1].success) { alert('Failed to load revisions'); return; }
+                                showDiff(arr[1].data, arr[0].data);
+                            });
+                        }
+                        function showDiff(older, newer) {
+                            var m = document.getElementById('diff-modal');
+                            document.getElementById('diff-older-label').textContent = older.revised_at;
+                            document.getElementById('diff-newer-label').textContent = newer.revised_at;
+                            var oldLines = stripHtml(older.content).split('\n');
+                            var newLines = stripHtml(newer.content).split('\n');
+                            var diff = simpleDiff(oldLines, newLines);
+                            document.getElementById('diff-older-content').innerHTML = diff.left;
+                            document.getElementById('diff-newer-content').innerHTML = diff.right;
+                            m.style.display = 'flex';
+                        }
+                        function stripHtml(html) {
+                            var tmp = document.createElement('div');
+                            tmp.innerHTML = html;
+                            return (tmp.textContent || tmp.innerText || '').trim();
+                        }
+                        function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+                        function simpleDiff(oldL, newL) {
+                            var left = [], right = [];
+                            var maxLen = Math.max(oldL.length, newL.length);
+                            for (var i = 0; i < maxLen; i++) {
+                                var ol = i < oldL.length ? oldL[i] : '';
+                                var nl = i < newL.length ? newL[i] : '';
+                                if (ol === nl) {
+                                    left.push('<div class="diff-line">' + escHtml(ol) + '</div>');
+                                    right.push('<div class="diff-line">' + escHtml(nl) + '</div>');
+                                } else {
+                                    left.push('<div class="diff-line diff-del">' + escHtml(ol) + '</div>');
+                                    right.push('<div class="diff-line diff-add">' + escHtml(nl) + '</div>');
+                                }
+                            }
+                            return { left: left.join(''), right: right.join('') };
+                        }
+                        function closeDiff() { document.getElementById('diff-modal').style.display = 'none'; }
                         window.addEventListener('DOMContentLoaded', function(){ loadRevisions(); });
                         </script>
+
+                        <!-- Diff Viewer Modal -->
+                        <div id="diff-modal" style="display:none;position:fixed;z-index:99999;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:20px;">
+                            <div style="background:#fff;width:100%;max-width:960px;max-height:90vh;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;">
+                                <div style="padding:12px 20px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+                                    <h3 style="margin:0;font-size:15px;font-weight:700;"><i class="fa-solid fa-code-compare" style="margin-right:6px;color:#0073aa;"></i>Compare Revisions</h3>
+                                    <button onclick="closeDiff()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#787c82;line-height:1;">&times;</button>
+                                </div>
+                                <div style="display:flex;border-bottom:1px solid #ddd;flex-shrink:0;">
+                                    <div style="flex:1;padding:8px 16px;font-size:12px;font-weight:600;color:#b32d2e;background:#fef2f2;border-right:1px solid #ddd;">
+                                        <i class="fa-solid fa-minus" style="margin-right:4px;"></i>Older: <span id="diff-older-label"></span>
+                                    </div>
+                                    <div style="flex:1;padding:8px 16px;font-size:12px;font-weight:600;color:#065f46;background:#f0fdf4;">
+                                        <i class="fa-solid fa-plus" style="margin-right:4px;"></i>Newer: <span id="diff-newer-label"></span>
+                                    </div>
+                                </div>
+                                <div style="display:flex;flex:1;overflow:hidden;">
+                                    <div id="diff-older-content" style="flex:1;overflow-y:auto;padding:12px;font-family:monospace;font-size:12px;line-height:1.6;border-right:1px solid #ddd;white-space:pre-wrap;word-break:break-word;"></div>
+                                    <div id="diff-newer-content" style="flex:1;overflow-y:auto;padding:12px;font-family:monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-word;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <style>
+                        .diff-line { padding:1px 4px; min-height:1.5em; }
+                        .diff-del { background:#fecaca; color:#991b1b; }
+                        .diff-add { background:#bbf7d0; color:#166534; }
+                        </style>
                         <?php
 endif; ?>
 
@@ -921,6 +1040,57 @@ endif; ?>
                             tr.querySelector('input').focus();
                         }
                         </script>
+
+                        <!-- Related Posts Meta Box -->
+                        <?php if ($post_id > 0): ?>
+                        <div id="related-posts-metabox" class="postbox">
+                            <div class="hndle" style="cursor:pointer;padding:10px 12px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">
+                                <h2 style="margin:0;font-size:14px;font-weight:600;"><i class="fa-solid fa-link" style="margin-right:4px;color:#0073aa;"></i> Related Posts</h2>
+                                <span style="color:#72777c;">▼</span>
+                            </div>
+                            <div class="inside" style="padding:10px 14px;">
+                                <div id="rp-selected" style="margin-bottom:8px;">
+                                    <?php foreach ($related_posts as $rp_id):
+                                        $rp_r = $conn->query("SELECT title FROM posts WHERE id=$rp_id")->fetch_assoc();
+                                        if (!$rp_r) continue;
+                                    ?>
+                                    <div class="rp-item" style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:#f8f9fa;border:1px solid #e0e0e0;border-radius:4px;margin-bottom:4px;font-size:12px;">
+                                        <input type="hidden" name="related_posts[]" value="<?php echo $rp_id; ?>">
+                                        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?php echo htmlspecialchars($rp_r['title']); ?></span>
+                                        <button type="button" onclick="this.closest('.rp-item').remove()" style="background:none;border:none;color:#d63638;cursor:pointer;font-size:14px;line-height:1;padding:0;">×</button>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <select id="rp-add-select" onchange="rpAdd(this)" style="width:100%;padding:5px;border:1px solid #8c8f94;border-radius:4px;font-size:12px;">
+                                    <option value="">+ Add related post...</option>
+                                    <?php foreach ($all_posts_for_rel as $ap): ?>
+                                    <option value="<?php echo $ap['id']; ?>"><?php echo htmlspecialchars($ap['title']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <p style="font-size:11px;color:#646970;margin:6px 0 0;">Select posts related to this article. They will appear as suggestions on the frontend.</p>
+                            </div>
+                        </div>
+                        <script>
+                        function rpAdd(sel) {
+                            var id = sel.value;
+                            if (!id) return;
+                            var title = sel.options[sel.selectedIndex].text;
+                            // Check if already added
+                            var existing = document.querySelectorAll('#rp-selected input[name="related_posts[]"]');
+                            for (var i = 0; i < existing.length; i++) {
+                                if (existing[i].value === id) { sel.value = ''; return; }
+                            }
+                            var div = document.createElement('div');
+                            div.className = 'rp-item';
+                            div.style.cssText = 'display:flex;align-items:center;gap:6px;padding:5px 8px;background:#f8f9fa;border:1px solid #e0e0e0;border-radius:4px;margin-bottom:4px;font-size:12px;';
+                            div.innerHTML = '<input type="hidden" name="related_posts[]" value="'+id+'">'
+                                + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+title+'</span>'
+                                + '<button type="button" onclick="this.closest(\'.rp-item\').remove()" style="background:none;border:none;color:#d63638;cursor:pointer;font-size:14px;line-height:1;padding:0;">×</button>';
+                            document.getElementById('rp-selected').appendChild(div);
+                            sel.value = '';
+                        }
+                        </script>
+                        <?php endif; ?>
 
                         </div>
 

@@ -537,6 +537,26 @@ function create_all_tables(PDO $pdo): void
             INDEX `idx_auto` (`automation_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
+        "CREATE TABLE IF NOT EXISTS `post_relations` (
+            `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `post_id` int NOT NULL,
+            `related_post_id` int NOT NULL,
+            `sort_order` int DEFAULT 0,
+            INDEX `idx_post` (`post_id`),
+            UNIQUE KEY `uq_rel` (`post_id`, `related_post_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+        "CREATE TABLE IF NOT EXISTS `redirects` (
+            `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `source_url` varchar(500) NOT NULL,
+            `target_url` varchar(500) NOT NULL,
+            `type` enum('301','302') DEFAULT '301',
+            `hits` int DEFAULT 0,
+            `active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY `uq_source` (`source_url`(191))
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
         "CREATE TABLE IF NOT EXISTS `daily_visitors` (
             `visit_date` date NOT NULL PRIMARY KEY,
             `visitor_count` int DEFAULT 0,

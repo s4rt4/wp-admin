@@ -79,6 +79,8 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'posts-calendar') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-calendar">Content Calendar</a></li>
                 <li class="<?php echo($topic === 'posts-custom-fields') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-custom-fields">Custom Fields</a></li>
                 <li class="<?php echo($topic === 'posts-trash') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-trash">Trash / Recycle Bin</a></li>
+                <li class="<?php echo($topic === 'posts-diff') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-diff">Revision Diff Viewer</a></li>
+                <li class="<?php echo($topic === 'posts-related') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-related">Related Posts</a></li>
             </ul>
         </li>
 
@@ -173,6 +175,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-analytics') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-analytics">Analytics</a></li>
                 <li class="<?php echo($topic === 'tools-automations') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-automations">Automations</a></li>
                 <li class="<?php echo($topic === 'tools-csv') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-csv">CSV Import/Export</a></li>
+                <li class="<?php echo($topic === 'tools-redirects') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-redirects">Redirects Manager</a></li>
             </ul>
         </li>
 
