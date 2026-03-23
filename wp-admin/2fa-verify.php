@@ -54,6 +54,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_role'] = $pending['role'];
             unset($_SESSION['2fa_pending'], $_SESSION['2fa_csrf']);
 
+            // Record last login
+            try {
+                $pdo_l = getDBConnection();
+                $pdo_l->exec("ALTER TABLE users ADD COLUMN last_login DATETIME NULL DEFAULT NULL");
+            } catch (\Exception $e) {}
+            try {
+                $pdo_l = $pdo_l ?? getDBConnection();
+                $pdo_l->exec("ALTER TABLE users ADD COLUMN last_active DATETIME NULL DEFAULT NULL");
+            } catch (\Exception $e) {}
+            try {
+                $pdo_l = $pdo_l ?? getDBConnection();
+                $pdo_l->prepare("UPDATE users SET last_login = NOW(), last_active = NOW() WHERE id = ?")->execute([$pending['user_id']]);
+            } catch (\Exception $e) {}
+
             audit_log('login_success', 'user', $pending['user_id'], $pending['username']);
             header('Location: index.php');
             exit;

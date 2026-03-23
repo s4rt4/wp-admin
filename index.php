@@ -11,6 +11,25 @@ if (!file_exists(__DIR__ . '/wp-admin/wp-config.php')) {
 
 require_once __DIR__ . '/wp-admin/db_config.php';
 
+// Maintenance Mode Check — show maintenance page for non-admin visitors
+if (get_option('maintenance_mode', '0') === '1') {
+    session_start();
+    if (empty($_SESSION['user_id'])) {
+        $mt_msg = get_option('maintenance_message', 'We are currently performing scheduled maintenance. Please check back soon.');
+        $mt_site = get_option('blogname', 'Site');
+        http_response_code(503);
+        header('Retry-After: 3600');
+        echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars($mt_site) . ' — Maintenance</title>';
+        echo '<style>*{margin:0;padding:0;box-sizing:border-box}body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f0f0f1;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1d2327;padding:20px}';
+        echo '.wrap{text-align:center;max-width:500px}.wrap h1{font-size:28px;margin-bottom:12px}.wrap p{font-size:15px;color:#646970;line-height:1.6}.icon{font-size:48px;margin-bottom:16px;color:#0073aa}</style>';
+        echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></head>';
+        echo '<body><div class="wrap"><div class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>';
+        echo '<h1>' . htmlspecialchars($mt_site) . '</h1>';
+        echo '<p>' . nl2br(htmlspecialchars($mt_msg)) . '</p></div></body></html>';
+        exit;
+    }
+}
+
 // Parse Request
 $request_uri = $_SERVER['REQUEST_URI'];
 $script_name = $_SERVER['SCRIPT_NAME'];

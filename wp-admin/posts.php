@@ -14,15 +14,46 @@ if (!current_user_can('edit_posts')) {
     die("Access denied");
 }
 
-// Handle delete
+// Handle trash (soft delete)
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
     $del_row = $conn->query("SELECT title FROM posts WHERE id=$id")->fetch_assoc();
+    $conn->query("UPDATE posts SET status='trash' WHERE id = $id");
+    require_once __DIR__ . '/includes/audit.php';
+    audit_log('post_trash', 'post', $id, $del_row['title'] ?? '');
+    echo "<script>window.location.href='posts.php';</script>";
+}
+
+// Handle restore from trash
+if (isset($_GET['action']) && $_GET['action'] == 'restore' && isset($_GET['id'])) {
+    $id = intval($_GET['id']);
+    $conn->query("UPDATE posts SET status='draft' WHERE id = $id AND status='trash'");
+    require_once __DIR__ . '/includes/audit.php';
+    $r = $conn->query("SELECT title FROM posts WHERE id=$id")->fetch_assoc();
+    audit_log('post_restore', 'post', $id, $r['title'] ?? '');
+    echo "<script>window.location.href='posts.php?status=trash';</script>";
+}
+
+// Handle permanent delete
+if (isset($_GET['action']) && $_GET['action'] == 'delete_permanent' && isset($_GET['id'])) {
+    $id = intval($_GET['id']);
+    $del_row = $conn->query("SELECT title FROM posts WHERE id=$id")->fetch_assoc();
     $conn->query("DELETE FROM posts WHERE id = $id");
+    $conn->query("DELETE FROM post_meta WHERE post_id = $id");
+    $conn->query("DELETE FROM post_categories WHERE post_id = $id");
+    $conn->query("DELETE FROM post_tags WHERE post_id = $id");
     require_once __DIR__ . '/includes/audit.php';
     audit_log('post_delete', 'post', $id, $del_row['title'] ?? '');
-    // Redirect to avoid resubmission
-    echo "<script>window.location.href='posts.php';</script>";
+    echo "<script>window.location.href='posts.php?status=trash';</script>";
+}
+
+// Handle empty trash
+if (isset($_GET['action']) && $_GET['action'] == 'empty_trash') {
+    $conn->query("DELETE pm FROM post_meta pm INNER JOIN posts p ON pm.post_id = p.id WHERE p.status='trash'");
+    $conn->query("DELETE pc FROM post_categories pc INNER JOIN posts p ON pc.post_id = p.id WHERE p.status='trash'");
+    $conn->query("DELETE pt FROM post_tags pt INNER JOIN posts p ON pt.post_id = p.id WHERE p.status='trash'");
+    $conn->query("DELETE FROM posts WHERE status='trash'");
+    echo "<script>window.location.href='posts.php?status=trash';</script>";
 }
 
 // Handle Quick Edit
@@ -90,12 +121,16 @@ $conn->query("UPDATE posts SET status='publish', scheduled_at=NULL WHERE status=
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
 $lang_filter   = isset($_GET['lang'])   ? $_GET['lang']   : 'all';
 $sql_where = "";
-if ($status_filter != 'all') {
+if ($status_filter === 'trash') {
+    $sql_where = "WHERE p.status = 'trash'";
+} elseif ($status_filter != 'all') {
     $sql_where = "WHERE p.status = '" . $conn->real_escape_string($status_filter) . "'";
+} else {
+    $sql_where = "WHERE p.status != 'trash'";
 }
 if ($lang_filter !== 'all') {
     $lf = $conn->real_escape_string($lang_filter);
-    $sql_where .= ($sql_where ? " AND " : "WHERE ") . "p.lang = '{$lf}'";
+    $sql_where .= " AND p.lang = '{$lf}'";
 }
 
 // Filter by Author if not Editor/Admin
@@ -113,17 +148,31 @@ $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as lo
         $title_prefix = 'Posts';
         if ($status_filter == 'publish') $title_prefix = 'Published Posts';
         if ($status_filter == 'draft') $title_prefix = 'Draft Posts';
+        if ($status_filter == 'trash') $title_prefix = 'Trash';
         ?>
-        <h1 class="wp-heading-inline"><?php echo $title_prefix; ?> <a href="post-new.php" class="page-title-action">Add New</a></h1>
+        <h1 class="wp-heading-inline"><?php echo $title_prefix; ?> <?php if ($status_filter !== 'trash'): ?><a href="post-new.php" class="page-title-action">Add New</a><?php endif; ?></h1>
+        <?php if ($status_filter === 'trash' && $count_trash > 0): ?>
+        <a href="posts.php?action=empty_trash" class="page-title-action" style="color:#b32d2e;border-color:#b32d2e;" onclick="return confirm('Permanently delete all items in trash?')">Empty Trash</a>
+        <?php endif; ?>
         <hr class="wp-header-end">
         
         <?php if (!empty($message)) echo $message; ?>
 
+        <?php
+        $count_all       = $conn->query("SELECT COUNT(*) FROM posts WHERE status != 'trash'")->fetch_column();
+        $count_publish   = $conn->query("SELECT COUNT(*) FROM posts WHERE status='publish'")->fetch_column();
+        $count_draft     = $conn->query("SELECT COUNT(*) FROM posts WHERE status='draft'")->fetch_column();
+        $count_scheduled = $conn->query("SELECT COUNT(*) FROM posts WHERE status='scheduled'")->fetch_column();
+        $count_trash     = $conn->query("SELECT COUNT(*) FROM posts WHERE status='trash'")->fetch_column();
+        ?>
         <ul class="subsubsub">
-            <li class="all"><a href="posts.php" class="<?php echo $status_filter == 'all' ? 'current' : ''; ?>">All <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts")->fetch_column(); ?>)</span></a> |</li>
-            <li class="publish"><a href="posts.php?status=publish" class="<?php echo $status_filter == 'publish' ? 'current' : ''; ?>">Published <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts WHERE status='publish'")->fetch_column(); ?>)</span></a> |</li>
-            <li class="draft"><a href="posts.php?status=draft" class="<?php echo $status_filter == 'draft' ? 'current' : ''; ?>">Draft <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts WHERE status='draft'")->fetch_column(); ?>)</span></a> |</li>
-            <li class="scheduled"><a href="posts.php?status=scheduled" class="<?php echo $status_filter == 'scheduled' ? 'current' : ''; ?>">Scheduled <span class="count">(<?php echo $conn->query("SELECT COUNT(*) FROM posts WHERE status='scheduled'")->fetch_column(); ?>)</span></a></li>
+            <li class="all"><a href="posts.php" class="<?php echo $status_filter == 'all' ? 'current' : ''; ?>">All <span class="count">(<?php echo $count_all; ?>)</span></a> |</li>
+            <li class="publish"><a href="posts.php?status=publish" class="<?php echo $status_filter == 'publish' ? 'current' : ''; ?>">Published <span class="count">(<?php echo $count_publish; ?>)</span></a> |</li>
+            <li class="draft"><a href="posts.php?status=draft" class="<?php echo $status_filter == 'draft' ? 'current' : ''; ?>">Draft <span class="count">(<?php echo $count_draft; ?>)</span></a> |</li>
+            <li class="scheduled"><a href="posts.php?status=scheduled" class="<?php echo $status_filter == 'scheduled' ? 'current' : ''; ?>">Scheduled <span class="count">(<?php echo $count_scheduled; ?>)</span></a><?php if ($count_trash > 0): ?> |<?php endif; ?></li>
+            <?php if ($count_trash > 0): ?>
+            <li class="trash"><a href="posts.php?status=trash" class="<?php echo $status_filter == 'trash' ? 'current' : ''; ?>" style="color:#b32d2e;">Trash <span class="count">(<?php echo $count_trash; ?>)</span></a></li>
+            <?php endif; ?>
         </ul>
 
         <!-- Language filter tabs -->
@@ -184,9 +233,13 @@ $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as lo
                                     <?php endif; ?>
                                 </strong>
                                 <div class=”row-actions”>
+                                    <?php if ($row['status'] === 'trash'): ?>
+                                    <span class=”restore”><a href=”posts.php?action=restore&id=<?php echo $row['id']; ?>”>Restore</a> | </span>
+                                    <span class=”delete”><a href=”posts.php?action=delete_permanent&id=<?php echo $row['id']; ?>” class=”submitdelete” style=”color:#b32d2e;” onclick=”return confirm('Delete permanently? This cannot be undone.')”>Delete Permanently</a></span>
+                                    <?php else: ?>
                                     <span class=”edit”><a href=”post-new.php?id=<?php echo $row['id']; ?>”>Edit</a> | </span>
                                     <span class=”quick-edit”><a href=”#” class=”quick-edit-btn” data-id=”<?php echo $row['id']; ?>” data-title=”<?php echo htmlspecialchars($row['title']); ?>” data-slug=”<?php echo htmlspecialchars($row['slug']); ?>” data-status=”<?php echo $row['status']; ?>”>Quick Edit</a> | </span>
-                                    <span class=”trash”><a href=”posts.php?action=delete&id=<?php echo $row['id']; ?>” class=”submitdelete” onclick=”return confirm('Are you sure?')”>Trash</a> | </span>
+                                    <span class=”trash”><a href=”posts.php?action=delete&id=<?php echo $row['id']; ?>” class=”submitdelete” onclick=”return confirm('Move to trash?')”>Trash</a> | </span>
                                     <span class=”view”><a href=”../post/<?php echo $row['slug']; ?>” target=”_blank”>View</a> | </span>
                                     <span class=”duplicate”><a href=”posts.php?action=duplicate&id=<?php echo $row['id']; ?>”>Duplicate</a> | </span>
                                     <?php
@@ -195,6 +248,7 @@ $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as lo
                                     $origin_id  = empty($row['translation_of']) ? $row['id'] : $row['translation_of'];
                                     ?>
                                     <span class=”translate”><a href=”post-new.php?translation_of=<?php echo $origin_id; ?>&lang=<?php echo $other_lang; ?>”><?php echo $flag; ?> Add <?php echo strtoupper($other_lang); ?></a></span>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                             <td data-colname=”Lang” style=”font-size:18px;text-align:center;”>

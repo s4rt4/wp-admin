@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $allowed_options = [
         'blogname', 'blogdescription', 'siteurl', 'home', 'admin_email',
         'users_can_register', 'default_role', 'timezone_string',
-        'date_format', 'time_format', 'start_of_week', 'weather_api_key'
+        'date_format', 'time_format', 'start_of_week', 'weather_api_key',
+        'maintenance_mode', 'maintenance_message'
     ];
 
     foreach ($allowed_options as $option) {
@@ -29,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
         } else {
              // Handle checkboxes like 'users_can_register' which might not be sent if unchecked
-             if ($option === 'users_can_register') {
+             if ($option === 'users_can_register' || $option === 'maintenance_mode') {
                 $value = '0';
                 $stmt = $conn->prepare("INSERT INTO options (option_name, option_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)");
                 $stmt->bind_param("ss", $option, $value);
@@ -185,6 +186,28 @@ include 'sidebar.php';
                                             }
                                             ?>
                                         </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h2 class="title" id="maintenance" style="margin-top:24px;">Maintenance Mode</h2>
+                        <table class="form-table" role="presentation">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Enable Maintenance Mode</th>
+                                    <td>
+                                        <label>
+                                            <input name="maintenance_mode" type="checkbox" value="1" <?php echo get_option('maintenance_mode', '0') === '1' ? 'checked' : ''; ?>>
+                                            Put the site in maintenance mode
+                                        </label>
+                                        <p class="description">When enabled, all frontend visitors will see a maintenance page. Admin users can still access the backend.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><label for="maintenance_message">Maintenance Message</label></th>
+                                    <td>
+                                        <textarea name="maintenance_message" id="maintenance_message" rows="3" style="width:25em;"><?php echo htmlspecialchars(get_option('maintenance_message', 'We are currently performing scheduled maintenance. Please check back soon.')); ?></textarea>
                                     </td>
                                 </tr>
                             </tbody>

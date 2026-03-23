@@ -7,12 +7,37 @@ require_once 'db_config.php';
 
 $pdo = getDBConnection();
 
-// Handle delete
+// Handle trash (soft delete)
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
+    $id = intval($_GET['id']);
+    $stmt = $pdo->prepare("UPDATE pages SET status='trash' WHERE id = ?");
+    $stmt->execute([$id]);
+    echo "<script>window.location.href='pages.php';</script>";
+    exit;
+}
+
+// Handle restore from trash
+if (isset($_GET['action']) && $_GET['action'] == 'restore' && isset($_GET['id'])) {
+    $id = intval($_GET['id']);
+    $stmt = $pdo->prepare("UPDATE pages SET status='draft' WHERE id = ? AND status='trash'");
+    $stmt->execute([$id]);
+    echo "<script>window.location.href='pages.php?status=trash';</script>";
+    exit;
+}
+
+// Handle permanent delete
+if (isset($_GET['action']) && $_GET['action'] == 'delete_permanent' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
     $stmt = $pdo->prepare("DELETE FROM pages WHERE id = ?");
     $stmt->execute([$id]);
-    echo "<script>window.location.href='pages.php';</script>";
+    echo "<script>window.location.href='pages.php?status=trash';</script>";
+    exit;
+}
+
+// Handle empty trash
+if (isset($_GET['action']) && $_GET['action'] == 'empty_trash') {
+    $pdo->exec("DELETE FROM pages WHERE status='trash'");
+    echo "<script>window.location.href='pages.php?status=trash';</script>";
     exit;
 }
 
@@ -71,9 +96,13 @@ $sql = "SELECT * FROM pages";
 $conditions = [];
 $params = [];
 
-if ($status_filter != 'all') {
+if ($status_filter === 'trash') {
+    $conditions[] = "status = 'trash'";
+} elseif ($status_filter != 'all') {
     $conditions[] = "status = ?";
     $params[] = $status_filter;
+} else {
+    $conditions[] = "status != 'trash'";
 }
 if ($builder_filter != 'all') {
     $conditions[] = "builder_type = ?";
@@ -94,9 +123,10 @@ $stmt->execute($params);
 $pages = $stmt->fetchAll();
 
 // Counts
-$totalCount = $pdo->query("SELECT COUNT(*) FROM pages")->fetchColumn();
+$totalCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE status != 'trash'")->fetchColumn();
 $publishCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE status='publish'")->fetchColumn();
 $draftCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE status='draft'")->fetchColumn();
+$trashCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE status='trash'")->fetchColumn();
 $grapesCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='grapesjs'")->fetchColumn();
 $editorCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='editorjs'")->fetchColumn();
 $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monaco'")->fetchColumn();
@@ -108,8 +138,12 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
         $title_prefix = 'Pages';
         if ($status_filter == 'publish') $title_prefix = 'Published Pages';
         if ($status_filter == 'draft') $title_prefix = 'Draft Pages';
+        if ($status_filter == 'trash') $title_prefix = 'Trash';
         ?>
-        <h1 class="wp-heading-inline"><?php echo $title_prefix; ?> <a href="builder.php" class="page-title-action">Add New</a></h1>
+        <h1 class="wp-heading-inline"><?php echo $title_prefix; ?> <?php if ($status_filter !== 'trash'): ?><a href="builder.php" class="page-title-action">Add New</a><?php endif; ?></h1>
+        <?php if ($status_filter === 'trash' && $trashCount > 0): ?>
+        <a href="pages.php?action=empty_trash" class="page-title-action" style="color:#b32d2e;border-color:#b32d2e;" onclick="return confirm('Permanently delete all items in trash?')">Empty Trash</a>
+        <?php endif; ?>
         <hr class="wp-header-end">
         
         <?php if (!empty($message)) echo $message; ?>
@@ -118,6 +152,9 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
             <li class="all"><a href="pages.php" class="<?php echo ($status_filter == 'all' && $builder_filter == 'all') ? 'current' : ''; ?>">All <span class="count">(<?php echo $totalCount; ?>)</span></a> |</li>
             <li class="publish"><a href="pages.php?status=publish" class="<?php echo $status_filter == 'publish' ? 'current' : ''; ?>">Published <span class="count">(<?php echo $publishCount; ?>)</span></a> |</li>
             <li class="draft"><a href="pages.php?status=draft" class="<?php echo $status_filter == 'draft' ? 'current' : ''; ?>">Draft <span class="count">(<?php echo $draftCount; ?>)</span></a> |</li>
+            <?php if ($trashCount > 0): ?>
+            <li class="trash-tab"><a href="pages.php?status=trash" class="<?php echo $status_filter == 'trash' ? 'current' : ''; ?>" style="color:#b32d2e;">Trash <span class="count">(<?php echo $trashCount; ?>)</span></a> |</li>
+            <?php endif; ?>
             <li class="grapesjs"><a href="pages.php?builder_type=grapesjs" class="<?php echo $builder_filter == 'grapesjs' ? 'current' : ''; ?>">GrapesJS <span class="count">(<?php echo $grapesCount; ?>)</span></a> |</li>
             <li class="editorjs"><a href="pages.php?builder_type=editorjs" class="<?php echo $builder_filter == 'editorjs' ? 'current' : ''; ?>">EditorJS <span class="count">(<?php echo $editorCount; ?>)</span></a> |</li>
             <li class="monaco"><a href="pages.php?builder_type=monaco" class="<?php echo $builder_filter == 'monaco' ? 'current' : ''; ?>">Monaco <span class="count">(<?php echo $monacoCount; ?>)</span></a></li>
@@ -169,28 +206,33 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
                                     <?php endif; ?>
                                 </strong>
                                 <div class="row-actions">
+                                    <?php if ($page['status'] === 'trash'): ?>
+                                    <span class="restore"><a href="pages.php?action=restore&id=<?php echo $page['id']; ?>">Restore</a> | </span>
+                                    <span class="delete"><a href="pages.php?action=delete_permanent&id=<?php echo $page['id']; ?>" class="submitdelete" style="color:#b32d2e;" onclick="return confirm('Delete permanently? This cannot be undone.')">Delete Permanently</a></span>
+                                    <?php else: ?>
                                     <span class="edit">
-                                        <a href="builder.php?id=<?php echo $page['id']; ?>">Edit</a> | 
+                                        <a href="builder.php?id=<?php echo $page['id']; ?>">Edit</a> |
                                     </span>
                                     <span class="quick-edit">
-                                        <a href="#" class="quick-edit-btn" 
-                                           data-id="<?php echo $page['id']; ?>" 
-                                           data-title="<?php echo htmlspecialchars($page['title']); ?>" 
-                                           data-slug="<?php echo htmlspecialchars($page['slug']); ?>" 
+                                        <a href="#" class="quick-edit-btn"
+                                           data-id="<?php echo $page['id']; ?>"
+                                           data-title="<?php echo htmlspecialchars($page['title']); ?>"
+                                           data-slug="<?php echo htmlspecialchars($page['slug']); ?>"
                                            data-status="<?php echo $page['status']; ?>"
-                                           data-builder="<?php echo $page['builder_type']; ?>">Quick Edit</a> | 
+                                           data-builder="<?php echo $page['builder_type']; ?>">Quick Edit</a> |
                                     </span>
                                     <span class="trash">
-                                        <a href="pages.php?action=delete&id=<?php echo $page['id']; ?>" class="submitdelete" onclick="return confirm('Are you sure you want to delete &quot;<?php echo htmlspecialchars($page['title']); ?>&quot;?')">Trash</a> | 
+                                        <a href="pages.php?action=delete&id=<?php echo $page['id']; ?>" class="submitdelete" onclick="return confirm('Move to trash?')">Trash</a> |
                                     </span>
                                     <?php if ($page['status'] === 'publish'): ?>
                                     <span class="view">
-                                        <a href="../page/<?php echo $page['slug']; ?>" target="_blank">View</a> |  
+                                        <a href="../page/<?php echo $page['slug']; ?>" target="_blank">View</a> |
                                     </span>
                                     <?php endif; ?>
                                     <span class="duplicate">
                                         <a href="pages.php?action=duplicate&id=<?php echo $page['id']; ?>">Duplicate</a>
                                     </span>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                             <td class="builder column-builder" data-colname="Builder">

@@ -146,6 +146,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         $_SESSION['username']  = $username;
                         $_SESSION['user_role'] = $role ?: 'subscriber';
 
+                        // Record last login
+                        try { $conn->query("ALTER TABLE users ADD COLUMN last_login DATETIME NULL DEFAULT NULL"); } catch (\Exception $e) {}
+                        try { $conn->query("ALTER TABLE users ADD COLUMN last_active DATETIME NULL DEFAULT NULL"); } catch (\Exception $e) {}
+                        $conn->query("UPDATE users SET last_login = NOW(), last_active = NOW() WHERE id = $id");
+
                         audit_log('login_success', 'user', $id, $username);
 
                         header("Location: index.php");

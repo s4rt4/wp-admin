@@ -113,6 +113,7 @@ endif; ?>
                 <li><a href="user-new.php">Add New</a></li>
                 <li><a href="profile.php">Profile</a></li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'User Roles') ? 'current' : ''; ?>"><a href="user-roles.php">Roles</a></li>
+                <li><a href="user-activity.php">Activity</a></li>
             </ul>
         </li>
         <?php

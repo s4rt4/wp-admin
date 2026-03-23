@@ -1,6 +1,6 @@
 # Roadmap Pengembangan Selanjutnya
 
-Semua fitur yang direncanakan telah **selesai dieksekusi**.
+Batch 1–2 telah **selesai dieksekusi**. Batch Ketiga sedang direncanakan.
 
 ---
 
@@ -66,6 +66,36 @@ Semua fitur yang direncanakan telah **selesai dieksekusi**.
 | 21 | **Media Folder Organizer** | Fitur Utama | ✅ Done — folder virtual di DB (`media_folders` + `media_assignments`), sidebar kiri dengan tree, drag file ke folder, create/rename/delete folder |
 | 22 | **Multi-language / i18n** | Fitur Utama | ✅ Done — kolom `lang` + `translation_of` di posts & pages, filter tab bahasa, badge bendera, tombol "Add Translation" per baris |
 | 23 | **Automation / Workflows** | Fitur Utama | ✅ Done — engine trigger/condition/action, builder UI visual, log eksekusi, trigger: post_published/form_submitted/user_registered/kanban_moved, action: send_email/webhook |
+
+---
+
+## Plan Batch Ketiga — Fitur Baru
+
+### Tier 1 — Ringan (1-2 file baru) ✅ DONE
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 1 | **Trash / Recycle Bin** | Soft-delete untuk posts/pages — pindah ke trash dulu, baru permanent delete. Bisa restore. Empty Trash untuk hapus semua. | ✅ Done |
+| 2 | **Bulk Import/Export Posts (CSV)** | Tab CSV di Tools — export ke CSV dengan filter status/bahasa, import dari CSV dengan handling duplikat (skip/overwrite/rename). Kategori & tag auto-create. | ✅ Done |
+| 3 | **Maintenance Mode** | Toggle di General Settings — frontend tampilkan halaman 503 "Under Maintenance" dengan custom message. Admin tetap bisa akses. | ✅ Done |
+| 4 | **User Activity Log** | Halaman user-activity.php — lihat siapa online (green dot), last login, last activity. Summary cards: online now, logged in today, total users. | ✅ Done |
+
+### Tier 2 — Sedang (logika tambahan)
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 5 | **Redirects Manager** | Kelola 301/302 redirect dari admin panel — berguna untuk SEO saat URL berubah. | Pending |
+| 6 | **Content Versioning / Diff Viewer** | Bandingkan 2 versi revisi post side-by-side dengan highlight diff (sudah ada revisi, tinggal tambah visual diff). | Pending |
+| 7 | **Duplicate Post/Page** | Tombol 1 klik untuk clone post/page beserta custom fields-nya. | Pending |
+| 8 | **Related Posts** | Pilih manual atau auto-suggest berdasarkan kategori/tag yang sama. | Pending |
+
+### Tier 3 — Besar (arsitektur baru)
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 9 | **REST API** | Full CRUD API dengan token auth — bisa dipakai headless CMS atau integrasi external app. | Pending |
+| 10 | **Media Editor** | Crop, resize, rotate gambar langsung dari media library tanpa download ulang. | Pending |
+| 11 | **Multi-site** | Satu instalasi bisa handle beberapa situs (mirip WordPress Multisite). | Pending |
 
 ---
 

@@ -228,7 +228,9 @@ function create_all_tables(PDO $pdo): void
             `two_fa_enabled` tinyint(1) NOT NULL DEFAULT 0,
             `two_fa_otp` varchar(6) DEFAULT NULL,
             `two_fa_otp_expires` datetime DEFAULT NULL,
-            `two_fa_backup_codes` text DEFAULT NULL
+            `two_fa_backup_codes` text DEFAULT NULL,
+            `last_login` datetime DEFAULT NULL,
+            `last_active` datetime DEFAULT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
         "CREATE TABLE IF NOT EXISTS `user_roles_caps` (

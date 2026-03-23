@@ -59,6 +59,7 @@ $current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'database';
         <div class="nav-tab-wrapper">
             <a href="tools.php?tab=database" class="nav-tab <?php echo $current_tab == 'database' ? 'nav-tab-active' : ''; ?>">Database Backup & Restore</a>
             <a href="tools.php?tab=import-export" class="nav-tab <?php echo $current_tab == 'import-export' ? 'nav-tab-active' : ''; ?>">Import/Export Content</a>
+            <a href="tools.php?tab=csv" class="nav-tab <?php echo $current_tab == 'csv' ? 'nav-tab-active' : ''; ?>">CSV Import/Export</a>
             <a href="tools.php?tab=health" class="nav-tab <?php echo $current_tab == 'health' ? 'nav-tab-active' : ''; ?>">Site Health</a>
         </div>
         
@@ -234,6 +235,73 @@ $current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'database';
                     </div>
                 </div>
                 
+            <?php elseif ($current_tab == 'csv'): ?>
+                <!-- CSV Import/Export Tab -->
+                <div class="card" style="max-width: 800px;">
+                    <h2>CSV Import/Export Posts</h2>
+
+                    <?php if (!empty($_SESSION['csv_import_msg'])): ?>
+                    <div class="notice notice-success" style="border-left:4px solid #00a32a;background:#fff;padding:10px 14px;margin:0 0 16px;">
+                        <p><?php echo htmlspecialchars($_SESSION['csv_import_msg']); ?></p>
+                    </div>
+                    <?php unset($_SESSION['csv_import_msg']); endif; ?>
+
+                    <!-- Export Section -->
+                    <div style="margin-bottom:30px;padding:20px;background:#f9f9f9;border:1px solid #ddd;">
+                        <h3><i class="fa-solid fa-file-export" style="margin-right:6px;color:#0073aa;"></i>Export Posts to CSV</h3>
+                        <p style="color:#666;">Download all posts as a CSV file. Includes title, slug, content, status, categories, tags, language, and more.</p>
+                        <form method="POST" action="api/csv-export.php">
+                            <p>
+                                <label><strong>Status:</strong></label><br>
+                                <select name="status" style="min-width:200px;padding:5px;">
+                                    <option value="all">All (except Trash)</option>
+                                    <option value="publish">Published only</option>
+                                    <option value="draft">Drafts only</option>
+                                    <option value="scheduled">Scheduled only</option>
+                                </select>
+                            </p>
+                            <p>
+                                <label><strong>Language:</strong></label><br>
+                                <select name="lang" style="min-width:200px;padding:5px;">
+                                    <option value="all">All languages</option>
+                                    <option value="id">Indonesian only</option>
+                                    <option value="en">English only</option>
+                                </select>
+                            </p>
+                            <button type="submit" class="button button-primary button-large">
+                                <i class="fa-solid fa-download" style="margin-right:4px;"></i> Export CSV
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Import Section -->
+                    <div style="padding:20px;background:#f9f9f9;border:1px solid #ddd;">
+                        <h3><i class="fa-solid fa-file-import" style="margin-right:6px;color:#00a32a;"></i>Import Posts from CSV</h3>
+                        <p style="color:#666;">Upload a CSV file to bulk-import posts. The CSV must have a header row. Supported columns:</p>
+                        <code style="display:block;background:#fff;padding:10px;margin:10px 0;border:1px solid #ddd;font-size:12px;">title, slug, content, status, visibility, excerpt, featured_image, meta_title, meta_desc, focus_keyword, lang, categories, tags</code>
+                        <p style="color:#666;font-size:12px;">Only <strong>title</strong> is required. Categories and tags are comma-separated names (created automatically if they don't exist).</p>
+
+                        <div id="csv-import-result" style="display:none;margin:12px 0;padding:10px 14px;border-radius:4px;font-size:13px;"></div>
+
+                        <form method="POST" action="api/csv-import.php" enctype="multipart/form-data" id="csv-import-form">
+                            <p>
+                                <label><strong>Duplicate handling (matching by slug):</strong></label><br>
+                                <select name="duplicate" style="min-width:200px;padding:5px;">
+                                    <option value="skip">Skip duplicates</option>
+                                    <option value="overwrite">Overwrite existing</option>
+                                    <option value="rename">Import with new slug</option>
+                                </select>
+                            </p>
+                            <p>
+                                <input type="file" name="csv_file" accept=".csv" required style="margin-bottom:8px;">
+                            </p>
+                            <button type="submit" class="button button-primary button-large">
+                                <i class="fa-solid fa-upload" style="margin-right:4px;"></i> Import CSV
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
             <?php elseif ($current_tab == 'health'): ?>
                 <!-- Site Health Tab -->
                 <div class="card" style="max-width: 800px;">
