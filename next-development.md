@@ -89,13 +89,13 @@ Batch 1–2 telah **selesai dieksekusi**. Batch Ketiga sedang direncanakan.
 | 7 | **Duplicate Post/Page** | Sudah ada sejak batch sebelumnya — tombol Duplicate di row actions posts.php dan pages.php. | ✅ Done (existing) |
 | 8 | **Related Posts** | Metabox Related Posts di sidebar post editor — pilih dari dropdown, simpan ke tabel post_relations, tampil sebagai saran di frontend. | ✅ Done |
 
-### Tier 3 — Besar (arsitektur baru)
+### Tier 3 — Besar (arsitektur baru) ✅ DONE
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 9 | **REST API** | Full CRUD API dengan token auth — bisa dipakai headless CMS atau integrasi external app. | Pending |
-| 10 | **Media Editor** | Crop, resize, rotate gambar langsung dari media library tanpa download ulang. | Pending |
-| 11 | **Multi-site** | Satu instalasi bisa handle beberapa situs (mirip WordPress Multisite). | Pending |
+| 9 | **REST API** | rest-api.php — CRUD untuk posts, pages, media, categories, tags, options. Token auth via Bearer header. Halaman api-tokens.php untuk manage token + API reference bawaan. | ✅ Done |
+| 10 | **Media Editor** | Tombol "Edit Image" di media detail panel — modal canvas editor: crop (drag select), resize (width/height dengan aspect lock), rotate 90°, flip H/V. Save langsung overwrite file. | ✅ Done |
+| 11 | **Multi-site** | Halaman sites.php — buat/kelola multi-site. Setiap site punya prefix tabel sendiri (site_N_posts, dll). Shared users. Activate/deactivate/delete site. | ✅ Done |
 
 ---
 

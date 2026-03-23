@@ -83,6 +83,9 @@
         { title: 'Maintenance Mode', section: 'Settings', topic: 'settings-maintenance', keywords: 'maintenance mode pemeliharaan offline 503 under construction tutup sementara' },
         // Users (extended - Tier 1 Batch 3)
         { title: 'User Activity', section: 'Users', topic: 'users-activity', keywords: 'user activity aktivitas online offline last login terakhir aktif status pengguna' },
+        { title: 'REST API', section: 'Tools', topic: 'tools-rest-api', keywords: 'rest api token crud endpoint headless json bearer authentication external integrasi' },
+        { title: 'Media Editor', section: 'Media', topic: 'media-editor', keywords: 'media editor crop resize rotate flip image gambar edit potong ukuran putar' },
+        { title: 'Multi-site', section: 'Settings', topic: 'settings-multisite', keywords: 'multi site multisite beberapa situs domain prefix tabel network kelola' },
         // Media (extended)
         { title: 'Image Optimizer', section: 'Media', topic: 'media-image-optimizer', keywords: 'optimasi gambar compress kompresi resize image optimizer' },
         { title: 'Media Folders', section: 'Media', topic: 'media-folders', keywords: 'folder media virtual organisasi drag drop file library kelola' },

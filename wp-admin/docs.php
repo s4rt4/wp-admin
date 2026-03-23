@@ -92,6 +92,9 @@ function topic_label(string $topic): string
         'tools-redirects' => 'Redirects Manager',
         'settings-maintenance' => 'Maintenance Mode',
         'users-activity' => 'User Activity',
+        'tools-rest-api' => 'REST API',
+        'media-editor' => 'Media Editor',
+        'settings-multisite' => 'Multi-site',
         'tools-automations' => 'Automations',
     ];
     return $map[$topic] ?? ucwords(str_replace('-', ' ', $topic));
@@ -262,12 +265,15 @@ if ($topic === 'getting-started') {
                 ['topic'=>'tools-kanban','en'=>'Kanban Board','id'=>'Papan Kanban'],
                 ['topic'=>'tools-form-builder','en'=>'Form Builder','id'=>'Form Builder'],
                 ['topic'=>'tools-snippets','en'=>'Snippets','id'=>'Snippets'],
+                ['topic'=>'tools-rest-api','en'=>'REST API','id'=>'REST API'],
+                ['topic'=>'settings-multisite','en'=>'Multi-site','id'=>'Multi-site'],
             ]
         ],
         [
             'title_en' => 'Media & Appearance',
             'title_id' => 'Media & Tampilan',
             'items' => [
+                ['topic'=>'media-editor','en'=>'Media Editor','id'=>'Media Editor'],
                 ['topic'=>'media-library','en'=>'Media Library','id'=>'Perpustakaan Media'],
                 ['topic'=>'media-folders','en'=>'Media Folders','id'=>'Folder Media'],
                 ['topic'=>'media-image-optimizer','en'=>'Image Optimizer','id'=>'Optimasi Gambar'],

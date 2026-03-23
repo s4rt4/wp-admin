@@ -546,6 +546,27 @@ function create_all_tables(PDO $pdo): void
             UNIQUE KEY `uq_rel` (`post_id`, `related_post_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
+        "CREATE TABLE IF NOT EXISTS `sites` (
+            `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `name` varchar(255) NOT NULL,
+            `slug` varchar(100) NOT NULL UNIQUE,
+            `domain` varchar(255) DEFAULT NULL,
+            `description` text DEFAULT NULL,
+            `status` enum('active','inactive','archived') DEFAULT 'active',
+            `admin_user_id` int NOT NULL,
+            `created_at` timestamp DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+        "CREATE TABLE IF NOT EXISTS `api_tokens` (
+            `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `token` varchar(64) NOT NULL UNIQUE,
+            `name` varchar(100) NOT NULL,
+            `user_id` int NOT NULL,
+            `permissions` varchar(255) DEFAULT 'read',
+            `last_used_at` datetime DEFAULT NULL,
+            `created_at` timestamp DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
         "CREATE TABLE IF NOT EXISTS `redirects` (
             `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `source_url` varchar(500) NOT NULL,

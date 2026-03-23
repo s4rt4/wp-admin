@@ -343,8 +343,9 @@ function formatFileSize($bytes) {
                         <input type="text" id="detail-url" class="widefat" readonly onclick="this.select();" style="margin-top:4px;">
                         <button type="button" class="button button-small" id="copy-url-btn" style="margin-top:6px;">Copy URL</button>
                     </div>
-                    <div class="detail-actions" style="margin-top:16px; padding-top:12px; border-top:1px solid #ddd;">
+                    <div class="detail-actions" style="margin-top:16px; padding-top:12px; border-top:1px solid #ddd; display:flex; flex-wrap:wrap; gap:6px;">
                         <a href="#" id="detail-view" class="button" target="_blank">View Original</a>
+                        <button type="button" class="button" id="detail-edit-img" style="display:none;" onclick="openImageEditor()"><i class="fa-solid fa-crop-simple" style="margin-right:3px;"></i>Edit Image</button>
                         <a href="#" id="detail-delete" class="button button-link-delete" onclick="return confirm('Delete this file permanently?')">Delete Permanently</a>
                     </div>
                 </div>
@@ -728,6 +729,9 @@ $(document).ready(function() {
         $('#detail-url').val(data.url);
         $('#detail-view').attr('href', data.url);
         $('#detail-delete').attr('href', data.deleteUrl);
+        $('#detail-edit-img').toggle(data.type === 'image');
+        window._editImgUrl = data.url;
+        window._editImgPath = data.path;
 
         panel.show();
     }
@@ -848,6 +852,235 @@ function copyToClipboard(text) {
         post({ action: 'delete_folder', id }).then(d => {
             if (d.ok) location.reload();
             else alert('Error: ' + d.msg);
+        });
+    };
+})();
+</script>
+
+<!-- Image Editor Modal -->
+<div id="img-editor-modal" style="display:none;position:fixed;z-index:99999;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:20px;">
+    <div style="background:#1d2327;width:100%;max-width:860px;max-height:92vh;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;">
+        <!-- Header -->
+        <div style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #3c434a;">
+            <h3 style="margin:0;font-size:15px;color:#fff;font-weight:600;"><i class="fa-solid fa-crop-simple" style="margin-right:6px;color:#72aee6;"></i>Edit Image</h3>
+            <button onclick="closeImgEditor()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#a7aaad;line-height:1;">&times;</button>
+        </div>
+        <!-- Toolbar -->
+        <div style="padding:10px 18px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #3c434a;background:#2c3338;">
+            <button onclick="imgRotate(-90)" class="ie-btn" title="Rotate Left"><i class="fa-solid fa-rotate-left"></i></button>
+            <button onclick="imgRotate(90)" class="ie-btn" title="Rotate Right"><i class="fa-solid fa-rotate-right"></i></button>
+            <button onclick="imgFlipH()" class="ie-btn" title="Flip Horizontal"><i class="fa-solid fa-left-right"></i></button>
+            <button onclick="imgFlipV()" class="ie-btn" title="Flip Vertical"><i class="fa-solid fa-up-down"></i></button>
+            <span style="width:1px;height:24px;background:#3c434a;margin:0 4px;"></span>
+            <label style="color:#c3c4c7;font-size:12px;">W</label>
+            <input type="number" id="ie-width" style="width:70px;padding:4px 6px;background:#1d2327;color:#fff;border:1px solid #3c434a;border-radius:3px;font-size:12px;" onchange="imgResize()">
+            <label style="color:#c3c4c7;font-size:12px;">H</label>
+            <input type="number" id="ie-height" style="width:70px;padding:4px 6px;background:#1d2327;color:#fff;border:1px solid #3c434a;border-radius:3px;font-size:12px;" onchange="imgResize()">
+            <button onclick="imgToggleAspect()" id="ie-aspect-btn" class="ie-btn ie-btn-active" title="Lock aspect ratio"><i class="fa-solid fa-lock"></i></button>
+            <span style="width:1px;height:24px;background:#3c434a;margin:0 4px;"></span>
+            <button onclick="imgCropToggle()" id="ie-crop-btn" class="ie-btn" title="Crop"><i class="fa-solid fa-crop-simple"></i> Crop</button>
+        </div>
+        <!-- Canvas -->
+        <div style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:16px;background:#1d2327;position:relative;" id="ie-canvas-wrap">
+            <canvas id="ie-canvas" style="max-width:100%;max-height:100%;cursor:crosshair;"></canvas>
+            <div id="ie-crop-overlay" style="display:none;position:absolute;border:2px dashed #72aee6;background:rgba(114,174,230,.1);cursor:move;"></div>
+        </div>
+        <!-- Footer -->
+        <div style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #3c434a;background:#2c3338;">
+            <span id="ie-info" style="font-size:12px;color:#a7aaad;"></span>
+            <div style="display:flex;gap:8px;">
+                <button onclick="imgReset()" class="ie-btn">Reset</button>
+                <button onclick="closeImgEditor()" class="ie-btn">Cancel</button>
+                <button onclick="imgSave()" style="padding:6px 16px;background:#2271b1;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.ie-btn { padding:6px 10px;background:#3c434a;color:#c3c4c7;border:1px solid #50575e;border-radius:4px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:4px;transition:background .15s; }
+.ie-btn:hover { background:#50575e;color:#fff; }
+.ie-btn-active, .ie-btn-active:hover { background:#2271b1;color:#fff;border-color:#2271b1; }
+</style>
+
+<script>
+(function(){
+    var img = new Image();
+    var canvas, ctx;
+    var origW, origH, curW, curH, rotation = 0, flipH = 1, flipV = 1;
+    var aspectLock = true;
+    var cropping = false, cropRect = null;
+
+    window.openImageEditor = function() {
+        var m = document.getElementById('img-editor-modal');
+        canvas = document.getElementById('ie-canvas');
+        ctx = canvas.getContext('2d');
+        rotation = 0; flipH = 1; flipV = 1; cropping = false; cropRect = null;
+        document.getElementById('ie-crop-overlay').style.display = 'none';
+        document.getElementById('ie-crop-btn').classList.remove('ie-btn-active');
+        img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            origW = img.naturalWidth; origH = img.naturalHeight;
+            curW = origW; curH = origH;
+            document.getElementById('ie-width').value = curW;
+            document.getElementById('ie-height').value = curH;
+            drawCanvas();
+            updateInfo();
+        };
+        img.src = window._editImgUrl + '?t=' + Date.now();
+        m.style.display = 'flex';
+    };
+
+    window.closeImgEditor = function() {
+        document.getElementById('img-editor-modal').style.display = 'none';
+    };
+
+    function drawCanvas() {
+        var w = curW, h = curH;
+        if (rotation % 180 !== 0) { w = curH; h = curW; }
+        canvas.width = w; canvas.height = h;
+        ctx.clearRect(0, 0, w, h);
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        ctx.rotate(rotation * Math.PI / 180);
+        ctx.scale(flipH, flipV);
+        ctx.drawImage(img, -curW / 2, -curH / 2, curW, curH);
+        ctx.restore();
+    }
+
+    function updateInfo() {
+        var w = curW, h = curH;
+        if (rotation % 180 !== 0) { w = curH; h = curW; }
+        document.getElementById('ie-info').textContent = w + ' x ' + h + ' px';
+    }
+
+    window.imgRotate = function(deg) {
+        rotation = (rotation + deg + 360) % 360;
+        var tw = curW, th = curH;
+        if (Math.abs(deg) === 90) {
+            document.getElementById('ie-width').value = rotation % 180 !== 0 ? curH : curW;
+            document.getElementById('ie-height').value = rotation % 180 !== 0 ? curW : curH;
+        }
+        drawCanvas(); updateInfo();
+    };
+
+    window.imgFlipH = function() { flipH *= -1; drawCanvas(); };
+    window.imgFlipV = function() { flipV *= -1; drawCanvas(); };
+
+    window.imgResize = function() {
+        var nw = parseInt(document.getElementById('ie-width').value) || curW;
+        var nh = parseInt(document.getElementById('ie-height').value) || curH;
+        if (aspectLock) {
+            if (nw !== curW) { nh = Math.round(nw * origH / origW); document.getElementById('ie-height').value = nh; }
+            else { nw = Math.round(nh * origW / origH); document.getElementById('ie-width').value = nw; }
+        }
+        curW = nw; curH = nh;
+        drawCanvas(); updateInfo();
+    };
+
+    window.imgToggleAspect = function() {
+        aspectLock = !aspectLock;
+        document.getElementById('ie-aspect-btn').classList.toggle('ie-btn-active', aspectLock);
+        document.getElementById('ie-aspect-btn').innerHTML = aspectLock ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+    };
+
+    window.imgReset = function() {
+        rotation = 0; flipH = 1; flipV = 1; curW = origW; curH = origH;
+        document.getElementById('ie-width').value = curW;
+        document.getElementById('ie-height').value = curH;
+        document.getElementById('ie-crop-overlay').style.display = 'none';
+        document.getElementById('ie-crop-btn').classList.remove('ie-btn-active');
+        cropping = false; cropRect = null;
+        drawCanvas(); updateInfo();
+    };
+
+    // Crop
+    var cropStartX, cropStartY, isDraggingCrop = false;
+    window.imgCropToggle = function() {
+        cropping = !cropping;
+        document.getElementById('ie-crop-btn').classList.toggle('ie-btn-active', cropping);
+        if (!cropping) {
+            // Apply crop
+            if (cropRect) applyCrop();
+            document.getElementById('ie-crop-overlay').style.display = 'none';
+            cropRect = null;
+        }
+    };
+
+    canvas && canvas.addEventListener && canvas.addEventListener('mousedown', function(e) {
+        if (!cropping) return;
+        var r = canvas.getBoundingClientRect();
+        cropStartX = e.clientX - r.left;
+        cropStartY = e.clientY - r.top;
+        isDraggingCrop = true;
+        cropRect = { x: cropStartX, y: cropStartY, w: 0, h: 0 };
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (!isDraggingCrop || !cropping) return;
+        var r = document.getElementById('ie-canvas').getBoundingClientRect();
+        var cx = e.clientX - r.left, cy = e.clientY - r.top;
+        cropRect.w = cx - cropStartX;
+        cropRect.h = cy - cropStartY;
+        var ov = document.getElementById('ie-crop-overlay');
+        var scaleX = document.getElementById('ie-canvas').width / r.width;
+        var scaleY = document.getElementById('ie-canvas').height / r.height;
+        ov.style.display = 'block';
+        ov.style.left = (r.left - document.getElementById('ie-canvas-wrap').getBoundingClientRect().left + Math.min(cropStartX, cx)) + 'px';
+        ov.style.top = (r.top - document.getElementById('ie-canvas-wrap').getBoundingClientRect().top + Math.min(cropStartY, cy)) + 'px';
+        ov.style.width = Math.abs(cropRect.w) + 'px';
+        ov.style.height = Math.abs(cropRect.h) + 'px';
+    });
+    document.addEventListener('mouseup', function() { isDraggingCrop = false; });
+
+    function applyCrop() {
+        if (!cropRect || (Math.abs(cropRect.w) < 5 && Math.abs(cropRect.h) < 5)) return;
+        var r = canvas.getBoundingClientRect();
+        var scaleX = canvas.width / r.width;
+        var scaleY = canvas.height / r.height;
+        var sx = Math.min(cropStartX, cropStartX + cropRect.w) * scaleX;
+        var sy = Math.min(cropStartY, cropStartY + cropRect.h) * scaleY;
+        var sw = Math.abs(cropRect.w) * scaleX;
+        var sh = Math.abs(cropRect.h) * scaleY;
+        sx = Math.max(0, Math.round(sx));
+        sy = Math.max(0, Math.round(sy));
+        sw = Math.min(canvas.width - sx, Math.round(sw));
+        sh = Math.min(canvas.height - sy, Math.round(sh));
+        if (sw < 1 || sh < 1) return;
+        var imageData = ctx.getImageData(sx, sy, sw, sh);
+        canvas.width = sw; canvas.height = sh;
+        ctx.putImageData(imageData, 0, 0);
+        // Update source image to cropped
+        var tmpImg = new Image();
+        tmpImg.onload = function() {
+            img = tmpImg;
+            origW = sw; origH = sh; curW = sw; curH = sh;
+            rotation = 0; flipH = 1; flipV = 1;
+            document.getElementById('ie-width').value = curW;
+            document.getElementById('ie-height').value = curH;
+            updateInfo();
+        };
+        tmpImg.src = canvas.toDataURL('image/png');
+    }
+
+    window.imgSave = function() {
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        var btn = document.querySelector('#img-editor-modal [onclick="imgSave()"]');
+        btn.textContent = 'Saving...'; btn.disabled = true;
+        fetch('api/media-edit.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: window._editImgPath, data: dataUrl })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            btn.textContent = 'Save'; btn.disabled = false;
+            if (d.success) { closeImgEditor(); location.reload(); }
+            else alert('Error: ' + (d.error || 'Unknown'));
+        })
+        .catch(function(err) {
+            btn.textContent = 'Save'; btn.disabled = false;
+            alert('Save failed: ' + err.message);
         });
     };
 })();

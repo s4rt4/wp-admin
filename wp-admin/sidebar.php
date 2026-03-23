@@ -120,7 +120,7 @@ endif; ?>
 endif; ?>
         <?php if (current_user_can('manage_options') && rmv_can_see('tools')): ?>
         <li class="wp-has-submenu <?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics','Automations','Edit Automation'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
-            <a href="tools.php" class="<?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics','Automations','Edit Automation','Redirects'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
+            <a href="tools.php" class="<?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics','Automations','Edit Automation','Redirects','API Tokens'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
                 <li class="wp-first-item"><a href="tools.php?tab=database">Database Backup</a></li>
@@ -147,10 +147,13 @@ endif; ?>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Redirects') ? 'current' : ''; ?>">
                     <a href="redirects.php">Redirects</a>
                 </li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'API Tokens') ? 'current' : ''; ?>">
+                    <a href="api-tokens.php">REST API</a>
+                </li>
             </ul>
         </li>
         <?php if (rmv_can_see('settings')): ?>
-        <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings' || $page_title === 'SMTP Email' || $page_title === 'Role Menu Visibility')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+        <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings' || $page_title === 'SMTP Email' || $page_title === 'Role Menu Visibility' || $page_title === 'Sites')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
             <a href="settings-general.php"><div class="wp-menu-image dashicons-admin-settings"></div><div class="wp-menu-name">Settings</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
@@ -162,6 +165,7 @@ endif; ?>
                 <li class="<?php echo(isset($page_title) && $page_title === 'SMTP Email') ? 'current' : ''; ?>"><a href="settings-smtp.php">SMTP Email</a></li>
                 <?php if (current_user_can('manage_options')): ?>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Role Menu Visibility') ? 'current' : ''; ?>"><a href="settings-roles-menu.php">Role Visibility</a></li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Sites') ? 'current' : ''; ?>"><a href="sites.php">Multi-site</a></li>
                 <?php endif; ?>
             </ul>
         </li>

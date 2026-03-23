@@ -1,6 +1,6 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, custom fields, a WordPress-like first-run installer, trash/recycle bin, CSV import/export, maintenance mode, user activity tracking, a redirects manager, revision diff viewer, and related posts.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, custom fields, a WordPress-like first-run installer, trash/recycle bin, CSV import/export, maintenance mode, user activity tracking, a redirects manager, revision diff viewer, related posts, a token-authenticated REST API, a built-in media editor, and multi-site management.
 
 ## Features
 
@@ -132,6 +132,9 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 - **Appearance & Menu Builder:** Customise colours and navigation menus.
 - **Maintenance Mode:** Toggle on/off from General Settings — frontend displays a branded "Under Maintenance" page (503) while admin panel remains accessible. Custom message support.
 - **Redirects Manager:** Create and manage 301/302 URL redirects from the admin panel. Hit counter, enable/disable toggle, edit modal. Processed by the front controller before routing.
+- **REST API:** Token-authenticated CRUD API for posts, pages, media, categories, tags, and options. Generate and manage API tokens from the admin panel. CORS-enabled, supports Bearer token and query param auth.
+- **Media Editor:** Crop, resize, rotate, and flip images directly from the media library using an HTML5 Canvas editor. Changes are saved in-place.
+- **Multi-site Manager:** Create and manage multiple sites from a single installation. Each site gets its own set of database tables (prefixed), with shared user authentication. Activate, deactivate, or delete sites.
 - **Database Backup & Restore** interface.
 - **Export / Import** content tools (JSON and CSV).
 

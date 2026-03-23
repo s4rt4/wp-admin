@@ -95,6 +95,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'media-new') ? 'current' : ''; ?>"><a href="docs.php?topic=media-new">Add New</a></li>
                 <li class="<?php echo($topic === 'media-image-optimizer') ? 'current' : ''; ?>"><a href="docs.php?topic=media-image-optimizer">Image Optimizer</a></li>
                 <li class="<?php echo($topic === 'media-folders') ? 'current' : ''; ?>"><a href="docs.php?topic=media-folders">Folders</a></li>
+                <li class="<?php echo($topic === 'media-editor') ? 'current' : ''; ?>"><a href="docs.php?topic=media-editor">Media Editor</a></li>
             </ul>
         </li>
 
@@ -176,6 +177,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-automations') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-automations">Automations</a></li>
                 <li class="<?php echo($topic === 'tools-csv') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-csv">CSV Import/Export</a></li>
                 <li class="<?php echo($topic === 'tools-redirects') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-redirects">Redirects Manager</a></li>
+                <li class="<?php echo($topic === 'tools-rest-api') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-rest-api">REST API</a></li>
             </ul>
         </li>
 
@@ -194,6 +196,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'settings-smtp') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-smtp">SMTP Email</a></li>
                 <li class="<?php echo($topic === 'settings-role-visibility') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-role-visibility">Role Visibility</a></li>
                 <li class="<?php echo($topic === 'settings-maintenance') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-maintenance">Maintenance Mode</a></li>
+                <li class="<?php echo($topic === 'settings-multisite') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-multisite">Multi-site</a></li>
             </ul>
         </li>
 
