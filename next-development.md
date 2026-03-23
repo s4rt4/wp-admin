@@ -99,6 +99,54 @@ Batch 1–2 telah **selesai dieksekusi**. Batch Ketiga sedang direncanakan.
 
 ---
 
+## Plan Batch Keempat — TUI Library Integration
+
+Strategi: lokalkan semua TUI library ke `/wp-admin/vendor/tui/`, lalu progressive replacement per halaman.
+
+### Persiapan — Lokalkan TUI Assets
+
+| # | Task | Deskripsi | Status |
+|---|------|-----------|--------|
+| 0 | **Vendor folder** | Download semua TUI assets ke `wp-admin/vendor/tui/` — tui-image-editor, tui-calendar, tui-chart, tui-grid, tui-color-picker, tui-code-snippet, fabric.js v4.6.0. Ganti semua CDN reference ke lokal. | Pending |
+
+### Tier 1 — tui-grid (Replace DataTables)
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 1 | **Posts Grid** | Ganti DataTables di posts.php → tui-grid: inline editing, column resize, sortable, filterable. | Pending |
+| 2 | **Pages Grid** | Ganti DataTables di pages.php → tui-grid dengan tree view untuk page hierarchy. | Pending |
+| 3 | **Comments Grid** | Ganti tabel comments.php → tui-grid: inline approve/reject/spam langsung di grid. | Pending |
+| 4 | **Audit Log Grid** | Upgrade audit-log.php → tui-grid: filter per kolom, virtual scrolling untuk ribuan rows, export. | Pending |
+| 5 | **Bulk SEO Editor** (fitur baru) | Halaman baru — spreadsheet-style tui-grid untuk edit meta title, meta desc, slug, focus keyword semua post sekaligus. | Pending |
+
+### Tier 2 — tui-calendar (Interactive Calendar)
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 6 | **Interactive Content Calendar** | Ganti calendar.php (PHP static) → tui-calendar: drag-to-reschedule post, week/month/day view, click-to-create post, warna per status. | Pending |
+| 7 | **Editorial Calendar** (fitur baru) | Assign writer + deadline per post, filter by author, warna per author/status, due date alerts. | Pending |
+| 8 | **Dashboard Calendar Widget** | Upgrade widget Content Calendar → mini tui-calendar yang interaktif di dashboard. | Pending |
+
+### Tier 3 — tui-chart (Advanced Analytics)
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 9 | **Analytics Redesign** | Ganti Chart.js di analytics.php → tui-chart: area chart visitors, heatmap jam/hari, stacked bar traffic sources, donut device breakdown. | Pending |
+| 10 | **Form Analytics** (fitur baru) | Halaman baru — tui-chart submission trends per form + tui-grid semua responses dengan filter/export. | Pending |
+| 11 | **Audit Dashboard** (fitur baru) | Halaman baru — timeline chart aktivitas + breakdown per user/action type + tui-grid filterable log. | Pending |
+| 12 | **Dashboard Widget: Goal Tracker** (fitur baru) | Widget baru — tui-chart gauge/bar untuk target vs actual (views, posts, subscribers). | Pending |
+
+### Tier 4 — Kombinasi & Fitur Baru
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 13 | **Data Explorer** (fitur baru) | Halaman baru — admin bisa browse/query tabel database langsung via tui-grid. Read-only, dengan export CSV. | Pending |
+| 14 | **Redirects Inline Edit** | Upgrade redirects.php → tui-grid dengan inline edit source/target/type langsung di tabel. | Pending |
+| 15 | **User Manager Grid** | Upgrade users.php → tui-grid: inline role change, sortable, column filters. | Pending |
+| 16 | **TUI Image Editor Upgrade** | Sudah terpasang via CDN → pindahkan ke vendor lokal, pastikan semua dependency konsisten. | Pending |
+
+---
+
 ## Catatan Multi-language
 
 User **harus menulis konten secara manual** dalam setiap bahasa (standar industri: WordPress, Craft CMS, Statamic). CMS yang mengurus:
