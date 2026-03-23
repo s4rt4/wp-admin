@@ -74,6 +74,12 @@
         { title: 'SEO Settings', section: 'Posts', topic: 'posts-seo', keywords: 'seo meta title description keyword preview google snippet analysis score optimasi pencarian' },
         { title: 'Content Calendar', section: 'Posts', topic: 'posts-calendar', keywords: 'calendar kalender bulan jadwal scheduled published konten rencana plan' },
         { title: 'Custom Fields', section: 'Posts', topic: 'posts-custom-fields', keywords: 'custom fields metadata post meta key value field tambahan data ekstra' },
+        { title: 'Trash / Recycle Bin', section: 'Posts', topic: 'posts-trash', keywords: 'trash recycle bin hapus sampah restore pulihkan permanent delete kosongkan' },
+        // Tools (extended - Tier 1 Batch 3)
+        { title: 'CSV Import/Export', section: 'Tools', topic: 'tools-csv', keywords: 'csv import export bulk massal post artikel download upload spreadsheet excel' },
+        { title: 'Maintenance Mode', section: 'Settings', topic: 'settings-maintenance', keywords: 'maintenance mode pemeliharaan offline 503 under construction tutup sementara' },
+        // Users (extended - Tier 1 Batch 3)
+        { title: 'User Activity', section: 'Users', topic: 'users-activity', keywords: 'user activity aktivitas online offline last login terakhir aktif status pengguna' },
         // Media (extended)
         { title: 'Image Optimizer', section: 'Media', topic: 'media-image-optimizer', keywords: 'optimasi gambar compress kompresi resize image optimizer' },
         { title: 'Media Folders', section: 'Media', topic: 'media-folders', keywords: 'folder media virtual organisasi drag drop file library kelola' },

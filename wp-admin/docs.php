@@ -85,6 +85,10 @@ function topic_label(string $topic): string
         'posts-seo' => 'SEO Settings',
         'posts-calendar' => 'Content Calendar',
         'posts-custom-fields' => 'Custom Fields',
+        'posts-trash' => 'Trash / Recycle Bin',
+        'tools-csv' => 'CSV Import/Export',
+        'settings-maintenance' => 'Maintenance Mode',
+        'users-activity' => 'User Activity',
         'tools-automations' => 'Automations',
     ];
     return $map[$topic] ?? ucwords(str_replace('-', ' ', $topic));

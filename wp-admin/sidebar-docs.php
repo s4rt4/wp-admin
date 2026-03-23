@@ -78,6 +78,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'posts-seo') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-seo">SEO Settings</a></li>
                 <li class="<?php echo($topic === 'posts-calendar') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-calendar">Content Calendar</a></li>
                 <li class="<?php echo($topic === 'posts-custom-fields') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-custom-fields">Custom Fields</a></li>
+                <li class="<?php echo($topic === 'posts-trash') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-trash">Trash / Recycle Bin</a></li>
             </ul>
         </li>
 
@@ -150,6 +151,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'users-roles') ? 'current' : ''; ?>"><a href="docs.php?topic=users-roles">Roles</a></li>
                 <li class="<?php echo($topic === 'users-2fa') ? 'current' : ''; ?>"><a href="docs.php?topic=users-2fa">Two-Factor Auth (2FA)</a></li>
                 <li class="<?php echo($topic === 'users-password-reset') ? 'current' : ''; ?>"><a href="docs.php?topic=users-password-reset">Password Reset</a></li>
+                <li class="<?php echo($topic === 'users-activity') ? 'current' : ''; ?>"><a href="docs.php?topic=users-activity">User Activity</a></li>
             </ul>
         </li>
 
@@ -170,6 +172,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-notifications') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-notifications">Notification Center</a></li>
                 <li class="<?php echo($topic === 'tools-analytics') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-analytics">Analytics</a></li>
                 <li class="<?php echo($topic === 'tools-automations') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-automations">Automations</a></li>
+                <li class="<?php echo($topic === 'tools-csv') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-csv">CSV Import/Export</a></li>
             </ul>
         </li>
 
@@ -187,6 +190,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'settings-permalinks') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-permalinks">Permalinks</a></li>
                 <li class="<?php echo($topic === 'settings-smtp') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-smtp">SMTP Email</a></li>
                 <li class="<?php echo($topic === 'settings-role-visibility') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-role-visibility">Role Visibility</a></li>
+                <li class="<?php echo($topic === 'settings-maintenance') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-maintenance">Maintenance Mode</a></li>
             </ul>
         </li>
 
