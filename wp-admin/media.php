@@ -346,6 +346,7 @@ function formatFileSize($bytes) {
                     <div class="detail-actions" style="margin-top:16px; padding-top:12px; border-top:1px solid #ddd; display:flex; flex-wrap:wrap; gap:6px;">
                         <a href="#" id="detail-view" class="button" target="_blank">View Original</a>
                         <button type="button" class="button" id="detail-edit-img" style="display:none;" onclick="openImageEditor()"><i class="fa-solid fa-crop-simple" style="margin-right:3px;"></i>Edit Image</button>
+                        <button type="button" class="button" id="detail-edit-tui" style="display:none;" onclick="openTuiEditor()"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right:3px;"></i>Advanced Editor</button>
                         <a href="#" id="detail-delete" class="button button-link-delete" onclick="return confirm('Delete this file permanently?')">Delete Permanently</a>
                     </div>
                 </div>
@@ -730,6 +731,7 @@ $(document).ready(function() {
         $('#detail-view').attr('href', data.url);
         $('#detail-delete').attr('href', data.deleteUrl);
         $('#detail-edit-img').toggle(data.type === 'image');
+        $('#detail-edit-tui').toggle(data.type === 'image');
         window._editImgUrl = data.url;
         window._editImgPath = data.path;
 
@@ -1084,6 +1086,109 @@ function copyToClipboard(text) {
         });
     };
 })();
+</script>
+
+<!-- TUI Image Editor Modal -->
+<div id="tui-editor-modal" style="display:none;position:fixed;z-index:99999;inset:0;background:rgba(0,0,0,.85);flex-direction:column;">
+    <!-- Header -->
+    <div style="padding:10px 18px;display:flex;justify-content:space-between;align-items:center;background:#1d2327;border-bottom:1px solid #3c434a;flex-shrink:0;">
+        <h3 style="margin:0;font-size:15px;color:#fff;font-weight:600;"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right:6px;color:#72aee6;"></i>Advanced Editor (TUI Image Editor)</h3>
+        <div style="display:flex;gap:8px;">
+            <button onclick="tuiSave()" style="padding:6px 16px;background:#2271b1;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;" id="tui-save-btn">Save</button>
+            <button onclick="closeTuiEditor()" style="background:none;border:1px solid #50575e;border-radius:4px;padding:6px 12px;cursor:pointer;color:#a7aaad;font-size:13px;">Cancel</button>
+        </div>
+    </div>
+    <!-- Editor container -->
+    <div id="tui-editor-container" style="flex:1;overflow:hidden;"></div>
+</div>
+
+<link rel="stylesheet" href="https://uicdn.toast.com/tui-image-editor/v3.15.3/tui-image-editor.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<script src="https://uicdn.toast.com/tui-image-editor/v3.15.3/tui-image-editor.js"></script>
+
+<script>
+var _tuiInstance = null;
+
+function openTuiEditor() {
+    var modal = document.getElementById('tui-editor-modal');
+    modal.style.display = 'flex';
+
+    // Destroy previous instance
+    if (_tuiInstance) {
+        try { _tuiInstance.destroy(); } catch(e) {}
+        _tuiInstance = null;
+    }
+    document.getElementById('tui-editor-container').innerHTML = '';
+
+    // Init TUI Image Editor
+    _tuiInstance = new tui.ImageEditor('#tui-editor-container', {
+        includeUI: {
+            loadImage: {
+                path: window._editImgUrl + '?t=' + Date.now(),
+                name: 'current'
+            },
+            theme: {
+                'common.bi.image': '',
+                'common.bisize.width': '0',
+                'common.bisize.height': '0',
+                'common.backgroundColor': '#1d2327',
+                'header.backgroundImage': 'none',
+                'header.backgroundColor': '#2c3338',
+                'header.border': '0',
+                'downloadButton.display': 'none',
+                'loadButton.display': 'none'
+            },
+            menu: ['crop', 'flip', 'rotate', 'draw', 'shape', 'icon', 'text', 'mask', 'filter'],
+            initMenu: 'crop',
+            uiSize: {
+                width: '100%',
+                height: '100%'
+            },
+            menuBarPosition: 'left'
+        },
+        cssMaxWidth: 1200,
+        cssMaxHeight: 800,
+        usageStatistics: false
+    });
+
+    // Fix canvas size after render
+    setTimeout(function() {
+        if (_tuiInstance) _tuiInstance.ui.resizeEditor();
+    }, 300);
+}
+
+function closeTuiEditor() {
+    document.getElementById('tui-editor-modal').style.display = 'none';
+    if (_tuiInstance) {
+        try { _tuiInstance.destroy(); } catch(e) {}
+        _tuiInstance = null;
+    }
+    document.getElementById('tui-editor-container').innerHTML = '';
+}
+
+function tuiSave() {
+    if (!_tuiInstance) return;
+    var btn = document.getElementById('tui-save-btn');
+    btn.textContent = 'Saving...'; btn.disabled = true;
+
+    var dataUrl = _tuiInstance.toDataURL({ format: 'jpeg', quality: 0.92 });
+
+    fetch('api/media-edit.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: window._editImgPath, data: dataUrl })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        btn.textContent = 'Save'; btn.disabled = false;
+        if (d.success) { closeTuiEditor(); location.reload(); }
+        else alert('Error: ' + (d.error || 'Unknown'));
+    })
+    .catch(function(err) {
+        btn.textContent = 'Save'; btn.disabled = false;
+        alert('Save failed: ' + err.message);
+    });
+}
 </script>
 
 <?php require_once 'footer.php'; ?>
