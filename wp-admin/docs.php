@@ -203,20 +203,180 @@ endif; ?>
         <main class="docs-main" id="docs-main" role="main">
             <?php
 if ($topic === 'getting-started') {
-    if ($lang === 'en') {
-        echo '<div class="docs-welcome">';
-        echo '<span class="dashicons dashicons-book-alt"></span>';
-        echo '<h1>Welcome to the Documentation</h1>';
-        echo '<p>Select a topic from the sidebar to get started. You can also use the search bar above or press <kbd>/</kbd> to quickly find what you need.</p>';
-        echo '</div>';
+    $is_en = ($lang === 'en');
+    ?>
+    <div class="docs-welcome" style="text-align:center;padding:10px 0 20px;">
+        <span class="dashicons dashicons-book-alt"></span>
+        <h1><?php echo $is_en ? 'Documentation' : 'Dokumentasi'; ?></h1>
+        <p style="color:#646970;font-size:14px;max-width:520px;margin:0 auto 28px;"><?php echo $is_en ? 'Browse by category or press <kbd>/</kbd> to search.' : 'Jelajahi berdasarkan kategori atau tekan <kbd>/</kbd> untuk mencari.'; ?></p>
+    </div>
+
+    <!-- Popular / Getting Started -->
+    <div style="margin-bottom:28px;">
+        <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.5px;color:#646970;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #e0e0e0;">
+            <i class="fa-solid fa-star" style="color:#f0b849;margin-right:5px;"></i><?php echo $is_en ? 'Popular Topics' : 'Topik Populer'; ?>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+            <?php
+            $popular = [
+                ['icon'=>'fa-pen-to-square','color'=>'#0073aa','topic'=>'posts-new','en'=>'Add New Post','id'=>'Tambah Post Baru'],
+                ['icon'=>'fa-pager','color'=>'#9b59b6','topic'=>'pages-builder-grapesjs','en'=>'GrapesJS Editor','id'=>'Editor GrapesJS'],
+                ['icon'=>'fa-magnifying-glass-chart','color'=>'#e67e22','topic'=>'posts-seo','en'=>'SEO Settings','id'=>'Pengaturan SEO'],
+                ['icon'=>'fa-shield-halved','color'=>'#27ae60','topic'=>'users-2fa','en'=>'Two-Factor Auth','id'=>'Autentikasi 2FA'],
+                ['icon'=>'fa-chart-line','color'=>'#e74c3c','topic'=>'tools-analytics','en'=>'Analytics','id'=>'Analytics'],
+                ['icon'=>'fa-calendar-days','color'=>'#3498db','topic'=>'posts-calendar','en'=>'Content Calendar','id'=>'Kalender Konten'],
+            ];
+            foreach ($popular as $p):
+            ?>
+            <a href="docs.php?topic=<?php echo $p['topic']; ?>&lang=<?php echo $lang; ?>" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;text-decoration:none;color:#1d2327;transition:border-color .15s,box-shadow .15s;">
+                <i class="fa-solid <?php echo $p['icon']; ?>" style="font-size:16px;color:<?php echo $p['color']; ?>;flex-shrink:0;width:20px;text-align:center;"></i>
+                <span style="font-size:13px;font-weight:600;"><?php echo $is_en ? $p['en'] : $p['id']; ?></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Content Management -->
+    <div style="margin-bottom:28px;">
+        <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.5px;color:#646970;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #e0e0e0;">
+            <i class="fa-solid fa-file-lines" style="color:#0073aa;margin-right:5px;"></i><?php echo $is_en ? 'Content Management' : 'Manajemen Konten'; ?>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+            <?php
+            $content = [
+                ['icon'=>'fa-list','topic'=>'posts-all','en'=>'All Posts','id'=>'Semua Post'],
+                ['icon'=>'fa-file','topic'=>'pages-all','en'=>'All Pages','id'=>'Semua Halaman'],
+                ['icon'=>'fa-folder-open','topic'=>'posts-categories','en'=>'Categories','id'=>'Kategori'],
+                ['icon'=>'fa-tags','topic'=>'posts-tags','en'=>'Tags','id'=>'Tag'],
+                ['icon'=>'fa-clock-rotate-left','topic'=>'posts-scheduled','en'=>'Scheduled Publishing','id'=>'Jadwal Terbit'],
+                ['icon'=>'fa-lock','topic'=>'posts-content-lock','en'=>'Content Lock','id'=>'Kunci Konten'],
+                ['icon'=>'fa-language','topic'=>'posts-multilang','en'=>'Multi-language','id'=>'Multi-bahasa'],
+                ['icon'=>'fa-key','topic'=>'posts-custom-fields','en'=>'Custom Fields','id'=>'Custom Fields'],
+                ['icon'=>'fa-trash-can','topic'=>'posts-trash','en'=>'Trash / Recycle Bin','id'=>'Trash / Tempat Sampah'],
+                ['icon'=>'fa-code-compare','topic'=>'posts-diff','en'=>'Revision Diff Viewer','id'=>'Diff Viewer Revisi'],
+                ['icon'=>'fa-link','topic'=>'posts-related','en'=>'Related Posts','id'=>'Post Terkait'],
+            ];
+            foreach ($content as $c):
+            ?>
+            <a href="docs.php?topic=<?php echo $c['topic']; ?>&lang=<?php echo $lang; ?>" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;text-decoration:none;color:#1d2327;transition:border-color .15s,box-shadow .15s;">
+                <i class="fa-solid <?php echo $c['icon']; ?>" style="font-size:14px;color:#646970;flex-shrink:0;width:20px;text-align:center;"></i>
+                <span style="font-size:13px;font-weight:500;"><?php echo $is_en ? $c['en'] : $c['id']; ?></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Page Builders -->
+    <div style="margin-bottom:28px;">
+        <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.5px;color:#646970;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #e0e0e0;">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color:#9b59b6;margin-right:5px;"></i><?php echo $is_en ? 'Page Builders & Editors' : 'Page Builder & Editor'; ?>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+            <?php
+            $builders = [
+                ['icon'=>'fa-object-group','color'=>'#0073aa','topic'=>'pages-builder-grapesjs','en'=>'GrapesJS (Visual)','id'=>'GrapesJS (Visual)'],
+                ['icon'=>'fa-cube','color'=>'#9b59b6','topic'=>'pages-builder-editorjs','en'=>'Editor.js (Block)','id'=>'Editor.js (Blok)'],
+                ['icon'=>'fa-code','color'=>'#e67e22','topic'=>'pages-builder-monaco','en'=>'Monaco (Code)','id'=>'Monaco (Kode)'],
+            ];
+            foreach ($builders as $b):
+            ?>
+            <a href="docs.php?topic=<?php echo $b['topic']; ?>&lang=<?php echo $lang; ?>" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;text-decoration:none;color:#1d2327;">
+                <i class="fa-solid <?php echo $b['icon']; ?>" style="font-size:14px;color:<?php echo $b['color']; ?>;flex-shrink:0;width:20px;text-align:center;"></i>
+                <span style="font-size:13px;font-weight:500;"><?php echo $is_en ? $b['en'] : $b['id']; ?></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Security & Users -->
+    <div style="margin-bottom:28px;">
+        <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.5px;color:#646970;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #e0e0e0;">
+            <i class="fa-solid fa-user-shield" style="color:#27ae60;margin-right:5px;"></i><?php echo $is_en ? 'Security & Users' : 'Keamanan & Pengguna'; ?>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+            <?php
+            $security = [
+                ['icon'=>'fa-shield-halved','topic'=>'users-2fa','en'=>'Two-Factor Auth (2FA)','id'=>'Autentikasi 2FA'],
+                ['icon'=>'fa-key','topic'=>'users-password-reset','en'=>'Password Reset','id'=>'Reset Password'],
+                ['icon'=>'fa-user-gear','topic'=>'users-roles','en'=>'User Roles','id'=>'Peran Pengguna'],
+                ['icon'=>'fa-users','topic'=>'users-all','en'=>'All Users','id'=>'Semua Pengguna'],
+                ['icon'=>'fa-signal','topic'=>'users-activity','en'=>'User Activity','id'=>'Aktivitas Pengguna'],
+                ['icon'=>'fa-eye-slash','topic'=>'settings-role-visibility','en'=>'Role Menu Visibility','id'=>'Visibilitas Menu Role'],
+            ];
+            foreach ($security as $s):
+            ?>
+            <a href="docs.php?topic=<?php echo $s['topic']; ?>&lang=<?php echo $lang; ?>" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;text-decoration:none;color:#1d2327;">
+                <i class="fa-solid <?php echo $s['icon']; ?>" style="font-size:14px;color:#646970;flex-shrink:0;width:20px;text-align:center;"></i>
+                <span style="font-size:13px;font-weight:500;"><?php echo $is_en ? $s['en'] : $s['id']; ?></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Tools & Settings -->
+    <div style="margin-bottom:28px;">
+        <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.5px;color:#646970;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #e0e0e0;">
+            <i class="fa-solid fa-toolbox" style="color:#e67e22;margin-right:5px;"></i><?php echo $is_en ? 'Tools & Settings' : 'Tools & Pengaturan'; ?>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+            <?php
+            $tools = [
+                ['icon'=>'fa-robot','topic'=>'tools-automations','en'=>'Automations','id'=>'Otomasi'],
+                ['icon'=>'fa-chart-line','topic'=>'tools-analytics','en'=>'Analytics','id'=>'Analytics'],
+                ['icon'=>'fa-clipboard-list','topic'=>'tools-audit-log','en'=>'Audit Log','id'=>'Audit Log'],
+                ['icon'=>'fa-envelope','topic'=>'settings-smtp','en'=>'SMTP Email','id'=>'Email SMTP'],
+                ['icon'=>'fa-file-csv','topic'=>'tools-csv','en'=>'CSV Import/Export','id'=>'CSV Import/Export'],
+                ['icon'=>'fa-arrows-turn-right','topic'=>'tools-redirects','en'=>'Redirects Manager','id'=>'Redirects Manager'],
+                ['icon'=>'fa-database','topic'=>'tools-db','en'=>'Database Backup','id'=>'Backup Database'],
+                ['icon'=>'fa-screwdriver-wrench','topic'=>'settings-maintenance','en'=>'Maintenance Mode','id'=>'Mode Pemeliharaan'],
+                ['icon'=>'fa-bell','topic'=>'tools-notifications','en'=>'Notifications','id'=>'Notifikasi'],
+                ['icon'=>'fa-columns','topic'=>'tools-kanban','en'=>'Kanban Board','id'=>'Papan Kanban'],
+                ['icon'=>'fa-puzzle-piece','topic'=>'tools-form-builder','en'=>'Form Builder','id'=>'Form Builder'],
+                ['icon'=>'fa-code','topic'=>'tools-snippets','en'=>'Snippets','id'=>'Snippets'],
+            ];
+            foreach ($tools as $t):
+            ?>
+            <a href="docs.php?topic=<?php echo $t['topic']; ?>&lang=<?php echo $lang; ?>" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;text-decoration:none;color:#1d2327;">
+                <i class="fa-solid <?php echo $t['icon']; ?>" style="font-size:14px;color:#646970;flex-shrink:0;width:20px;text-align:center;"></i>
+                <span style="font-size:13px;font-weight:500;"><?php echo $is_en ? $t['en'] : $t['id']; ?></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Media & Appearance -->
+    <div style="margin-bottom:28px;">
+        <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.5px;color:#646970;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #e0e0e0;">
+            <i class="fa-solid fa-palette" style="color:#3498db;margin-right:5px;"></i><?php echo $is_en ? 'Media & Appearance' : 'Media & Tampilan'; ?>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+            <?php
+            $media = [
+                ['icon'=>'fa-images','topic'=>'media-library','en'=>'Media Library','id'=>'Perpustakaan Media'],
+                ['icon'=>'fa-folder-tree','topic'=>'media-folders','en'=>'Media Folders','id'=>'Folder Media'],
+                ['icon'=>'fa-compress','topic'=>'media-image-optimizer','en'=>'Image Optimizer','id'=>'Optimasi Gambar'],
+                ['icon'=>'fa-moon','topic'=>'appearance-darkmode','en'=>'Dark Mode','id'=>'Mode Gelap'],
+                ['icon'=>'fa-paintbrush','topic'=>'appearance-themes','en'=>'Customize','id'=>'Kustomisasi'],
+                ['icon'=>'fa-bars','topic'=>'appearance-menus','en'=>'Menus','id'=>'Menu'],
+                ['icon'=>'fa-gauge-high','topic'=>'dashboard-widgets','en'=>'Dashboard Widgets','id'=>'Widget Dashboard'],
+            ];
+            foreach ($media as $m):
+            ?>
+            <a href="docs.php?topic=<?php echo $m['topic']; ?>&lang=<?php echo $lang; ?>" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;text-decoration:none;color:#1d2327;">
+                <i class="fa-solid <?php echo $m['icon']; ?>" style="font-size:14px;color:#646970;flex-shrink:0;width:20px;text-align:center;"></i>
+                <span style="font-size:13px;font-weight:500;"><?php echo $is_en ? $m['en'] : $m['id']; ?></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <style>
+    .docs-main a[href*="docs.php?topic"]:hover {
+        border-color: #0073aa !important;
+        box-shadow: 0 2px 6px rgba(0,115,170,.12);
     }
-    else {
-        echo '<div class="docs-welcome">';
-        echo '<span class="dashicons dashicons-book-alt"></span>';
-        echo '<h1>Selamat Datang di Dokumentasi</h1>';
-        echo '<p>Pilih topik dari sidebar untuk memulai. Anda juga bisa menggunakan kotak pencarian di atas atau tekan <kbd>/</kbd> untuk menemukan topik dengan cepat.</p>';
-        echo '</div>';
-    }
+    </style>
+    <?php
 }
 else {
     $doc_file = __DIR__ . '/docs/' . $lang . '/' . $topic . '.php';
