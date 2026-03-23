@@ -449,10 +449,17 @@ function loadBoard(boardId, tabEl) {
     if (_historyVisible) renderHistory();
 
     fetch('api/kanban.php?action=get_board&board_id=' + boardId)
-        .then(function(r){ return r.json(); })
+        .then(function(r){
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
         .then(function(d){
             if (!d.success) { document.getElementById('board-content').innerHTML = '<p style="color:red;padding:10px;">Failed to load board.</p>'; return; }
             renderBoard(d.data);
+        })
+        .catch(function(err){
+            console.error('loadBoard error:', err);
+            document.getElementById('board-content').innerHTML = '<p style="color:red;padding:10px;">Error loading board: ' + err.message + '</p>';
         });
 }
 

@@ -15,10 +15,6 @@ if (!isset($_SESSION['_last_ping']) || time() - $_SESSION['_last_ping'] > 60) {
     try {
         require_once __DIR__ . '/db_config.php';
         $pdo_ping = getDBConnection();
-        $pdo_ping->exec("ALTER TABLE users ADD COLUMN last_active DATETIME NULL DEFAULT NULL");
-    } catch (\Exception $e) {}
-    try {
-        $pdo_ping = $pdo_ping ?? getDBConnection();
         $stmt_ping = $pdo_ping->prepare("UPDATE users SET last_active = NOW() WHERE id = ?");
         $stmt_ping->execute([$_SESSION['user_id']]);
     } catch (\Exception $e) {}
