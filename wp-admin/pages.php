@@ -196,6 +196,7 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
 </div>
 
 <!-- tui-grid -->
+<link rel="stylesheet" href="vendor/tui/css/tui-pagination.min.css">
 <link rel="stylesheet" href="vendor/tui/css/tui-grid.min.css">
 <style>
     .wp-heading-inline { display: inline-block; margin-right: 5px; vertical-align: middle; }
@@ -229,6 +230,7 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
     .notice-error { border-left-color: #d63638; }
     .notice-success { border-left-color: #00a32a; }
 </style>
+<script src="vendor/tui/js/tui-pagination.min.js"></script>
 <script src="vendor/tui/js/tui-grid.min.js"></script>
 <script>
 (function() {

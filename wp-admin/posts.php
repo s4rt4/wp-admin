@@ -224,6 +224,7 @@ foreach ($posts_data as $r) {
 </div>
 
 <!-- tui-grid -->
+<link rel="stylesheet" href="vendor/tui/css/tui-pagination.min.css">
 <link rel="stylesheet" href="vendor/tui/css/tui-grid.min.css">
 <style>
     .wp-heading-inline { display: inline-block; margin-right: 5px; vertical-align: middle; }
@@ -256,6 +257,7 @@ foreach ($posts_data as $r) {
     .grid-toolbar input[type="search"]:focus { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; outline: none; }
     .grid-toolbar label { font-size: 13px; color: #1d2327; font-weight: 400; }
 </style>
+<script src="vendor/tui/js/tui-pagination.min.js"></script>
 <script src="vendor/tui/js/tui-grid.min.js"></script>
 <script>
 (function() {

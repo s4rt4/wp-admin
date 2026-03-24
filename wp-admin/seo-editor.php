@@ -51,6 +51,7 @@ require_once 'sidebar.php';
 </div>
 </div>
 
+<link rel="stylesheet" href="vendor/tui/css/tui-pagination.min.css">
 <link rel="stylesheet" href="vendor/tui/css/tui-grid.min.css">
 <style>
 .wp-heading-inline { display: inline-block; margin-right: 5px; vertical-align: middle; }
@@ -61,6 +62,7 @@ require_once 'sidebar.php';
 .tui-grid-cell .tui-grid-cell-content { font-size: 13px; }
 .seo-good { color: #065f46; } .seo-ok { color: #856404; } .seo-bad { color: #d63638; }
 </style>
+<script src="vendor/tui/js/tui-pagination.min.js"></script>
 <script src="vendor/tui/js/tui-grid.min.js"></script>
 <script>
 (function() {
