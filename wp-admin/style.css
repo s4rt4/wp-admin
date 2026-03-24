@@ -1672,3 +1672,85 @@ html.dark-mode .dw-row {
 /* docs sidebar stays light */
 html.dark-mode .docs-sidebar { background: #fff !important; }
 html.dark-mode .docs-sidebar * { color: #3c434a !important; }
+
+/* ── TUI Grid dark mode ─────────────────────────────────────────────────── */
+html.dark-mode .tui-grid-container { background: #2c3338; }
+html.dark-mode .tui-grid-border-line-top,
+html.dark-mode .tui-grid-border-line-bottom,
+html.dark-mode .tui-grid-border-line-left,
+html.dark-mode .tui-grid-border-line-right { background: #404952; }
+html.dark-mode .tui-grid-header-area { background: #262a2f; }
+html.dark-mode .tui-grid-cell-header { background: #262a2f; border-color: #404952; color: #c3c4c7; }
+html.dark-mode .tui-grid-cell { background: #2c3338; border-color: #404952; color: #c3c4c7; }
+html.dark-mode .tui-grid-cell-content { color: #c3c4c7; }
+html.dark-mode .tui-grid-cell-content a { color: #72aee6; }
+html.dark-mode .tui-grid-row-even .tui-grid-cell { background: #262a2f; }
+html.dark-mode .tui-grid-row-hover .tui-grid-cell { background: #3c434a; }
+html.dark-mode .tui-grid-cell-selected { background: #3c434a; }
+html.dark-mode .tui-grid-body-area { background: #2c3338; }
+html.dark-mode .tui-grid-scrollbar-y-inner-border,
+html.dark-mode .tui-grid-scrollbar-x-inner-border { background: #404952; }
+html.dark-mode .tui-grid-scrollbar-y-outer-border,
+html.dark-mode .tui-grid-scrollbar-x-outer-border { background: #404952; }
+html.dark-mode .tui-grid-content-before { color: #646970; }
+html.dark-mode .tui-grid-layer-not-empty { background: #2c3338; }
+html.dark-mode .tui-grid-cell-current-row .tui-grid-cell { background: #3c434a; }
+/* TUI Grid pagination */
+html.dark-mode .tui-pagination { color: #c3c4c7; }
+html.dark-mode .tui-pagination .tui-page-btn { background: #2c3338; border-color: #404952; color: #c3c4c7; }
+html.dark-mode .tui-pagination .tui-page-btn:hover { background: #3c434a; }
+html.dark-mode .tui-pagination .tui-page-btn.tui-is-selected { background: #2271b1; border-color: #2271b1; color: #fff; }
+html.dark-mode .tui-pagination .tui-page-btn.tui-is-disabled { background: #1a1d21; color: #50575e; }
+/* TUI Grid editor input */
+html.dark-mode .tui-grid-content-text { background: #1a1d21; color: #c3c4c7; border-color: #72aee6; }
+html.dark-mode .tui-grid-editor-select-list-layer { background: #2c3338; border-color: #404952; }
+html.dark-mode .tui-grid-editor-select-list-item { color: #c3c4c7; }
+html.dark-mode .tui-grid-editor-select-list-item:hover { background: #3c434a; }
+/* TUI Grid checkbox */
+html.dark-mode .tui-grid-row-header-checkbox { accent-color: #2271b1; }
+
+/* ── TUI Chart dark mode ────────────────────────────────────────────────── */
+html.dark-mode .toastui-chart-wrapper { background: #2c3338 !important; }
+html.dark-mode .toastui-chart-title { color: #c3c4c7 !important; }
+html.dark-mode .toastui-chart-legend-label { color: #c3c4c7 !important; }
+html.dark-mode .toastui-chart-xAxis-label,
+html.dark-mode .toastui-chart-yAxis-label { color: #9ca3ae !important; }
+
+/* ── TUI Calendar dark mode ─────────────────────────────────────────────── */
+html.dark-mode .toastui-calendar-layout { background: #2c3338; color: #c3c4c7; }
+html.dark-mode .toastui-calendar-month { background: #2c3338; }
+html.dark-mode .toastui-calendar-weekday-grid { border-color: #404952; }
+html.dark-mode .toastui-calendar-grid-cell-header { color: #c3c4c7; }
+html.dark-mode .toastui-calendar-grid-cell-date { color: #c3c4c7; }
+html.dark-mode .toastui-calendar-template-monthDayName { color: #9ca3ae; }
+html.dark-mode .toastui-calendar-weekday-cell { border-color: #404952; }
+html.dark-mode .toastui-calendar-daygrid-cell { border-color: #404952; }
+html.dark-mode .toastui-calendar-panel { border-color: #404952; }
+html.dark-mode .toastui-calendar-day-name-item { color: #9ca3ae; }
+html.dark-mode .toastui-calendar-timegrid { background: #2c3338; }
+html.dark-mode .toastui-calendar-timegrid-time-column { color: #9ca3ae; }
+html.dark-mode .toastui-calendar-popup-overlay { background: rgba(0,0,0,.6); }
+html.dark-mode .toastui-calendar-popup-container { background: #2c3338; border-color: #404952; color: #c3c4c7; }
+html.dark-mode .toastui-calendar-detail-item-value { color: #c3c4c7; }
+
+/* ── Inline page styles dark mode (an-box, stat cards, etc.) ────────────── */
+html.dark-mode .an-box,
+html.dark-mode .an-stat,
+html.dark-mode .ad-box,
+html.dark-mode .ad-stat,
+html.dark-mode .fa-stat,
+html.dark-mode .cal-stat-card { background: #2c3338; border-color: #404952; color: #c3c4c7; }
+html.dark-mode .an-box-hd,
+html.dark-mode .ad-box h3 { color: #c3c4c7; border-bottom-color: #404952; }
+html.dark-mode .an-stat .value,
+html.dark-mode .ad-stat .num,
+html.dark-mode .fa-stat .num,
+html.dark-mode .cal-stat-card .num { color: #e0e2e4; }
+html.dark-mode .an-stat .label,
+html.dark-mode .ad-stat .lbl,
+html.dark-mode .fa-stat .lbl,
+html.dark-mode .cal-stat-card .lbl { color: #9ca3ae; }
+html.dark-mode .period-tab { background: #2c3338; border-color: #404952; color: #72aee6; }
+html.dark-mode .period-tab.active { background: #2271b1; color: #fff; border-color: #2271b1; }
+html.dark-mode .grid-toolbar input[type="search"] { background: #1a1d21; border-color: #50575e; color: #c3c4c7; }
+html.dark-mode #calendar-container { border-color: #404952; background: #2c3338; }
