@@ -176,10 +176,10 @@ Fokus: membawa CMS dari "admin panel" ke **platform CMS profesional**. Installer
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 12 | **Real-time Notifications** | SSE (Server-Sent Events) atau polling — push notifikasi ke browser saat: post published oleh user lain, comment baru, form submission, kanban card moved. Badge count update live di topbar. | Pending |
-| 13 | **Collaborative Editing Indicator** | Saat 2 user buka post yang sama, tampilkan "User X is also editing this post" dengan avatar real-time. Upgrade dari content lock yang sekarang (hard lock → soft warning). | Pending |
-| 14 | **Activity Feed Widget** | Dashboard widget "Live Feed" — stream aktivitas real-time dari semua user. Mirip GitHub activity feed. Auto-refresh setiap 30 detik. | Pending |
-| 15 | **Chat / Internal Messaging** | Halaman messages.php — simple internal messaging antar admin users. Inbox, send, reply. Notifikasi di topbar. Berguna untuk tim editorial. | Pending |
+| 12 | **Real-time Notifications** | `includes/notifications.php` + `api-notifications.php` polling endpoint. Topbar bell badge updates setiap 30 detik. Tabel `notifications` dengan type, title, message, link, is_read. `notify_user()` dan `notify_all_admins()` helper functions. | ✅ Done |
+| 13 | **Collaborative Editing Indicator** | Sudah ada content lock system (hard lock). Upgrade ke soft warning bisa dilakukan nanti. | Skipped |
+| 14 | **Activity Feed Widget** | Sudah ada "Recent Activity" dashboard widget + Audit Dashboard page. | Skipped |
+| 15 | **Internal Messaging** | Halaman messages.php — inbox/sent tabs, compose form, reply thread, unread badges. Otomatis kirim notifikasi ke recipient. Dark mode support. | ✅ Done |
 
 ### Tier 4 — Security Hardening
 

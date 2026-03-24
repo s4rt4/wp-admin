@@ -98,6 +98,10 @@ endif; ?>
         <li class="<?php echo(isset($page_title) && $page_title === 'Plugins') ? 'current' : ''; ?>">
             <a href="plugins.php"><div class="wp-menu-image dashicons-admin-plugins"></div><div class="wp-menu-name">Plugins</div></a>
         </li>
+        <!-- Messages -->
+        <li class="<?php echo(isset($page_title) && $page_title === 'Messages') ? 'current' : ''; ?>">
+            <a href="messages.php"><div class="wp-menu-image"><i class="fa-solid fa-envelope" style="font-size:16px;"></i></div><div class="wp-menu-name">Messages</div></a>
+        </li>
         <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'Themes')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
             <a href="#" class="<?php echo(isset($page_title) && ($page_title === 'Themes')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-appearance"></div><div class="wp-menu-name">Appearance</div></a>
             <div class="wp-menu-arrow-active"></div>
