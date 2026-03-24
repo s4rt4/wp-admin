@@ -147,6 +147,61 @@ Strategi: lokalkan semua TUI library ke `/wp-admin/vendor/tui/`, lalu progressiv
 
 ---
 
+## Plan Batch Kelima — Advanced CMS Platform
+
+Fokus: membawa CMS dari "admin panel" ke **platform CMS profesional**. Installer yang canggih, sistem update, plugin architecture, real-time collaboration, dan security hardening.
+
+### Tier 1 — Advanced Installer & Update System
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 1 | **System Requirements Check** | Installer cek PHP version (≥7.4), MySQL version (≥5.7), required extensions (pdo, mbstring, json, gd/imagick, curl, openssl), writable directories, max_upload_size. Tampilkan pass/fail checklist sebelum lanjut install. | Pending |
+| 2 | **Database Migration System** | Versioned migration files (`migrations/001_initial.php`, `002_add_seo.php`, dst). Tabel `migrations` track versi yang sudah dijalankan. Auto-run pending migrations saat login admin. Tidak perlu manual ALTER TABLE lagi. | Pending |
+| 3 | **Auto-Updater** | Halaman update.php — cek versi terbaru dari GitHub releases API, bandingkan dengan versi lokal. Tombol "Update Now" download ZIP, extract, jalankan migration. Backup otomatis sebelum update. | Pending |
+| 4 | **Installer: Import Demo Content** | Opsi di installer step terakhir: "Install demo content?" — import sample posts, pages, categories, media, form, kanban board. Biar CMS tidak kosong saat pertama kali. | Pending |
+| 5 | **Installer: SMTP Setup** | Tambah step SMTP configuration di installer wizard. Test kirim email langsung. Skip jika tidak mau setup sekarang. | Pending |
+| 6 | **Environment Config** | `wp-config.php` support `WP_DEBUG`, `WP_ENV` (production/staging/development), `WP_CACHE`. Debug mode tampilkan error detail + query log. Production mode hide errors. | Pending |
+
+### Tier 2 — Plugin & Hook System
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 7 | **Hook/Event System** | `do_action('post_published', $post)` dan `add_action('post_published', $callback)`. Core CMS fire events di titik-titik penting (post CRUD, user login, comment, form submit). Plugin tinggal register listener. | Pending |
+| 8 | **Plugin Architecture** | Folder `wp-admin/plugins/`. Setiap plugin = folder dengan `plugin.json` (name, version, author, hooks). Halaman plugins.php untuk activate/deactivate. Plugins bisa register sidebar menu, dashboard widget, atau hook ke events. | Pending |
+| 9 | **Plugin: Contact Form Mailer** | Contoh plugin pertama — auto-email setiap form submission ke alamat yang dikonfigurasi. Bukti bahwa plugin system bekerja. | Pending |
+| 10 | **Theme System** | Folder `themes/`. Setiap theme = folder dengan `theme.json` + template files (header, footer, single, archive, page). Halaman themes.php untuk switch active theme. Frontend render pakai theme aktif. | Pending |
+
+### Tier 3 — Real-time & Collaboration
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 11 | **Real-time Notifications** | SSE (Server-Sent Events) atau polling — push notifikasi ke browser saat: post published oleh user lain, comment baru, form submission, kanban card moved. Badge count update live di topbar. | Pending |
+| 12 | **Collaborative Editing Indicator** | Saat 2 user buka post yang sama, tampilkan "User X is also editing this post" dengan avatar real-time. Upgrade dari content lock yang sekarang (hard lock → soft warning). | Pending |
+| 13 | **Activity Feed Widget** | Dashboard widget "Live Feed" — stream aktivitas real-time dari semua user. Mirip GitHub activity feed. Auto-refresh setiap 30 detik. | Pending |
+| 14 | **Chat / Internal Messaging** | Halaman messages.php — simple internal messaging antar admin users. Inbox, send, reply. Notifikasi di topbar. Berguna untuk tim editorial. | Pending |
+
+### Tier 4 — Security Hardening
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 15 | **Security Headers Manager** | Halaman security.php — toggle CSP, X-Frame-Options, HSTS, X-Content-Type-Options, Referrer-Policy. Preview header yang akan dikirim. Auto-inject via PHP di header.php. | Pending |
+| 16 | **Rate Limiter** | Middleware rate limiting — max N requests per IP per menit untuk login, API, form submit. Tabel `rate_limits`. Block IP yang melebihi threshold. Configurable dari settings. | Pending |
+| 17 | **File Integrity Monitor** | Scan core files, hash dengan SHA-256, simpan di DB. Halaman integrity.php — bandingkan hash saat ini vs baseline. Alert jika ada file yang berubah tanpa update resmi. | Pending |
+| 18 | **Login Security Dashboard** | Halaman login-security.php — geografis login attempts (IP → country via free GeoIP), failed login timeline chart, blocked IPs list, active sessions management (force logout). | Pending |
+
+### Tier 5 — Content & Media Powerups
+
+| # | Fitur | Deskripsi | Status |
+|---|-------|-----------|--------|
+| 19 | **Content Workflow / Approval** | Multi-step editorial workflow: Draft → Review → Approved → Published. Role "Reviewer" bisa approve/reject. Email notification per step. Status badge di post list. | Pending |
+| 20 | **Media CDN Integration** | Settings untuk CDN prefix URL (Cloudflare, BunnyCDN, S3). Semua media URL otomatis rewrite ke CDN URL di frontend. Upload langsung ke S3/R2 (optional). | Pending |
+| 21 | **Scheduled Actions Queue** | Background job queue — `wp_schedule_event('daily', 'cleanup_trash')`. Cron runner via AJAX ping atau system cron. Untuk: auto-purge trash (30 days), sitemap regeneration, cache clear, email digest. | Pending |
+| 22 | **Sitemap Generator** | Auto-generate `sitemap.xml` dari published posts/pages. Regenerate on publish/unpublish. Ping Google/Bing on update. Include lastmod, priority, changefreq. | Pending |
+| 23 | **Performance Dashboard** | Halaman performance.php — page load time tracking, slowest pages, DB query count per page, cache hit rate. Powered by tui-chart. Recommendations list. | Pending |
+| 24 | **Global Search (Spotlight)** | Keyboard shortcut `Ctrl+K` — command palette seperti VSCode/Notion. Search across posts, pages, users, settings, docs. Quick actions: "New Post", "Go to Media", dll. | Pending |
+
+---
+
 ## Catatan Multi-language
 
 User **harus menulis konten secara manual** dalam setiap bahasa (standar industri: WordPress, Craft CMS, Statamic). CMS yang mengurus:
