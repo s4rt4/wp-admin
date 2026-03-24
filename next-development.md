@@ -123,7 +123,7 @@ Strategi: lokalkan semua TUI library ke `/wp-admin/vendor/tui/`, lalu progressiv
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 6 | **Interactive Content Calendar** | Ganti calendar.php (PHP static) → tui-calendar: drag-to-reschedule post, week/month/day view, click-to-create post, warna per status. | Pending |
+| 6 | **Interactive Content Calendar** | Ganti calendar.php (PHP static) → tui-calendar: drag-to-reschedule post via AJAX, month/week/day view, click-to-edit, color-coded published/scheduled. | ✅ Done |
 | 7 | **Editorial Calendar** (fitur baru) | Assign writer + deadline per post, filter by author, warna per author/status, due date alerts. | Pending |
 | 8 | **Dashboard Calendar Widget** | Upgrade widget Content Calendar → mini tui-calendar yang interaktif di dashboard. | Pending |
 

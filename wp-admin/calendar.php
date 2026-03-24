@@ -5,179 +5,233 @@ require_once 'db_config.php';
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
-
-// ── Month / Year ──────────────────────────────────────────────────────────────
-$year  = intval($_GET['year']  ?? date('Y'));
-$month = intval($_GET['month'] ?? date('n'));
-if ($month < 1)  { $month = 12; $year--; }
-if ($month > 12) { $month = 1;  $year++; }
-
-$first_day     = mktime(0, 0, 0, $month, 1, $year);
-$days_in_month = (int) date('t', $first_day);
-$start_dow     = (int) date('w', $first_day); // 0=Sun
-$month_name    = date('F', $first_day);
-$today         = date('Y-m-d');
-
-$month_start = sprintf('%d-%02d-01', $year, $month);
-$month_end   = sprintf('%d-%02d-%02d', $year, $month, $days_in_month);
+$conn->set_charset('utf8mb4');
 
 // Ensure scheduled_at column exists
 try { $conn->query("ALTER TABLE posts ADD COLUMN scheduled_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
 
-// ── Fetch posts ────────────────────────────────────────────────────────────────
+// AJAX: reschedule post
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reschedule') {
+    header('Content-Type: application/json');
+    $id = intval($_POST['id'] ?? 0);
+    $date = $_POST['date'] ?? '';
+    if (!$id || !$date) { echo json_encode(['ok' => false]); exit; }
+    // Update created_at for published, scheduled_at for scheduled
+    $row = $conn->query("SELECT status FROM posts WHERE id=$id")->fetch_assoc();
+    if ($row && $row['status'] === 'scheduled') {
+        $stmt = $conn->prepare("UPDATE posts SET scheduled_at=? WHERE id=?");
+    } else {
+        $stmt = $conn->prepare("UPDATE posts SET created_at=? WHERE id=?");
+    }
+    $stmt->bind_param("si", $date, $id);
+    echo json_encode(['ok' => $stmt->execute()]);
+    exit;
+}
+
+// Fetch all posts for calendar (published + scheduled, last 6 months to next 6 months)
+$range_start = date('Y-m-d', strtotime('-6 months'));
+$range_end = date('Y-m-d', strtotime('+6 months'));
+
+$events = [];
+
 $pub_res = $conn->query(
-    "SELECT id, title, slug, DATE(created_at) as d FROM posts
-     WHERE status = 'publish' AND DATE(created_at) BETWEEN '$month_start' AND '$month_end'
+    "SELECT id, title, slug, created_at FROM posts
+     WHERE status = 'publish' AND DATE(created_at) BETWEEN '$range_start' AND '$range_end'
      ORDER BY created_at"
 );
-$published = [];
-if ($pub_res) { while ($r = $pub_res->fetch_assoc()) { $published[$r['d']][] = $r; } }
+if ($pub_res) while ($r = $pub_res->fetch_assoc()) {
+    $events[] = [
+        'id' => (int)$r['id'], 'calendarId' => 'published',
+        'title' => $r['title'],
+        'start' => $r['created_at'],
+        'end' => $r['created_at'],
+        'isAllday' => true,
+        'category' => 'allday',
+    ];
+}
 
 $sch_res = $conn->query(
-    "SELECT id, title, slug, DATE(scheduled_at) as d FROM posts
-     WHERE status = 'scheduled' AND DATE(scheduled_at) BETWEEN '$month_start' AND '$month_end'
+    "SELECT id, title, slug, scheduled_at FROM posts
+     WHERE status = 'scheduled' AND DATE(scheduled_at) BETWEEN '$range_start' AND '$range_end'
      ORDER BY scheduled_at"
 );
-$scheduled_map = [];
-if ($sch_res) { while ($r = $sch_res->fetch_assoc()) { $scheduled_map[$r['d']][] = $r; } }
+if ($sch_res) while ($r = $sch_res->fetch_assoc()) {
+    $events[] = [
+        'id' => (int)$r['id'], 'calendarId' => 'scheduled',
+        'title' => $r['title'],
+        'start' => $r['scheduled_at'],
+        'end' => $r['scheduled_at'],
+        'isAllday' => true,
+        'category' => 'allday',
+    ];
+}
 
-// ── Navigation ────────────────────────────────────────────────────────────────
-$prev_m = $month - 1; $prev_y = $year;
-if ($prev_m < 1)  { $prev_m = 12; $prev_y--; }
-$next_m = $month + 1; $next_y = $year;
-if ($next_m > 12) { $next_m = 1;  $next_y++; }
+// Quick stats for current month
+$cm_start = date('Y-m-01');
+$cm_end = date('Y-m-t');
+$pub_total = (int)$conn->query("SELECT COUNT(*) FROM posts WHERE status='publish' AND DATE(created_at) BETWEEN '$cm_start' AND '$cm_end'")->fetch_row()[0];
+$sch_total = (int)$conn->query("SELECT COUNT(*) FROM posts WHERE status='scheduled' AND DATE(scheduled_at) BETWEEN '$cm_start' AND '$cm_end'")->fetch_row()[0];
 
 include 'header.php';
+include 'sidebar.php';
 ?>
-<?php include 'sidebar.php'; ?>
 
+<link rel="stylesheet" href="vendor/tui/css/tui-date-picker.min.css">
+<link rel="stylesheet" href="vendor/tui/css/tui-calendar.min.css">
 <style>
-.cal-wrap       { max-width:1000px; }
-.cal-nav        { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-.cal-nav h2     { margin:0; font-size:20px; font-weight:700; color:#1d2327; }
-.cal-grid       { display:grid; grid-template-columns:repeat(7,1fr); border:1px solid #c3c4c7; border-radius:4px; overflow:hidden; background:#fff; }
-.cal-dow        { background:#f0f0f1; text-align:center; font-size:12px; font-weight:600; color:#646970; padding:8px 0; border-bottom:1px solid #c3c4c7; }
-.cal-cell       { min-height:100px; border-right:1px solid #e0e0e0; border-bottom:1px solid #e0e0e0; padding:6px 7px; vertical-align:top; position:relative; box-sizing:border-box; }
-.cal-cell:nth-child(7n) { border-right:none; }
-.cal-cell.empty { background:#fafafa; }
-.cal-cell.today { background:#f0f6fc; }
-.cal-cell .day-num { font-size:13px; font-weight:600; color:#1d2327; margin-bottom:4px; }
-.cal-cell.today .day-num { background:#0073aa; color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; }
-.cal-event      { font-size:11px; line-height:1.3; padding:2px 6px; border-radius:3px; margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; text-decoration:none; display:block; }
-.cal-event.pub  { background:#d1fae5; color:#065f46; }
-.cal-event.pub:hover  { background:#a7f3d0; }
-.cal-event.sch  { background:#fef3c7; color:#92400e; }
-.cal-event.sch:hover  { background:#fde68a; }
-.cal-legend     { display:flex; gap:16px; margin-top:12px; font-size:12px; color:#646970; }
-.cal-legend span{ display:flex; align-items:center; gap:5px; }
-.cal-legend b   { display:inline-block; width:12px; height:12px; border-radius:2px; }
-.cal-more       { font-size:11px; color:#646970; cursor:pointer; padding:1px 4px; }
-.cal-more:hover { color:#0073aa; }
+#wpcontent .wrap { max-width: 1100px; }
+.cal-toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+.cal-toolbar h2 { margin:0; font-size:18px; font-weight:700; color:#1d2327; min-width:180px; text-align:center; }
+.cal-toolbar .btn-group { display:flex; gap:0; }
+.cal-toolbar .btn-group .button { border-radius:0; margin-left:-1px; }
+.cal-toolbar .btn-group .button:first-child { border-radius:3px 0 0 3px; margin-left:0; }
+.cal-toolbar .btn-group .button:last-child { border-radius:0 3px 3px 0; }
+.cal-toolbar .btn-group .button.active { background:#0073aa; color:#fff; border-color:#0073aa; }
+#calendar-container { border:1px solid #c3c4c7; border-radius:4px; overflow:hidden; background:#fff; }
+.cal-stats { margin-top:16px; display:flex; gap:16px; flex-wrap:wrap; }
+.cal-stat-card { background:#fff; border:1px solid #c3c4c7; border-radius:4px; padding:12px 18px; min-width:160px; }
+.cal-stat-card .num { font-size:22px; font-weight:700; color:#1d2327; }
+.cal-stat-card .lbl { font-size:12px; color:#646970; }
+.cal-legend { display:flex; gap:16px; margin-top:12px; font-size:12px; color:#646970; }
+.cal-legend span { display:flex; align-items:center; gap:5px; }
+.cal-legend b { display:inline-block; width:12px; height:12px; border-radius:2px; }
+/* Override tui-calendar colors */
+.toastui-calendar-weekday-event-dot[style*="published"] { background:#00a32a !important; }
 </style>
 
 <div id="wpcontent">
-<div class="wrap cal-wrap">
+<div class="wrap">
     <h1 style="margin-bottom:4px;"><i class="fa-solid fa-calendar-days" style="font-size:20px;margin-right:6px;vertical-align:middle;color:#0073aa;"></i>Content Calendar</h1>
-    <p style="color:#646970;font-size:13px;margin-bottom:20px;">Overview of published and scheduled posts.</p>
+    <p style="color:#646970;font-size:13px;margin-bottom:16px;">Drag events to reschedule. Click to edit.</p>
 
-    <!-- Navigation -->
-    <div class="cal-nav">
-        <a href="calendar.php?year=<?php echo $prev_y; ?>&month=<?php echo $prev_m; ?>" class="button">← <?php echo date('M Y', mktime(0,0,0,$prev_m,1,$prev_y)); ?></a>
-        <h2><?php echo $month_name . ' ' . $year; ?></h2>
-        <a href="calendar.php?year=<?php echo $next_y; ?>&month=<?php echo $next_m; ?>" class="button"><?php echo date('M Y', mktime(0,0,0,$next_m,1,$next_y)); ?> →</a>
-    </div>
-    <div style="text-align:center;margin-bottom:8px;">
-        <a href="calendar.php" class="button button-small" style="font-size:12px;">Today</a>
-    </div>
-
-    <!-- Calendar Grid -->
-    <div class="cal-grid">
-        <!-- Day-of-week headers -->
-        <?php foreach (['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $d): ?>
-            <div class="cal-dow"><?php echo $d; ?></div>
-        <?php endforeach; ?>
-
-        <!-- Empty cells before first day -->
-        <?php for ($i = 0; $i < $start_dow; $i++): ?>
-            <div class="cal-cell empty"></div>
-        <?php endfor; ?>
-
-        <!-- Day cells -->
-        <?php for ($day = 1; $day <= $days_in_month; $day++):
-            $date_str = sprintf('%d-%02d-%02d', $year, $month, $day);
-            $is_today = ($date_str === $today);
-            $pubs = $published[$date_str]     ?? [];
-            $schs = $scheduled_map[$date_str] ?? [];
-            $total = count($pubs) + count($schs);
-            $show  = 3; // max visible events per day
-        ?>
-        <div class="cal-cell <?php echo $is_today ? 'today' : ''; ?>">
-            <div class="day-num"><?php echo $day; ?></div>
-
-            <?php $shown = 0; ?>
-            <?php foreach ($pubs as $p):
-                if ($shown >= $show) break; $shown++;
-            ?>
-                <a href="post-new.php?id=<?php echo $p['id']; ?>" class="cal-event pub" title="Published: <?php echo htmlspecialchars($p['title']); ?>">
-                    <?php echo htmlspecialchars(mb_strimwidth($p['title'], 0, 28, '…')); ?>
-                </a>
-            <?php endforeach; ?>
-
-            <?php foreach ($schs as $s):
-                if ($shown >= $show) break; $shown++;
-            ?>
-                <a href="post-new.php?id=<?php echo $s['id']; ?>" class="cal-event sch" title="Scheduled: <?php echo htmlspecialchars($s['title']); ?>">
-                    🕐 <?php echo htmlspecialchars(mb_strimwidth($s['title'], 0, 24, '…')); ?>
-                </a>
-            <?php endforeach; ?>
-
-            <?php if ($total > $show): ?>
-                <div class="cal-more" onclick="alert('<?php
-                    $all = array_merge($pubs, $schs);
-                    $titles = array_map(function($p){ return htmlspecialchars($p['title']); }, $all);
-                    echo implode('\n', $titles);
-                ?>')" title="See all <?php echo $total; ?> posts">
-                    +<?php echo $total - $show; ?> more
-                </div>
-            <?php endif; ?>
+    <div class="cal-toolbar">
+        <button class="button" id="btn-prev"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="button button-small" id="btn-today">Today</button>
+        <button class="button" id="btn-next"><i class="fa-solid fa-chevron-right"></i></button>
+        <h2 id="cal-title"></h2>
+        <div style="margin-left:auto;" class="btn-group">
+            <button class="button active" data-view="month">Month</button>
+            <button class="button" data-view="week">Week</button>
+            <button class="button" data-view="day">Day</button>
         </div>
-        <?php endfor; ?>
-
-        <!-- Trailing empty cells -->
-        <?php
-        $total_cells = $start_dow + $days_in_month;
-        $trailing = (7 - ($total_cells % 7)) % 7;
-        for ($i = 0; $i < $trailing; $i++): ?>
-            <div class="cal-cell empty"></div>
-        <?php endfor; ?>
     </div>
 
-    <!-- Legend -->
+    <div id="calendar-container" style="height:700px;"></div>
+
     <div class="cal-legend">
-        <span><b style="background:#d1fae5;"></b> Published</span>
-        <span><b style="background:#fef3c7;"></b> Scheduled</span>
+        <span><b style="background:#d1fae5;border:1px solid #065f46;"></b> Published</span>
+        <span><b style="background:#fef3c7;border:1px solid #92400e;"></b> Scheduled</span>
     </div>
 
-    <!-- Quick stats -->
-    <?php
-    $pub_total = $conn->query("SELECT COUNT(*) FROM posts WHERE status='publish' AND DATE(created_at) BETWEEN '$month_start' AND '$month_end'")->fetch_column();
-    $sch_total = $conn->query("SELECT COUNT(*) FROM posts WHERE status='scheduled' AND DATE(scheduled_at) BETWEEN '$month_start' AND '$month_end'")->fetch_column() ?? 0;
-    ?>
-    <div style="margin-top:16px;display:flex;gap:16px;flex-wrap:wrap;">
-        <div style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid #00a32a;border-radius:4px;padding:12px 18px;min-width:160px;">
-            <div style="font-size:22px;font-weight:700;color:#1d2327;"><?php echo $pub_total; ?></div>
-            <div style="font-size:12px;color:#646970;">Published this month</div>
+    <div class="cal-stats">
+        <div class="cal-stat-card" style="border-left:4px solid #00a32a;">
+            <div class="num"><?php echo $pub_total; ?></div>
+            <div class="lbl">Published this month</div>
         </div>
-        <div style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid #dba617;border-radius:4px;padding:12px 18px;min-width:160px;">
-            <div style="font-size:22px;font-weight:700;color:#1d2327;"><?php echo $sch_total; ?></div>
-            <div style="font-size:12px;color:#646970;">Scheduled this month</div>
+        <div class="cal-stat-card" style="border-left:4px solid #dba617;">
+            <div class="num"><?php echo $sch_total; ?></div>
+            <div class="lbl">Scheduled this month</div>
         </div>
-        <div style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid #0073aa;border-radius:4px;padding:12px 18px;min-width:160px;display:flex;align-items:center;">
+        <div class="cal-stat-card" style="border-left:4px solid #0073aa;display:flex;align-items:center;">
             <a href="post-new.php" class="button button-primary" style="font-size:13px;">+ New Post</a>
         </div>
     </div>
+</div>
+</div>
 
-</div>
-</div>
+<script src="vendor/tui/js/tui-date-picker.min.js"></script>
+<script src="vendor/tui/js/tui-calendar.min.js"></script>
+<script>
+(function() {
+    var Calendar = tui.Calendar;
+    var events = <?php echo json_encode($events, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE) ?: '[]'; ?>;
+
+    var cal = new Calendar('#calendar-container', {
+        defaultView: 'month',
+        usageStatistics: false,
+        isReadOnly: false,
+        useDetailPopup: true,
+        useFormPopup: false,
+        month: {
+            startDayOfWeek: 0,
+            dayNames: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+        },
+        week: {
+            startDayOfWeek: 0,
+            dayNames: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+            taskView: false,
+            eventView: ['allday','time']
+        },
+        calendars: [
+            { id: 'published', name: 'Published', backgroundColor: '#d1fae5', borderColor: '#065f46', color: '#065f46' },
+            { id: 'scheduled', name: 'Scheduled', backgroundColor: '#fef3c7', borderColor: '#92400e', color: '#92400e' }
+        ],
+        template: {
+            allday: function(event) {
+                return '<span style="font-size:11px;cursor:pointer;">' + (event.title || '') + '</span>';
+            },
+            monthGridHeaderExceed: function(hiddenEvents) {
+                return '<span style="font-size:11px;color:#646970;cursor:pointer;">+' + hiddenEvents + ' more</span>';
+            }
+        }
+    });
+
+    // Load events
+    cal.createEvents(events);
+
+    // Title update
+    function updateTitle() {
+        var d = cal.getDate().toDate();
+        var view = cal.getViewName();
+        var opts = { year: 'numeric', month: 'long' };
+        if (view === 'day') opts.day = 'numeric';
+        document.getElementById('cal-title').textContent = d.toLocaleDateString('en-US', opts);
+    }
+    updateTitle();
+
+    // Navigation
+    document.getElementById('btn-prev').onclick = function() { cal.prev(); updateTitle(); };
+    document.getElementById('btn-next').onclick = function() { cal.next(); updateTitle(); };
+    document.getElementById('btn-today').onclick = function() { cal.today(); updateTitle(); };
+
+    // View switcher
+    document.querySelectorAll('[data-view]').forEach(function(btn) {
+        btn.onclick = function() {
+            document.querySelectorAll('[data-view]').forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            cal.changeView(this.dataset.view);
+            updateTitle();
+        };
+    });
+
+    // Click to edit
+    cal.on('clickEvent', function(ev) {
+        var id = ev.event.id;
+        window.location.href = 'post-new.php?id=' + id;
+    });
+
+    // Drag to reschedule
+    cal.on('beforeUpdateEvent', function(ev) {
+        var event = ev.event;
+        var changes = ev.changes;
+        if (!changes.start && !changes.end) return;
+        var newDate = (changes.start || event.start).toDate ? (changes.start || event.start).toDate() : new Date(changes.start || event.start);
+        var dateStr = newDate.getFullYear() + '-' + String(newDate.getMonth() + 1).padStart(2, '0') + '-' + String(newDate.getDate()).padStart(2, '0') + ' ' + String(newDate.getHours()).padStart(2, '0') + ':' + String(newDate.getMinutes()).padStart(2, '0') + ':00';
+
+        var fd = new FormData();
+        fd.append('action', 'reschedule');
+        fd.append('id', event.id);
+        fd.append('date', dateStr);
+
+        fetch('calendar.php', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.ok) {
+                    cal.updateEvent(event.id, event.calendarId, changes);
+                }
+            });
+    });
+})();
+</script>
 
 <?php include 'footer.php'; ?>
