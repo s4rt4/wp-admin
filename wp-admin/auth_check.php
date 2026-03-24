@@ -18,6 +18,20 @@ if (!isset($_SESSION['_last_ping']) || time() - $_SESSION['_last_ping'] > 60) {
         $stmt_ping = $pdo_ping->prepare("UPDATE users SET last_active = NOW() WHERE id = ?");
         $stmt_ping->execute([$_SESSION['user_id']]);
     } catch (\Exception $e) {}
+
+    // Auto-run pending database migrations (once per minute max)
+    if (!isset($_SESSION['_migrations_ran'])) {
+        try {
+            $conn_mig = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+            if (!$conn_mig->connect_error) {
+                $conn_mig->set_charset('utf8mb4');
+                require_once __DIR__ . '/includes/migrator.php';
+                run_migrations($conn_mig);
+                $conn_mig->close();
+            }
+            $_SESSION['_migrations_ran'] = true;
+        } catch (\Exception $e) {}
+    }
 }
 
 /**
