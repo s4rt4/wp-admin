@@ -1,0 +1,7 @@
+{
+    "name": "Contact Form Mailer",
+    "version": "1.0.0",
+    "author": "CMS Team",
+    "description": "Automatically sends an email notification for every new form submission. Configure the recipient email in Settings > SMTP Email.",
+    "main": "main.php"
+}

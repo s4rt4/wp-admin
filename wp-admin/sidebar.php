@@ -94,6 +94,10 @@ endif; ?>
         <li class="wp-menu-separator"></li>
         
         <?php if (current_user_can('manage_options') && rmv_can_see('appearance')): ?>
+        <!-- Plugins -->
+        <li class="<?php echo(isset($page_title) && $page_title === 'Plugins') ? 'current' : ''; ?>">
+            <a href="plugins.php"><div class="wp-menu-image dashicons-admin-plugins"></div><div class="wp-menu-name">Plugins</div></a>
+        </li>
         <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'Themes')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
             <a href="#" class="<?php echo(isset($page_title) && ($page_title === 'Themes')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-appearance"></div><div class="wp-menu-name">Appearance</div></a>
             <div class="wp-menu-arrow-active"></div>

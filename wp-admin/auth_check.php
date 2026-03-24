@@ -19,7 +19,15 @@ if (!isset($_SESSION['_last_ping']) || time() - $_SESSION['_last_ping'] > 60) {
         $stmt_ping->execute([$_SESSION['user_id']]);
     } catch (\Exception $e) {}
 
-    // Auto-run pending database migrations (once per minute max)
+    // Load active plugins (hooks system + plugin files)
+    if (!isset($_SESSION['_plugins_loaded'])) {
+        try {
+            require_once __DIR__ . '/includes/plugin-loader.php';
+            $_SESSION['_plugins_loaded'] = true;
+        } catch (\Exception $e) {}
+    }
+
+    // Auto-run pending database migrations (once per session)
     if (!isset($_SESSION['_migrations_ran'])) {
         try {
             $conn_mig = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);

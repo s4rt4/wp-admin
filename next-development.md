@@ -166,11 +166,11 @@ Fokus: membawa CMS dari "admin panel" ke **platform CMS profesional**. Installer
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 7 | **Hook/Event System** | `do_action('post_published', $post)` dan `add_action('post_published', $callback)`. Core CMS fire events di titik-titik penting (post CRUD, user login, comment, form submit). Plugin tinggal register listener. | Pending |
-| 8 | **Plugin Architecture** | Folder `wp-admin/plugins/`. Setiap plugin = folder dengan `plugin.json` (name, version, author, hooks). Halaman plugins.php untuk activate/deactivate. Plugins bisa register sidebar menu, dashboard widget, atau hook ke events. | Pending |
-| 9 | **Plugin: Contact Form Mailer** | Contoh plugin pertama — auto-email setiap form submission ke alamat yang dikonfigurasi. Bukti bahwa plugin system bekerja. | Pending |
-| 10 | **Theme System** | Folder `themes/`. Setiap theme = folder dengan `theme.json` + template files (header, footer, single, archive, page). Halaman themes.php untuk switch active theme. Frontend render pakai theme aktif. | Pending |
-| 11 | **Header/Footer Builder** | Halaman template-builder.php — gallery grid template navbar dan footer dengan screenshot preview. Satu klik untuk activate. Folder `templates/headers/` dan `templates/footers/`, setiap template = PHP + CSS + screenshot. Konten (menu, logo, social links, copyright) dibaca dari `options` table, jadi desain berubah total tapi konten tetap. User siapkan gambar desain sebagai referensi. | Pending |
+| 7 | **Hook/Event System** | `includes/hooks.php` — `add_action()`, `do_action()`, `add_filter()`, `apply_filters()` dengan priority support. WordPress-like API. | ✅ Done |
+| 8 | **Plugin Architecture** | `includes/plugin-loader.php` + `plugins/` folder. Manifest `plugin.json` per plugin. `plugins.php` halaman manage activate/deactivate. Auto-load via `auth_check.php`. | ✅ Done |
+| 9 | **Plugin: Contact Form Mailer** | Plugin contoh — hook `form_submitted`, kirim email notifikasi dengan data submission. Pakai SMTP jika tersedia, fallback PHP mail(). | ✅ Done |
+| 10 | **Theme System** | Folder `themes/`. Setiap theme = folder dengan `theme.json` + template files. Butuh desain assets dari user. | Pending |
+| 11 | **Header/Footer Builder** | Template gallery untuk navbar/footer. Butuh gambar desain dari user. | Pending |
 
 ### Tier 3 — Real-time & Collaboration
 
