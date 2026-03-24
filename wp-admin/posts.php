@@ -247,13 +247,18 @@ foreach ($posts_data as $r) {
     .row-actions a { color: #0073aa; text-decoration: none; }
     .row-actions a:hover { color: #005f8a; text-decoration: underline; }
     .row-actions .submitdelete { color: #b32d2e; }
+    /* Title marquee on hover (only when overflowing) */
+    .row-title-link { color: #0073aa; text-decoration: none; font-size: 13px; display: block; overflow: hidden; white-space: nowrap; max-width: 100%; }
+    .row-title-link .title-text { display: inline-block; padding-right: 0; }
+    .row-title-link.overflows:hover .title-text { animation: marquee-scroll var(--scroll-dur, 4s) linear infinite; padding-right: 50px; }
+    @keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(calc(-100% + 50px)); } }
     .post-state { display: inline-block; padding: 1px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; }
     .post-state.published { background: #d1fae5; color: #065f46; }
     .post-state.draft { background: #f0f0f1; color: #646970; }
     .post-state.trash { background: #fce8e8; color: #b32d2e; }
     .tui-grid-cell .tui-grid-cell-content { line-height: 1.5; }
     /* Search bar */
-    .grid-toolbar { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; }
+    .grid-toolbar { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; justify-content: flex-end; }
     .grid-toolbar input[type="search"] { padding: 5px 10px; border: 1px solid #8c8f94; border-radius: 4px; font-size: 13px; width: 250px; }
     .grid-toolbar input[type="search"]:focus { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; outline: none; }
     .grid-toolbar label { font-size: 13px; color: #1d2327; font-weight: 400; }
@@ -277,7 +282,7 @@ foreach ($posts_data as $r) {
 
     function fmtTitle(o) {
         var r = o.row;
-        var h = '<strong><a href="post-new.php?id=' + r.id + '" style="color:#0073aa;text-decoration:none;font-size:13px;">' + esc(r.title) + '</a>';
+        var h = '<strong><a href="post-new.php?id=' + r.id + '" class="row-title-link"><span class="title-text">' + esc(r.title) + '</span></a>';
         if (r.locked_by && r.locked_by !== currentUserId) {
             h += ' <span style="display:inline-flex;align-items:center;gap:3px;margin-left:6px;font-size:11px;color:#a00;background:#fce8e8;padding:1px 7px;border-radius:20px;font-weight:600;">&#128274; ' + esc(r.locker_name) + '</span>';
         }
@@ -380,6 +385,24 @@ foreach ($posts_data as $r) {
     });
     // Expose for inline onclick
     window._postsGridData = gridData;
+
+    // Detect overflowing titles and add marquee class
+    function markOverflows() {
+        document.querySelectorAll('.row-title-link').forEach(function(el) {
+            var txt = el.querySelector('.title-text');
+            if (!txt) return;
+            if (txt.scrollWidth > el.clientWidth) {
+                el.classList.add('overflows');
+                // Set duration based on text length (longer = slower)
+                var dur = Math.max(3, txt.scrollWidth / 60);
+                el.style.setProperty('--scroll-dur', dur + 's');
+            } else {
+                el.classList.remove('overflows');
+            }
+        });
+    }
+    grid.on('afterRender', markOverflows);
+    setTimeout(markOverflows, 300);
 })();
 
 function openQuickEditById(id) {
