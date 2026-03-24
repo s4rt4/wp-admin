@@ -2133,6 +2133,30 @@ html.dark-mode .wm-item .wm-icon { color: #72aee6 !important; }
 html.dark-mode .wm-drag-handle { color: #646970 !important; }
 html.dark-mode .wm-item.wm-disabled { opacity: 0.5; }
 
+/* ── snippets.php ───────────────────────────────────────────────────────── */
+html.dark-mode #snp-table { background: #2c3338 !important; }
+html.dark-mode #snp-table th { background: #262a2f !important; color: #c3c4c7 !important; border-color: #404952 !important; }
+html.dark-mode #snp-table td { color: #c3c4c7 !important; border-color: #404952 !important; }
+html.dark-mode #snp-table tr:hover td { background: #3c434a !important; }
+html.dark-mode #snp-filters select,
+html.dark-mode #snp-search { background: #1a1d21 !important; color: #c3c4c7 !important; border-color: #50575e !important; }
+
+/* ── tag-manager.php ────────────────────────────────────────────────────── */
+html.dark-mode #tm-table { background: #2c3338 !important; }
+html.dark-mode #tm-table th { background: #262a2f !important; color: #c3c4c7 !important; border-color: #404952 !important; }
+html.dark-mode #tm-table td { color: #c3c4c7 !important; border-color: #404952 !important; }
+html.dark-mode #tm-table tr:hover td { background: #3c434a !important; }
+html.dark-mode #tm-filters select,
+html.dark-mode #tm-search { background: #1a1d21 !important; color: #c3c4c7 !important; border-color: #50575e !important; }
+
+/* ── tools.php — export/import sections ─────────────────────────────────── */
+html.dark-mode .export-section,
+html.dark-mode .import-section { background: #262a2f !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .export-section *,
+html.dark-mode .import-section * { color: #c3c4c7 !important; }
+html.dark-mode .export-section a,
+html.dark-mode .import-section a { color: #72aee6 !important; }
+
 /* ── menus.php ──────────────────────────────────────────────────────────── */
 html.dark-mode .accordion-section { background: #2c3338 !important; border-color: #404952 !important; }
 html.dark-mode .accordion-section-title { background: #262a2f !important; border-color: #404952 !important; color: #c3c4c7 !important; }

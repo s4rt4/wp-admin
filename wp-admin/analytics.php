@@ -281,8 +281,12 @@ include 'header.php';
 <script>
 (function() {
     var Chart = toastui.Chart;
+    var isDark = document.documentElement.classList.contains('dark-mode');
     var theme = {
-        chart: { fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' },
+        chart: { fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif', backgroundColor: isDark ? '#2c3338' : '#fff' },
+        plot: { backgroundColor: isDark ? '#2c3338' : '#fff' },
+        xAxis: isDark ? { label:{color:'#9ca3ae'}, title:{color:'#c3c4c7'} } : {},
+        yAxis: isDark ? { label:{color:'#9ca3ae'}, title:{color:'#c3c4c7'} } : {},
         series: { colors: ['#0073aa', '#46b450', '#e67e22', '#888', '#d63638', '#f0b849'] }
     };
 

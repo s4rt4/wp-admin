@@ -75,8 +75,8 @@ include 'sidebar.php';
     </div>
 
     <!-- Charts -->
-    <div style="background:#fff;border:1px solid #c3c4c7;border-radius:4px;padding:16px;margin-bottom:20px;">
-        <h3 style="margin:0 0 8px;font-size:14px;">Activity Timeline (Last 30 Days)</h3>
+    <div class="ad-box" style="padding:16px;margin-bottom:20px;">
+        <h3 style="margin:0 0 8px;font-size:14px;border:none;padding:0;">Activity Timeline (Last 30 Days)</h3>
         <div id="timeline-chart" style="width:100%;height:280px;"></div>
     </div>
 
@@ -102,12 +102,14 @@ include 'sidebar.php';
 <script>
 (function() {
     var Chart = toastui.Chart;
+    var isDark = document.documentElement.classList.contains('dark-mode');
+    var darkTheme = isDark ? { chart:{backgroundColor:'#2c3338'}, plot:{backgroundColor:'#2c3338'}, xAxis:{label:{color:'#9ca3ae'},title:{color:'#c3c4c7'}}, yAxis:{label:{color:'#9ca3ae'},title:{color:'#c3c4c7'}} } : {};
 
     <?php if (!empty($daily_data)): ?>
     Chart.areaChart({
         el: document.getElementById('timeline-chart'),
         data: { categories:<?php echo json_encode($daily_labels); ?>, series:[{name:'Events',data:<?php echo json_encode($daily_data); ?>}] },
-        options: { chart:{width:'auto',height:280}, series:{spline:true,showDot:false}, legend:{visible:false}, theme:{series:{area:{colors:['#0073aa']}}}, usageStatistics:false }
+        options: { chart:{width:'auto',height:280}, series:{spline:true,showDot:false}, legend:{visible:false}, theme:Object.assign({series:{area:{colors:['#0073aa']}}}, darkTheme), usageStatistics:false }
     });
     <?php endif; ?>
 
@@ -115,7 +117,7 @@ include 'sidebar.php';
     Chart.barChart({
         el: document.getElementById('action-chart'),
         data: { categories:<?php echo json_encode($action_labels); ?>, series:[{name:'Count',data:<?php echo json_encode($action_data); ?>}] },
-        options: { chart:{width:'auto',height:240}, legend:{visible:false}, theme:{series:{bar:{colors:['#2271b1']}}}, usageStatistics:false }
+        options: { chart:{width:'auto',height:240}, legend:{visible:false}, theme:Object.assign({series:{bar:{colors:['#2271b1']}}}, darkTheme), usageStatistics:false }
     });
     <?php endif; ?>
 
@@ -123,7 +125,7 @@ include 'sidebar.php';
     Chart.barChart({
         el: document.getElementById('user-chart'),
         data: { categories:<?php echo json_encode($user_labels); ?>, series:[{name:'Count',data:<?php echo json_encode($user_data); ?>}] },
-        options: { chart:{width:'auto',height:240}, legend:{visible:false}, theme:{series:{bar:{colors:['#e67e22']}}}, usageStatistics:false }
+        options: { chart:{width:'auto',height:240}, legend:{visible:false}, theme:Object.assign({series:{bar:{colors:['#e67e22']}}}, darkTheme), usageStatistics:false }
     });
     <?php endif; ?>
 

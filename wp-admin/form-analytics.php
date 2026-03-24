@@ -7,9 +7,25 @@ $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if ($conn->connect_error) die("Connection failed");
 $conn->set_charset('utf8mb4');
 
-// Ensure tables exist
+// Ensure tables exist — create them if missing
+$conn->query("CREATE TABLE IF NOT EXISTS `forms` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL DEFAULT 'Untitled Form',
+    `fields` LONGTEXT,
+    `settings` LONGTEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+$conn->query("CREATE TABLE IF NOT EXISTS `form_submissions` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `form_id` INT NOT NULL DEFAULT 0,
+    `data` LONGTEXT,
+    `submitted_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
 $has_forms = $conn->query("SHOW TABLES LIKE 'forms'")->num_rows > 0;
-$has_subs = $conn->query("SHOW TABLES LIKE 'form_submissions'")->num_rows > 0;
+$has_subs  = $conn->query("SHOW TABLES LIKE 'form_submissions'")->num_rows > 0;
 
 $forms = [];
 $chart_labels = [];
@@ -30,10 +46,16 @@ if ($has_subs) {
         "AND submitted_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY DATE(submitted_at) ORDER BY d");
     if ($res) while ($r = $res->fetch_assoc()) { $chart_labels[] = date('M j', strtotime($r['d'])); $chart_data[] = (int)$r['c']; }
 
-    // All submissions
-    $sql = "SELECT s.*, f.name as form_name FROM form_submissions s LEFT JOIN forms f ON s.form_id = f.id " .
-        ($selected_form ? "WHERE s.form_id=$selected_form " : "") .
-        "ORDER BY s.submitted_at DESC LIMIT 200";
+    // All submissions — only JOIN forms table if it exists
+    if ($has_forms) {
+        $sql = "SELECT s.*, f.name as form_name FROM form_submissions s LEFT JOIN forms f ON s.form_id = f.id " .
+            ($selected_form ? "WHERE s.form_id=$selected_form " : "") .
+            "ORDER BY s.submitted_at DESC LIMIT 200";
+    } else {
+        $sql = "SELECT s.*, NULL as form_name FROM form_submissions s " .
+            ($selected_form ? "WHERE s.form_id=$selected_form " : "") .
+            "ORDER BY s.submitted_at DESC LIMIT 200";
+    }
     $res = $conn->query($sql);
     if ($res) while ($r = $res->fetch_assoc()) $submissions[] = $r;
 }
@@ -82,7 +104,7 @@ include 'sidebar.php';
     </div>
 
     <?php if (!empty($chart_data)): ?>
-    <div style="background:#fff;border:1px solid #c3c4c7;border-radius:4px;padding:16px;margin-bottom:20px;">
+    <div class="fa-stat" style="flex:none;min-width:auto;padding:16px;margin-bottom:20px;border-left:none;">
         <h3 style="margin:0 0 8px;font-size:14px;">Submissions (Last 30 Days)</h3>
         <div id="sub-chart" style="width:100%;height:280px;"></div>
     </div>
@@ -98,11 +120,14 @@ include 'sidebar.php';
 <script src="vendor/tui/js/tui-grid.min.js"></script>
 <script>
 (function() {
+    var isDark = document.documentElement.classList.contains('dark-mode');
+    var darkTheme = isDark ? { chart:{backgroundColor:'#2c3338'}, plot:{backgroundColor:'#2c3338'}, xAxis:{label:{color:'#9ca3ae'}}, yAxis:{label:{color:'#9ca3ae'}} } : {};
+
     <?php if (!empty($chart_data)): ?>
     toastui.Chart.barChart({
         el: document.getElementById('sub-chart'),
         data: { categories: <?php echo json_encode($chart_labels); ?>, series: [{ name:'Submissions', data:<?php echo json_encode($chart_data); ?> }] },
-        options: { chart:{width:'auto',height:280}, legend:{visible:false}, theme:{series:{bar:{colors:['#0073aa']}}}, usageStatistics:false }
+        options: { chart:{width:'auto',height:280}, legend:{visible:false}, theme:Object.assign({series:{bar:{colors:['#0073aa']}}}, darkTheme), usageStatistics:false }
     });
     <?php endif; ?>
 
