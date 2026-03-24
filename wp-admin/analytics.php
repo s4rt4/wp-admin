@@ -107,7 +107,8 @@ $jkc       = json_encode(array_column($kanban_done, 'count'));
 
 include 'header.php';
 ?>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="vendor/tui/css/tui-chart.min.css">
+<script src="vendor/tui/js/tui-chart.min.js"></script>
 <?php include 'sidebar.php'; ?>
 
 <style>
@@ -172,7 +173,7 @@ include 'header.php';
         <div class="an-box an-full" style="margin-bottom:24px;">
             <div class="an-box-hd">Traffic Overview</div>
             <div class="an-box-bd">
-                <canvas id="trafficChart" height="80"></canvas>
+                <div id="trafficChart" style="width:100%;height:320px;"></div>
             </div>
         </div>
 
@@ -181,7 +182,7 @@ include 'header.php';
             <div class="an-box an-third">
                 <div class="an-box-hd">Traffic Sources</div>
                 <div class="an-box-bd" style="display:flex;flex-direction:column;align-items:center;">
-                    <canvas id="sourcesChart" width="200" height="200"></canvas>
+                    <div id="sourcesChart" style="width:220px;height:220px;"></div>
                     <div style="margin-top:12px;font-size:12px;width:100%;">
                         <?php $src_colors=['direct'=>'#0073aa','search'=>'#46b450','social'=>'#e67e22','other'=>'#888']; ?>
                         <?php foreach ($sources as $k => $v): ?>
@@ -197,7 +198,7 @@ include 'header.php';
             <div class="an-box an-third">
                 <div class="an-box-hd">Device Breakdown</div>
                 <div class="an-box-bd" style="display:flex;flex-direction:column;align-items:center;">
-                    <canvas id="devicesChart" width="200" height="200"></canvas>
+                    <div id="devicesChart" style="width:220px;height:220px;"></div>
                     <div style="margin-top:12px;font-size:12px;width:100%;">
                         <?php $dev_colors=['desktop'=>'#2271b1','mobile'=>'#d63638','tablet'=>'#f0b849']; ?>
                         <?php foreach ($devices as $k => $v): ?>
@@ -269,7 +270,7 @@ include 'header.php';
         <div class="an-box an-full" style="margin-bottom:24px;">
             <div class="an-box-hd">Kanban Throughput — Cards Completed per Week</div>
             <div class="an-box-bd">
-                <canvas id="kanbanChart" height="60"></canvas>
+                <div id="kanbanChart" style="width:100%;height:280px;"></div>
             </div>
         </div>
         <?php endif; ?>
@@ -278,41 +279,86 @@ include 'header.php';
 </div>
 
 <script>
-// Traffic Overview
-new Chart(document.getElementById('trafficChart').getContext('2d'), {
-    type: 'line',
-    data: {
-        labels: <?php echo $jdays; ?>,
-        datasets: [
-            { label: 'Visitors',   data: <?php echo $jvis; ?>,  borderColor:'#0073aa', backgroundColor:'rgba(0,115,170,.08)', borderWidth:2, tension:.3, fill:true },
-            { label: 'Page Views', data: <?php echo $jpv; ?>,   borderColor:'#46b450', backgroundColor:'rgba(70,180,80,.06)',  borderWidth:2, tension:.3, fill:true }
+(function() {
+    var Chart = toastui.Chart;
+    var theme = {
+        chart: { fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' },
+        series: { colors: ['#0073aa', '#46b450', '#e67e22', '#888', '#d63638', '#f0b849'] }
+    };
+
+    // Traffic Overview — Area Chart
+    var trafficData = {
+        categories: <?php echo $jdays; ?>,
+        series: [
+            { name: 'Visitors', data: <?php echo $jvis; ?> },
+            { name: 'Page Views', data: <?php echo $jpv; ?> }
         ]
-    },
-    options: { responsive:true, interaction:{mode:'index',intersect:false}, scales:{y:{beginAtZero:true}} }
-});
+    };
+    Chart.areaChart({
+        el: document.getElementById('trafficChart'),
+        data: trafficData,
+        options: {
+            chart: { width: 'auto', height: 320 },
+            series: { spline: true, showDot: false },
+            xAxis: { label: { interval: Math.max(1, Math.floor(<?php echo count($chart_days); ?> / 10)) } },
+            yAxis: { scale: { min: 0 } },
+            legend: { align: 'bottom' },
+            theme: { series: { area: { colors: ['#0073aa', '#46b450'] } } },
+            tooltip: { grouped: true },
+            usageStatistics: false
+        }
+    });
 
-// Traffic Sources
-new Chart(document.getElementById('sourcesChart').getContext('2d'), {
-    type: 'doughnut',
-    data: { labels: <?php echo $jsrc_lbl; ?>, datasets:[{ data: <?php echo $jsrc_data; ?>, backgroundColor:['#0073aa','#46b450','#e67e22','#888'] }] },
-    options: { responsive:false, plugins:{ legend:{ display:false } } }
-});
+    // Traffic Sources — Pie Chart
+    var srcLabels = <?php echo $jsrc_lbl; ?>;
+    var srcValues = <?php echo $jsrc_data; ?>;
+    var srcSeries = srcLabels.map(function(lbl, i) { return { name: lbl.charAt(0).toUpperCase() + lbl.slice(1), data: srcValues[i] }; });
+    Chart.pieChart({
+        el: document.getElementById('sourcesChart'),
+        data: { categories: ['Sources'], series: srcSeries },
+        options: {
+            chart: { width: 220, height: 220 },
+            legend: { visible: false },
+            series: { dataLabels: { visible: false } },
+            theme: { series: { pie: { colors: ['#0073aa','#46b450','#e67e22','#888'] } } },
+            usageStatistics: false
+        }
+    });
 
-// Devices
-new Chart(document.getElementById('devicesChart').getContext('2d'), {
-    type: 'doughnut',
-    data: { labels: <?php echo $jdev_lbl; ?>, datasets:[{ data: <?php echo $jdev_data; ?>, backgroundColor:['#2271b1','#d63638','#f0b849'] }] },
-    options: { responsive:false, plugins:{ legend:{ display:false } } }
-});
+    // Devices — Pie Chart
+    var devLabels = <?php echo $jdev_lbl; ?>;
+    var devValues = <?php echo $jdev_data; ?>;
+    var devSeries = devLabels.map(function(lbl, i) { return { name: lbl.charAt(0).toUpperCase() + lbl.slice(1), data: devValues[i] }; });
+    Chart.pieChart({
+        el: document.getElementById('devicesChart'),
+        data: { categories: ['Devices'], series: devSeries },
+        options: {
+            chart: { width: 220, height: 220 },
+            legend: { visible: false },
+            series: { dataLabels: { visible: false } },
+            theme: { series: { pie: { colors: ['#2271b1','#d63638','#f0b849'] } } },
+            usageStatistics: false
+        }
+    });
 
-<?php if (!empty($kanban_done)): ?>
-// Kanban Throughput
-new Chart(document.getElementById('kanbanChart').getContext('2d'), {
-    type: 'bar',
-    data: { labels: <?php echo $jkw; ?>, datasets:[{ label:'Cards Done', data: <?php echo $jkc; ?>, backgroundColor:'#46b450' }] },
-    options: { responsive:true, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
-});
-<?php endif; ?>
+    <?php if (!empty($kanban_done)): ?>
+    // Kanban Throughput — Bar Chart
+    Chart.barChart({
+        el: document.getElementById('kanbanChart'),
+        data: {
+            categories: <?php echo $jkw; ?>,
+            series: [{ name: 'Cards Done', data: <?php echo $jkc; ?> }]
+        },
+        options: {
+            chart: { width: 'auto', height: 280 },
+            yAxis: { scale: { min: 0, stepSize: 1 } },
+            legend: { visible: false },
+            theme: { series: { bar: { colors: ['#46b450'] } } },
+            usageStatistics: false
+        }
+    });
+    <?php endif; ?>
+})();
 </script>
 
 <?php include 'footer.php'; ?>

@@ -131,7 +131,7 @@ Strategi: lokalkan semua TUI library ke `/wp-admin/vendor/tui/`, lalu progressiv
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 9 | **Analytics Redesign** | Ganti Chart.js di analytics.php → tui-chart: area chart visitors, heatmap jam/hari, stacked bar traffic sources, donut device breakdown. | Pending |
+| 9 | **Analytics Redesign** | Ganti Chart.js CDN di analytics.php → tui-chart lokal: area chart visitors, pie chart sources/devices, bar chart kanban throughput. | ✅ Done |
 | 10 | **Form Analytics** (fitur baru) | Halaman baru — tui-chart submission trends per form + tui-grid semua responses dengan filter/export. | Pending |
 | 11 | **Audit Dashboard** (fitur baru) | Halaman baru — timeline chart aktivitas + breakdown per user/action type + tui-grid filterable log. | Pending |
 | 12 | **Dashboard Widget: Goal Tracker** (fitur baru) | Widget baru — tui-chart gauge/bar untuk target vs actual (views, posts, subscribers). | Pending |
