@@ -220,7 +220,7 @@ foreach ($posts_data as $r) {
                class="button button-small <?php echo $lang_filter === 'en' ? 'button-primary' : ''; ?>">🇬🇧 EN (<?php echo $count_en; ?>)</a>
         </div>
 
-        <div id=”posts-grid”></div>
+        <div id="posts-grid"></div>
     </div>
 </div>
 

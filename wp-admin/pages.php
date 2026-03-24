@@ -81,11 +81,11 @@ if (isset($_GET['action']) && $_GET['action'] == 'duplicate' && isset($_GET['id'
 }
 
 // Ensure lang/translation_of columns exist
-try { $conn->query("ALTER TABLE pages ADD COLUMN lang VARCHAR(10) NOT NULL DEFAULT 'id'"); } catch (Exception $e) {}
-try { $conn->query("ALTER TABLE pages ADD COLUMN translation_of INT NULL DEFAULT NULL"); } catch (Exception $e) {}
+try { $pdo->exec("ALTER TABLE pages ADD COLUMN lang VARCHAR(10) NOT NULL DEFAULT 'id'"); } catch (Exception $e) {}
+try { $pdo->exec("ALTER TABLE pages ADD COLUMN translation_of INT NULL DEFAULT NULL"); } catch (Exception $e) {}
 // Content Lock — add columns if missing, release stale locks
-try { $conn->query("ALTER TABLE pages ADD COLUMN locked_by INT NULL DEFAULT NULL, ADD COLUMN locked_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
-$conn->query("UPDATE pages SET locked_by=NULL, locked_at=NULL WHERE locked_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+try { $pdo->exec("ALTER TABLE pages ADD COLUMN locked_by INT NULL DEFAULT NULL, ADD COLUMN locked_at DATETIME NULL DEFAULT NULL"); } catch (Exception $e) {}
+$pdo->exec("UPDATE pages SET locked_by=NULL, locked_at=NULL WHERE locked_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
 
 // Filters
 $status_filter  = isset($_GET['status'])       ? $_GET['status']       : 'all';
@@ -177,8 +177,8 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
         $locker_ids = array_filter(array_unique(array_column($pages, 'locked_by')));
         $locker_names = [];
         if (!empty($locker_ids)) {
-            $lr = $conn->query("SELECT id, username FROM users WHERE id IN (" . implode(',', array_map('intval', $locker_ids)) . ")");
-            if ($lr) while ($l = $lr->fetch_assoc()) $locker_names[$l['id']] = $l['username'];
+            $lr = $pdo->query("SELECT id, username FROM users WHERE id IN (" . implode(',', array_map('intval', $locker_ids)) . ")");
+            if ($lr) foreach ($lr->fetchAll(PDO::FETCH_ASSOC) as $l) $locker_names[$l['id']] = $l['username'];
         }
         $grid_rows = [];
         foreach ($pages as $p) {
