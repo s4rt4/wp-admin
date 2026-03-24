@@ -271,6 +271,24 @@ if ($pageId > 0) {
             font-size: 12px;
             margin-top: 4px;
         }
+
+        /* Dark mode */
+        html.dark-mode .modal-overlay { background: rgba(0,0,0,.7); }
+        html.dark-mode .modal { background: #2c3338; }
+        html.dark-mode .modal-header { background: #262a2f; border-bottom-color: #404952; }
+        html.dark-mode .modal-header h2 { color: #e0e2e4; }
+        html.dark-mode .close-button { color: #9ca3ae; }
+        html.dark-mode .close-button:hover { color: #d63638; background: #3c434a; }
+        html.dark-mode .modal-body { background: #2c3338; }
+        html.dark-mode .form-group label { color: #c3c4c7; }
+        html.dark-mode .form-group input,
+        html.dark-mode .form-group select { background: #1a1d21; border-color: #50575e; color: #c3c4c7; }
+        html.dark-mode .form-group small { color: #9ca3ae; }
+        html.dark-mode .builder-option { background: #1a1d21; border-color: #404952; }
+        html.dark-mode .builder-option h3 { color: #c3c4c7; }
+        html.dark-mode .builder-option p { color: #9ca3ae; }
+        html.dark-mode .builder-option:hover { background: #262a2f; border-color: #2271b1; }
+        html.dark-mode .builder-option.selected { background: #1e2a38; border-color: #2271b1; }
     </style>
 </head>
 <body>
