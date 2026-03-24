@@ -2101,3 +2101,88 @@ html.dark-mode #wpcontent [style*="color:#1e40af"],
 html.dark-mode #wpcontent [style*="color: #1e40af"] { color: #72aee6 !important; }
 html.dark-mode #wpcontent [style*="color:#065f46"],
 html.dark-mode #wpcontent [style*="color: #065f46"] { color: #6ee7b7 !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ROUND 5 — Override inline <style> blocks in PHP files
+   These classes are defined in page-specific <style> blocks with hardcoded
+   background:#fff. The !important here overrides them.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── index.php (Dashboard) ──────────────────────────────────────────────── */
+html.dark-mode .card-stat { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .card-stat .val { color: #e0e2e4 !important; }
+html.dark-mode .card-stat .lbl { color: #9ca3ae !important; }
+html.dark-mode .card-stat .dashicons { color: #72aee6 !important; }
+html.dark-mode #dw-customize-bar { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode #dw-add-widget-panel { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode #dw-add-widget-panel .dw-add-item { color: #c3c4c7 !important; }
+html.dark-mode #dw-add-widget-panel .dw-add-item:hover { background: #3c434a !important; }
+/* Dashboard widget insides — world clock, site overview, etc. */
+html.dark-mode .postbox .inside { background: #2c3338 !important; color: #c3c4c7 !important; }
+html.dark-mode .postbox .inside * { color: inherit !important; }
+html.dark-mode .postbox .inside a { color: #72aee6 !important; }
+html.dark-mode .postbox .inside .val,
+html.dark-mode .postbox .inside .num,
+html.dark-mode .postbox .inside strong { color: #e0e2e4 !important; }
+
+/* ── widgets.php (Dashboard Widgets Manager) ────────────────────────────── */
+html.dark-mode .wm-item { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .wm-item .wm-title { color: #c3c4c7 !important; }
+html.dark-mode .wm-item.wm-disabled { opacity: 0.5; }
+
+/* ── menus.php ──────────────────────────────────────────────────────────── */
+html.dark-mode .accordion-section { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .accordion-section-title { background: #262a2f !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .accordion-section-content { background: #2c3338 !important; color: #c3c4c7 !important; }
+html.dark-mode .tabs-panel { background: #1a1d21 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .tabs-panel label { color: #c3c4c7 !important; }
+html.dark-mode .menu-edit { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .menu-item { background: #262a2f !important; border-color: #404952 !important; }
+html.dark-mode .menu-item .menu-item-title { color: #c3c4c7 !important; }
+html.dark-mode .menu-item .item-type { color: #9ca3ae !important; }
+html.dark-mode .menu-item-settings { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .menu-item-settings label { color: #c3c4c7 !important; }
+html.dark-mode .menu-item-settings input[type="text"],
+html.dark-mode .menu-item-settings select { background: #1a1d21 !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+html.dark-mode .menu-header { background: #262a2f !important; border-color: #404952 !important; }
+html.dark-mode .menu-name-label,
+html.dark-mode .menu-name-label span { color: #c3c4c7 !important; }
+html.dark-mode #menu-name { background: #1a1d21 !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+html.dark-mode .menu-footer { background: #262a2f !important; border-color: #404952 !important; }
+html.dark-mode .nav-tab-wrapper { border-color: #404952 !important; }
+html.dark-mode .nav-tab { background: #262a2f !important; border-color: #404952 !important; color: #72aee6 !important; }
+html.dark-mode .nav-tab-active { background: #2c3338 !important; border-bottom-color: #2c3338 !important; color: #e0e2e4 !important; }
+html.dark-mode .menu-selector { background: #262a2f !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .menu-selector select { background: #1a1d21 !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+
+/* ── tools.php ──────────────────────────────────────────────────────────── */
+html.dark-mode .tools-tab { background: #262a2f !important; border-color: #404952 !important; color: #72aee6 !important; }
+html.dark-mode .tools-tab.active { background: #2c3338 !important; color: #e0e2e4 !important; border-bottom-color: #2c3338 !important; }
+html.dark-mode .tab-content { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .tab-content h2,
+html.dark-mode .tab-content h3,
+html.dark-mode .tab-content p,
+html.dark-mode .tab-content label,
+html.dark-mode .tab-content span,
+html.dark-mode .tab-content td,
+html.dark-mode .tab-content th { color: #c3c4c7 !important; }
+html.dark-mode .tab-content a { color: #72aee6 !important; }
+html.dark-mode .tab-content code { background: #1a1d21 !important; color: #c3c4c7 !important; border-color: #404952 !important; }
+html.dark-mode .restore-section { background: #2a2517 !important; border-color: #5c4a1e !important; }
+html.dark-mode .specific-items { background: #1a1d21 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .tab-content input[type="text"],
+html.dark-mode .tab-content input[type="file"],
+html.dark-mode .tab-content select,
+html.dark-mode .tab-content textarea { background: #1a1d21 !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+
+/* ── calendar.php — TUI Calendar deep overrides ─────────────────────────── */
+html.dark-mode .toastui-calendar-layout * { color: #c3c4c7; }
+html.dark-mode .toastui-calendar-weekday-grid-line { border-color: #404952 !important; }
+html.dark-mode .toastui-calendar-column-header { background: #262a2f !important; }
+html.dark-mode .toastui-calendar-day-name-container { background: #262a2f !important; }
+html.dark-mode .toastui-calendar-panel-container { background: #2c3338 !important; }
+html.dark-mode .toastui-calendar-grid-row { background: #2c3338 !important; }
+html.dark-mode .toastui-calendar-see-more-container { background: #2c3338 !important; color: #c3c4c7 !important; box-shadow: 0 4px 16px rgba(0,0,0,.4) !important; }
+html.dark-mode .toastui-calendar-weekday-event-title { color: inherit !important; }
+html.dark-mode .toastui-calendar-template-time { color: #c3c4c7 !important; }
+html.dark-mode .toastui-calendar-weekday-grid-date-decorator { background: #2271b1 !important; }

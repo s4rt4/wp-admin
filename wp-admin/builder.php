@@ -34,7 +34,8 @@ if ($pageId > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Page Builder</title>
-    
+    <script>if(localStorage.getItem('wp_dark_mode')==='true')document.documentElement.classList.add('dark-mode');</script>
+
     <style>
         /* WP Admin Generic Reset */
         * { box-sizing: border-box; }
@@ -273,6 +274,7 @@ if ($pageId > 0) {
         }
 
         /* Dark mode */
+        html.dark-mode body { background: #1a1d21; }
         html.dark-mode .modal-overlay { background: rgba(0,0,0,.7); }
         html.dark-mode .modal { background: #2c3338; }
         html.dark-mode .modal-header { background: #262a2f; border-bottom-color: #404952; }
