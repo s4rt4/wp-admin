@@ -1104,19 +1104,19 @@ endif; ?>
     </div>
 </div>
 
-<!-- Toast UI Editor CSS -->
-<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
-<link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-color-syntax/latest/toastui-editor-plugin-color-syntax.min.css">
-<link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<!-- Toast UI Editor CSS (local) -->
+<link rel="stylesheet" href="vendor/tui/css/toastui-editor.min.css">
+<link rel="stylesheet" href="vendor/tui/css/toastui-editor-plugin-color-syntax.min.css">
+<link rel="stylesheet" href="vendor/tui/css/toastui-editor-plugin-code-syntax-highlight.min.css">
+<link rel="stylesheet" href="vendor/tui/css/codemirror.min.css">
 
-<!-- Toast UI Editor JS -->
-<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-<script src="https://uicdn.toast.com/editor-plugin-color-syntax/latest/toastui-editor-plugin-color-syntax.min.js"></script>
-<script src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
-<script src="https://uicdn.toast.com/editor-plugin-chart/latest/toastui-editor-plugin-chart.min.js"></script>
-<script src="https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.js"></script>
-<script src="https://uicdn.toast.com/editor-plugin-uml/latest/toastui-editor-plugin-uml.min.js"></script>
+<!-- Toast UI Editor JS (local) -->
+<script src="vendor/tui/js/toastui-editor-all.min.js"></script>
+<script src="vendor/tui/js/toastui-editor-plugin-color-syntax.min.js"></script>
+<script src="vendor/tui/js/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
+<script src="vendor/tui/js/toastui-editor-plugin-chart.min.js"></script>
+<script src="vendor/tui/js/toastui-editor-plugin-table-merged-cell.min.js"></script>
+<script src="vendor/tui/js/toastui-editor-plugin-uml.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

@@ -107,7 +107,7 @@ Strategi: lokalkan semua TUI library ke `/wp-admin/vendor/tui/`, lalu progressiv
 
 | # | Task | Deskripsi | Status |
 |---|------|-----------|--------|
-| 0 | **Vendor folder** | Download semua TUI assets ke `wp-admin/vendor/tui/` — tui-image-editor, tui-calendar, tui-chart, tui-grid, tui-color-picker, tui-code-snippet, fabric.js v4.6.0. Ganti semua CDN reference ke lokal. | Pending |
+| 0 | **Vendor folder** | Download semua TUI assets ke `wp-admin/vendor/tui/` — tui-image-editor, tui-calendar, tui-chart, tui-grid, tui-color-picker, tui-code-snippet, fabric.js v4.6.0. Ganti semua CDN reference ke lokal. | ✅ Done |
 
 ### Tier 1 — tui-grid (Replace DataTables)
 

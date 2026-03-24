@@ -1102,12 +1102,12 @@ function copyToClipboard(text) {
     <div id="tui-editor-container" style="flex:1;overflow:hidden;"></div>
 </div>
 
-<link rel="stylesheet" href="https://uicdn.toast.com/tui-image-editor/v3.15.3/tui-image-editor.css">
-<link rel="stylesheet" href="https://uicdn.toast.com/tui-color-picker/v2.2.6/tui-color-picker.min.css">
-<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
-<script src="https://uicdn.toast.com/tui-color-picker/v2.2.6/tui-color-picker.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.6.0/fabric.min.js"></script>
-<script src="https://uicdn.toast.com/tui-image-editor/v3.15.3/tui-image-editor.js"></script>
+<link rel="stylesheet" href="vendor/tui/css/tui-image-editor.css">
+<link rel="stylesheet" href="vendor/tui/css/tui-color-picker.min.css">
+<script src="vendor/tui/js/tui-code-snippet.min.js"></script>
+<script src="vendor/tui/js/tui-color-picker.min.js"></script>
+<script src="vendor/tui/js/fabric.min.js"></script>
+<script src="vendor/tui/js/tui-image-editor.js"></script>
 
 <script>
 var _tuiInstance = null;

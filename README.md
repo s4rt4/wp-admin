@@ -184,7 +184,8 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 - **Backend:** Native PHP (no frameworks).
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript.
 - **Database:** MySQL.
-- **Libraries / Editors:** GrapesJS, Editor.js, Toast UI Editor, Monaco Editor, Chart.js, SortableJS.
+- **Libraries / Editors:** GrapesJS, Editor.js, Toast UI Editor, Toast UI Image Editor, Monaco Editor, Chart.js, SortableJS, Fabric.js.
+- **Vendored assets:** TUI libraries are bundled locally in `wp-admin/vendor/tui/` for offline use and faster loading.
 
 ---
 
