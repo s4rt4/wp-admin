@@ -8,6 +8,7 @@ $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+$conn->set_charset('utf8mb4');
 
 // Access Check
 if (!current_user_can('edit_posts')) {
@@ -263,7 +264,7 @@ foreach ($posts_data as $r) {
 (function() {
     var currentUserId = <?php echo (int)$_SESSION['user_id']; ?>;
     var isTrash = <?php echo json_encode($status_filter === 'trash'); ?>;
-    var gridData = <?php echo json_encode($grid_rows, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+    var gridData = <?php echo json_encode($grid_rows, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE | JSON_UNESCAPED_UNICODE) ?: '[]'; ?>;
 
     function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
@@ -286,7 +287,7 @@ foreach ($posts_data as $r) {
             h += '<span><a href="posts.php?action=delete_permanent&id=' + r.id + '" class="submitdelete" onclick="return confirm(\'Delete permanently? This cannot be undone.\')">Delete Permanently</a></span>';
         } else {
             h += '<span><a href="post-new.php?id=' + r.id + '">Edit</a> | </span>';
-            h += '<span><a href="#" onclick="openQuickEdit({id:' + r.id + ',title:\'' + esc(r.title).replace(/'/g, "\\'") + '\',slug:\'' + esc(r.slug).replace(/'/g, "\\'") + '\',status:\'' + r.status + '\'});return false;">Quick Edit</a> | </span>';
+            h += '<span><a href="#" onclick="openQuickEditById(' + r.id + ');return false;">Quick Edit</a> | </span>';
             h += '<span><a href="posts.php?action=delete&id=' + r.id + '" class="submitdelete" onclick="return confirm(\'Move to trash?\')">Trash</a> | </span>';
             h += '<span><a href="../post/' + encodeURIComponent(r.slug) + '" target="_blank">View</a> | </span>';
             h += '<span><a href="posts.php?action=duplicate&id=' + r.id + '">Duplicate</a> | </span>';
@@ -377,7 +378,14 @@ foreach ($posts_data as $r) {
         });
         grid.resetData(filtered);
     });
+    // Expose for inline onclick
+    window._postsGridData = gridData;
 })();
+
+function openQuickEditById(id) {
+    var r = window._postsGridData.find(function(x) { return x.id === id; });
+    if (r) openQuickEdit({id: r.id, title: r.title, slug: r.slug, status: r.status});
+}
 </script>
 
 <!-- Quick Edit Modal -->
