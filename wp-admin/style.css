@@ -2000,3 +2000,104 @@ html.dark-mode .form-group input[type="email"],
 html.dark-mode .form-group input[type="password"],
 html.dark-mode .form-group select,
 html.dark-mode .form-group textarea { background: #1a1d21 !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+
+/* ── Dashboard: My Dashboard bar, widget cards, clock, site overview ────── */
+html.dark-mode .dashboard-toolbar,
+html.dark-mode .dw-toolbar,
+html.dark-mode [class*="dashboard-bar"],
+html.dark-mode .my-dashboard { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .clock-card,
+html.dark-mode .wc-card,
+html.dark-mode [class*="clock-item"],
+html.dark-mode .wc-item { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .clock-card *,
+html.dark-mode .wc-card *,
+html.dark-mode .wc-item * { color: #c3c4c7 !important; }
+html.dark-mode .overview-card,
+html.dark-mode .so-card,
+html.dark-mode [class*="stat-card"],
+html.dark-mode .site-overview-card { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .overview-card *,
+html.dark-mode .so-card *,
+html.dark-mode .site-overview-card * { color: #c3c4c7 !important; }
+
+/* Dashboard widgets manage page (widgets.php) */
+html.dark-mode .widget-row,
+html.dark-mode .widget-item,
+html.dark-mode .widgets-grid .widget-card,
+html.dark-mode [class*="widget-manage"] { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+
+/* ── Menu editor specifics ──────────────────────────────────────────────── */
+html.dark-mode .nav-tab-wrapper { background: #262a2f; border-color: #404952; }
+html.dark-mode .nav-tab { background: #2c3338; border-color: #404952; color: #72aee6; }
+html.dark-mode .nav-tab:hover { background: #3c434a; }
+html.dark-mode .nav-tab-active,
+html.dark-mode .nav-tab-active:hover { background: #2c3338; border-bottom-color: #2c3338; color: #e0e2e4; }
+html.dark-mode #menu-settings-column .accordion-container { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .metabox-holder .postbox { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .menu-item-bar .menu-item-handle { background: #262a2f !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .menu-item-bar .menu-item-handle .item-title { color: #c3c4c7 !important; }
+html.dark-mode .menu-item-bar .menu-item-handle .item-type { color: #9ca3ae !important; }
+html.dark-mode .menu-item-settings { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .menu-item-settings label,
+html.dark-mode .menu-item-settings p { color: #c3c4c7 !important; }
+html.dark-mode .menu-item-settings input[type="text"] { background: #1a1d21 !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+html.dark-mode #menu-management { background: #2c3338 !important; }
+html.dark-mode .menu-name-label { color: #c3c4c7 !important; }
+html.dark-mode #menu-name { background: #1a1d21 !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+html.dark-mode .pages-checklist,
+html.dark-mode .categorychecklist,
+html.dark-mode .posttype-checklist { background: #1a1d21 !important; border-color: #404952 !important; }
+html.dark-mode .pages-checklist label,
+html.dark-mode .posttype-checklist label { color: #c3c4c7 !important; }
+
+/* ── Tools: Database Backup/Restore, Import/Export, Site Health ──────────── */
+html.dark-mode .tool-section,
+html.dark-mode .tab-content,
+html.dark-mode .tab-pane,
+html.dark-mode .backup-section,
+html.dark-mode .restore-section { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .tab-content h2,
+html.dark-mode .tab-content h3,
+html.dark-mode .tab-content p,
+html.dark-mode .tab-content label,
+html.dark-mode .tab-content span { color: #c3c4c7 !important; }
+
+/* ── Calendar: TUI calendar cells white bg ──────────────────────────────── */
+html.dark-mode .toastui-calendar-weekday-grid-date { color: #c3c4c7 !important; }
+html.dark-mode .toastui-calendar-grid-cell-date { color: #c3c4c7 !important; }
+html.dark-mode .toastui-calendar-weekday-grid { background: #2c3338 !important; }
+html.dark-mode .toastui-calendar-daygrid-cell { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .toastui-calendar-month-daygrid { background: #2c3338 !important; }
+html.dark-mode .toastui-calendar-day-names { background: #262a2f !important; border-color: #404952 !important; }
+html.dark-mode .toastui-calendar-day-name { color: #9ca3ae !important; }
+html.dark-mode .toastui-calendar-grid-cell { background: #2c3338 !important; }
+html.dark-mode .toastui-calendar-see-more-container { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .toastui-calendar-day-view,
+html.dark-mode .toastui-calendar-week-view { background: #2c3338 !important; }
+html.dark-mode .toastui-calendar-panel-resizer { border-color: #404952 !important; }
+html.dark-mode .toastui-calendar-time { color: #9ca3ae !important; }
+html.dark-mode .toastui-calendar-column { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .toastui-calendar-today .toastui-calendar-weekday-grid-date .toastui-calendar-grid-cell-date { background: #2271b1 !important; color: #fff !important; }
+
+/* ── Catch-all: any remaining white bg inline styles in #wpcontent ──────── */
+html.dark-mode #wpcontent [style*="background:#f6f7f7"],
+html.dark-mode #wpcontent [style*="background: #f6f7f7"],
+html.dark-mode #wpcontent [style*="background:#f8f9fa"],
+html.dark-mode #wpcontent [style*="background: #f8f9fa"],
+html.dark-mode #wpcontent [style*="background:#f0f0f1"],
+html.dark-mode #wpcontent [style*="background: #f0f0f1"],
+html.dark-mode #wpcontent [style*="background:#f5f5f5"],
+html.dark-mode #wpcontent [style*="background: #f5f5f5"] { background: #262a2f !important; }
+html.dark-mode #wpcontent [style*="border:1px solid #c3c4c7"],
+html.dark-mode #wpcontent [style*="border: 1px solid #c3c4c7"] { border-color: #404952 !important; }
+html.dark-mode #wpcontent [style*="color:#1d2327"],
+html.dark-mode #wpcontent [style*="color: #1d2327"] { color: #e0e2e4 !important; }
+html.dark-mode #wpcontent [style*="color:#646970"],
+html.dark-mode #wpcontent [style*="color: #646970"] { color: #9ca3ae !important; }
+html.dark-mode #wpcontent [style*="color:#374151"],
+html.dark-mode #wpcontent [style*="color: #374151"] { color: #c3c4c7 !important; }
+html.dark-mode #wpcontent [style*="color:#1e40af"],
+html.dark-mode #wpcontent [style*="color: #1e40af"] { color: #72aee6 !important; }
+html.dark-mode #wpcontent [style*="color:#065f46"],
+html.dark-mode #wpcontent [style*="color: #065f46"] { color: #6ee7b7 !important; }
