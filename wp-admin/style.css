@@ -2127,7 +2127,10 @@ html.dark-mode .postbox .inside strong { color: #e0e2e4 !important; }
 
 /* ── widgets.php (Dashboard Widgets Manager) ────────────────────────────── */
 html.dark-mode .wm-item { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
-html.dark-mode .wm-item .wm-title { color: #c3c4c7 !important; }
+html.dark-mode .wm-item .wm-title,
+html.dark-mode .wm-item .wm-label { color: #c3c4c7 !important; }
+html.dark-mode .wm-item .wm-icon { color: #72aee6 !important; }
+html.dark-mode .wm-drag-handle { color: #646970 !important; }
 html.dark-mode .wm-item.wm-disabled { opacity: 0.5; }
 
 /* ── menus.php ──────────────────────────────────────────────────────────── */
