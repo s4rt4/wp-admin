@@ -1754,3 +1754,171 @@ html.dark-mode .period-tab { background: #2c3338; border-color: #404952; color: 
 html.dark-mode .period-tab.active { background: #2271b1; color: #fff; border-color: #2271b1; }
 html.dark-mode .grid-toolbar input[type="search"] { background: #1a1d21; border-color: #50575e; color: #c3c4c7; }
 html.dark-mode #calendar-container { border-color: #404952; background: #2c3338; }
+
+/* ── Comprehensive dark mode — all remaining elements ───────────────────── */
+
+/* Generic cards, boxes, white containers */
+html.dark-mode .card,
+html.dark-mode .card-body,
+html.dark-mode [style*="background:#fff"],
+html.dark-mode [style*="background: #fff"],
+html.dark-mode [style*="background:white"],
+html.dark-mode div[style*="background:#fff"],
+html.dark-mode div[style*="background: #fff"] { background: #2c3338 !important; color: #c3c4c7 !important; border-color: #404952 !important; }
+
+/* Page title action buttons (Add New, etc.) */
+html.dark-mode .page-title-action { background: #2c3338; border-color: #72aee6; color: #72aee6; }
+html.dark-mode .page-title-action:hover { background: #3c434a; border-color: #a8d4ff; color: #a8d4ff; }
+
+/* Dashboard widgets */
+html.dark-mode .dashboard-widget,
+html.dark-mode .meta-box-sortables .postbox,
+html.dark-mode #dashboard-widgets .postbox,
+html.dark-mode .widget-container { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .dashboard-widget h2,
+html.dark-mode .dashboard-widget h3,
+html.dark-mode .dashboard-widget p,
+html.dark-mode .dashboard-widget span,
+html.dark-mode .dashboard-widget td,
+html.dark-mode .dashboard-widget th,
+html.dark-mode .dashboard-widget li,
+html.dark-mode .dashboard-widget .inside,
+html.dark-mode .dashboard-widget .inside * { color: #c3c4c7 !important; }
+html.dark-mode .dashboard-widget a { color: #72aee6 !important; }
+
+/* World Clock widget */
+html.dark-mode .clock-card,
+html.dark-mode [class*="clock"] { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+
+/* Site Overview widget */
+html.dark-mode .site-overview,
+html.dark-mode .overview-item,
+html.dark-mode .stat-item { background: #2c3338 !important; color: #c3c4c7 !important; }
+
+/* Weather widget */
+html.dark-mode .weather-widget,
+html.dark-mode .weather-card,
+html.dark-mode [class*="weather"] { background: #2c3338 !important; color: #c3c4c7 !important; }
+
+/* Post editor sidebar — SEO, Categories, Tags, etc. */
+html.dark-mode .postbox .inside,
+html.dark-mode #categorydiv,
+html.dark-mode #tagsdiv-post_tag,
+html.dark-mode .categorydiv,
+html.dark-mode .tagsdiv { background: #2c3338 !important; color: #c3c4c7 !important; }
+html.dark-mode .postbox .inside label,
+html.dark-mode .postbox .inside h3,
+html.dark-mode .postbox .inside h4,
+html.dark-mode .postbox .inside p,
+html.dark-mode .postbox .inside span,
+html.dark-mode .postbox .inside td,
+html.dark-mode .postbox .inside th { color: #c3c4c7 !important; }
+html.dark-mode .postbox .inside a { color: #72aee6 !important; }
+html.dark-mode .postbox .inside input[type="text"],
+html.dark-mode .postbox .inside input[type="url"],
+html.dark-mode .postbox .inside textarea { background: #1a1d21; border-color: #50575e; color: #c3c4c7; }
+
+/* Category/tag checklist */
+html.dark-mode .categorychecklist,
+html.dark-mode .tagchecklist,
+html.dark-mode ul.cat-checklist { background: #1a1d21 !important; border-color: #404952 !important; }
+html.dark-mode .categorychecklist label,
+html.dark-mode .categorychecklist li { color: #c3c4c7 !important; }
+
+/* Featured image button */
+html.dark-mode .set-post-thumbnail,
+html.dark-mode .remove-post-thumbnail,
+html.dark-mode #postimagediv .inside a { color: #72aee6 !important; }
+
+/* Modals */
+html.dark-mode .modal-content,
+html.dark-mode .quick-edit-modal .modal-content { background: #2c3338 !important; }
+html.dark-mode .modal-header { background: #2c3338 !important; border-bottom-color: #404952 !important; }
+html.dark-mode .modal-header h2,
+html.dark-mode .modal-header h3 { color: #c3c4c7 !important; }
+html.dark-mode .modal-body { background: #2c3338 !important; color: #c3c4c7 !important; }
+html.dark-mode .modal-body label { color: #c3c4c7 !important; }
+html.dark-mode .modal-footer { background: #262a2f !important; border-top-color: #404952 !important; }
+
+/* Comment Settings card */
+html.dark-mode .form-table { background: transparent; }
+html.dark-mode .form-table td,
+html.dark-mode .form-table th { color: #c3c4c7; }
+html.dark-mode .description { color: #9ca3ae !important; }
+
+/* Menu editor */
+html.dark-mode .menu-edit,
+html.dark-mode #menu-management,
+html.dark-mode .menu-settings,
+html.dark-mode #nav-menu-meta,
+html.dark-mode .accordion-section-content { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .accordion-section-title { background: #262a2f !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .menu-item-bar,
+html.dark-mode .menu-item-handle { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .menu-item-title,
+html.dark-mode .menu-item-settings label { color: #c3c4c7 !important; }
+
+/* Role & Capabilities table */
+html.dark-mode table.widefat th,
+html.dark-mode table.widefat td { color: #c3c4c7; }
+html.dark-mode table.widefat tr:hover td { background: #3c434a !important; }
+html.dark-mode table.widefat thead th { background: #262a2f; }
+
+/* Tools pages — Snippets, Tag Manager, etc. */
+html.dark-mode .snippet-editor,
+html.dark-mode .tag-manager-card,
+html.dark-mode .tool-card { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+
+/* Audit Log filter card */
+html.dark-mode form[action="audit-log.php"],
+html.dark-mode form[method="get"][style*="background:#fff"],
+html.dark-mode form[method="get"][style*="background: #fff"] { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode form label { color: #c3c4c7; }
+
+/* Automations card */
+html.dark-mode .automation-card,
+html.dark-mode .automation-list { background: #2c3338 !important; border-color: #404952 !important; }
+
+/* API Tokens */
+html.dark-mode .token-card,
+html.dark-mode .api-reference { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+
+/* Settings pages — SMTP, Multi-site, etc. */
+html.dark-mode .settings-card,
+html.dark-mode .smtp-card { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+
+/* General: any white bg container inside #wpcontent */
+html.dark-mode #wpcontent div[style*="background:#fff"],
+html.dark-mode #wpcontent div[style*="background: #fff"],
+html.dark-mode #wpcontent div[style*="background:white"] { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode #wpcontent form[style*="background:#fff"],
+html.dark-mode #wpcontent form[style*="background: #fff"] { background: #2c3338 !important; border-color: #404952 !important; }
+
+/* Inline style overrides for stat cards with colored borders */
+html.dark-mode div[style*="background:#e8f0fe"],
+html.dark-mode div[style*="background:#d1fae5"],
+html.dark-mode div[style*="background:#f3f4f6"],
+html.dark-mode div[style*="background:#fef3c7"] { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode div[style*="background:#e8f0fe"] *,
+html.dark-mode div[style*="background:#d1fae5"] *,
+html.dark-mode div[style*="background:#f3f4f6"] *,
+html.dark-mode div[style*="background:#fef3c7"] * { color: #c3c4c7 !important; }
+
+/* Notice boxes in dark mode */
+html.dark-mode .notice { background: #2c3338; color: #c3c4c7; border-color: #404952; }
+html.dark-mode .notice p { color: #c3c4c7; }
+html.dark-mode .notice-info { background: #1e2a38; border-left-color: #2271b1; }
+html.dark-mode .notice-warning { background: #2a2517; border-left-color: #dba617; }
+
+/* Calendar toolbar */
+html.dark-mode .cal-toolbar h2 { color: #e0e2e4; }
+html.dark-mode .cal-legend span,
+html.dark-mode .cal-legend { color: #9ca3ae; }
+
+/* Code elements */
+html.dark-mode code { background: #1a1d21; color: #c3c4c7; }
+
+/* Subsubsub filter links */
+html.dark-mode ul.subsubsub li a { color: #72aee6; }
+html.dark-mode ul.subsubsub li a.current { color: #e0e2e4; }
+html.dark-mode ul.subsubsub { color: #9ca3ae; }

@@ -25,8 +25,8 @@ $selected_form = intval($_GET['form_id'] ?? 0);
 
 if ($has_subs) {
     // Daily submissions chart (last 30 days)
-    $res = $conn->query("SELECT DATE(submitted_at) as d, COUNT(*) as c FROM form_submissions " .
-        ($selected_form ? "WHERE form_id=$selected_form " : "") .
+    $res = $conn->query("SELECT DATE(submitted_at) as d, COUNT(*) as c FROM form_submissions WHERE 1=1 " .
+        ($selected_form ? "AND form_id=$selected_form " : "") .
         "AND submitted_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY DATE(submitted_at) ORDER BY d");
     if ($res) while ($r = $res->fetch_assoc()) { $chart_labels[] = date('M j', strtotime($r['d'])); $chart_data[] = (int)$r['c']; }
 
