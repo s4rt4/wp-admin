@@ -648,6 +648,35 @@ require_once 'sidebar.php';
 .move-up:hover, .move-down:hover {
     background: #e0e0e1;
 }
+
+/* Dark mode overrides */
+html.dark-mode .manage-menus { background: #2c3338; border-color: #50575e; }
+html.dark-mode .manage-menus label { color: #c3c4c7; }
+html.dark-mode .manage-menus select { background: #1a1d21; border-color: #50575e; color: #c3c4c7; }
+html.dark-mode .nav-tab { color: #c3c4c7; border-color: transparent; }
+html.dark-mode .nav-tab-active { background: #2c3338; border-color: #50575e; border-bottom-color: #2c3338; color: #fff; }
+html.dark-mode .accordion-section { background: #2c3338; border-color: #50575e; }
+html.dark-mode .accordion-section-title { background: #1d2327; color: #c3c4c7; border-color: #50575e; }
+html.dark-mode .tabs-panel { background: #1a1d21; border-color: #50575e; }
+html.dark-mode .menu-item-title { color: #c3c4c7; }
+html.dark-mode .menu-edit { background: #2c3338; border-color: #50575e; }
+html.dark-mode .menu-header { background: #1d2327; border-color: #50575e; }
+html.dark-mode .menu-header label { color: #c3c4c7; }
+html.dark-mode .menu-header input[type="text"] { background: #1a1d21; border-color: #50575e; color: #c3c4c7; }
+html.dark-mode .menu-item { background: #2c3338; border-color: #50575e; }
+html.dark-mode .menu-item-bar { background: #262a2f; }
+html.dark-mode .menu-item-toggle { color: #9ca3ae; }
+html.dark-mode .item-type { color: #9ca3ae; }
+html.dark-mode .item-title { color: #c3c4c7; }
+html.dark-mode #menu-to-edit { border-color: #50575e; }
+html.dark-mode .menu-item-settings { background: #1a1d21; border-color: #50575e; }
+html.dark-mode .menu-item-settings label { color: #c3c4c7; }
+html.dark-mode .menu-item-settings input[type="text"],
+html.dark-mode .menu-item-settings select { background: #1d2327; border-color: #50575e; color: #c3c4c7; }
+html.dark-mode .menu-item-actions { border-color: #50575e; }
+html.dark-mode .menu-footer { background: #1d2327; border-color: #50575e; }
+html.dark-mode .move-up, html.dark-mode .move-down { background: #3c434a; border-color: #50575e; color: #c3c4c7; }
+html.dark-mode .move-up:hover, html.dark-mode .move-down:hover { background: #50575e; }
 </style>
 
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>

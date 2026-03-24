@@ -53,7 +53,7 @@ require_once 'sidebar.php'; // Restore Sidebar
                         <div class="inside" style="padding: 20px;">
 
                             <!-- Info: Site Title managed in General Settings -->
-                            <div style="background:#f0f6fc;border:1px solid #c2d4e8;border-radius:6px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+                            <div class="site-info-notice">
                                 <span style="font-size:18px;">ℹ️</span>
                                 <span style="font-size:13px;color:#2271b1;">
                                     <strong>Site Title</strong> and <strong>Tagline</strong> are managed in
@@ -261,6 +261,13 @@ endforeach; ?>
 
 <!-- Media Picker Modal -->
 <style>
+.site-info-notice { background:#f0f6fc; border:1px solid #c2d4e8; border-radius:6px; padding:12px 16px; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+html.dark-mode .site-info-notice { background:#1a2d3f !important; border-color:#2e5272 !important; }
+html.dark-mode .site-info-notice span { color:#7eb8e0 !important; }
+html.dark-mode .postbox { background:#2c3338; border-color:#50575e; }
+html.dark-mode .postbox .hndle { background:#1d2327; border-color:#50575e; color:#c3c4c7; }
+html.dark-mode .postbox .inside { background:#2c3338; color:#c3c4c7; }
+html.dark-mode .color-option-label { color:#c3c4c7; }
 #media-modal-box { background:#fff; width:82%; max-width:900px; height:82vh; margin:4vh auto; display:flex; flex-direction:column; border-radius:4px; overflow:hidden; box-shadow:0 4px 30px rgba(0,0,0,.35); }
 .mm-tabs { display:flex; border-bottom:1px solid #ddd; background:#f6f7f7; }
 .mm-tab { padding:10px 20px; font-size:13px; font-weight:600; cursor:pointer; border:none; background:none; color:#50575e; border-bottom:2px solid transparent; transition:all .15s; }
