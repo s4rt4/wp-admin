@@ -222,7 +222,7 @@ $monacoCount = $pdo->query("SELECT COUNT(*) FROM pages WHERE builder_type='monac
     .post-state.draft { background: #f0f0f1; color: #646970; }
     .post-state.trash { background: #fce8e8; color: #b32d2e; }
     .tui-grid-cell .tui-grid-cell-content { line-height: 1.5; }
-    .grid-toolbar { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; }
+    .grid-toolbar { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; justify-content: flex-end; }
     .grid-toolbar input[type="search"] { padding: 5px 10px; border: 1px solid #8c8f94; border-radius: 4px; font-size: 13px; width: 250px; }
     .grid-toolbar input[type="search"]:focus { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; outline: none; }
     .grid-toolbar label { font-size: 13px; color: #1d2327; }

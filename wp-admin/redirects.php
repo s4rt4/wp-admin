@@ -118,48 +118,80 @@ $total_hits = $conn->query("SELECT COALESCE(SUM(hits),0) FROM redirects")->fetch
             </form>
         </div>
 
-        <table class="wp-list-table widefat fixed striped">
-            <thead>
-                <tr>
-                    <th style="width:30%;">Source URL</th>
-                    <th style="width:5%;text-align:center;"><i class="fa-solid fa-arrow-right"></i></th>
-                    <th style="width:30%;">Target URL</th>
-                    <th style="width:60px;">Type</th>
-                    <th style="width:60px;">Hits</th>
-                    <th style="width:70px;">Status</th>
-                    <th style="width:140px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($redirects && $redirects->num_rows > 0): ?>
-                <?php while ($r = $redirects->fetch_assoc()): ?>
-                <tr id="row-<?php echo $r['id']; ?>" style="<?php echo !$r['active'] ? 'opacity:0.5;' : ''; ?>">
-                    <td><code style="font-size:12px;background:#f0f0f1;padding:2px 6px;border-radius:3px;"><?php echo htmlspecialchars($r['source_url']); ?></code></td>
-                    <td style="text-align:center;color:#646970;"><i class="fa-solid fa-arrow-right"></i></td>
-                    <td><code style="font-size:12px;background:#f0f0f1;padding:2px 6px;border-radius:3px;"><?php echo htmlspecialchars($r['target_url']); ?></code></td>
-                    <td><span style="background:<?php echo $r['type']==='301'?'#0073aa':'#e67e22'; ?>;color:#fff;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;"><?php echo $r['type']; ?></span></td>
-                    <td style="text-align:center;"><?php echo $r['hits']; ?></td>
-                    <td>
-                        <?php if ($r['active']): ?>
-                        <span style="color:#00a32a;font-size:12px;font-weight:600;"><i class="fa-solid fa-circle" style="font-size:8px;vertical-align:middle;margin-right:3px;"></i>Active</span>
-                        <?php else: ?>
-                        <span style="color:#646970;font-size:12px;"><i class="fa-solid fa-circle" style="font-size:8px;vertical-align:middle;margin-right:3px;"></i>Inactive</span>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <div class="row-actions" style="visibility:visible;font-size:12px;">
-                            <a href="#" onclick="editRedirect(<?php echo htmlspecialchars(json_encode($r)); ?>);return false;">Edit</a> |
-                            <a href="redirects.php?action=toggle&id=<?php echo $r['id']; ?>"><?php echo $r['active'] ? 'Disable' : 'Enable'; ?></a> |
-                            <a href="redirects.php?action=delete&id=<?php echo $r['id']; ?>" style="color:#b32d2e;" onclick="return confirm('Delete this redirect?')">Delete</a>
-                        </div>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-                <?php else: ?>
-                <tr><td colspan="7" style="text-align:center;color:#646970;padding:20px;">No redirects yet.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+        <?php
+        $redir_data = [];
+        if ($redirects) { while ($r = $redirects->fetch_assoc()) $redir_data[] = $r; }
+        ?>
+        <div id="redir-grid"></div>
+
+        <link rel="stylesheet" href="vendor/tui/css/tui-pagination.min.css">
+        <link rel="stylesheet" href="vendor/tui/css/tui-grid.min.css">
+        <script src="vendor/tui/js/tui-pagination.min.js"></script>
+        <script src="vendor/tui/js/tui-grid.min.js"></script>
+        <style>
+            #redir-grid { margin-top:4px; }
+            .redir-actions a { color:#0073aa; text-decoration:none; font-size:12px; }
+            .redir-actions a:hover { text-decoration:underline; }
+            .redir-actions .del { color:#b32d2e; }
+        </style>
+        <script>
+        (function() {
+            var gridData = <?php echo json_encode($redir_data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE) ?: '[]'; ?>;
+
+            function esc(s) { var d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
+
+            function fmtType(o) {
+                var c = o.value === '301' ? '#0073aa' : '#e67e22';
+                return '<span style="background:'+c+';color:#fff;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">'+esc(o.value)+'</span>';
+            }
+            function fmtStatus(o) {
+                if (parseInt(o.value)) return '<span style="color:#00a32a;font-size:12px;font-weight:600;"><i class="fa-solid fa-circle" style="font-size:8px;margin-right:3px;"></i>Active</span>';
+                return '<span style="color:#646970;font-size:12px;"><i class="fa-solid fa-circle" style="font-size:8px;margin-right:3px;"></i>Inactive</span>';
+            }
+            function fmtActions(o) {
+                var r = o.row;
+                var tog = parseInt(r.active) ? 'Disable' : 'Enable';
+                return '<span class="redir-actions"><a href="redirects.php?action=toggle&id='+r.id+'">'+tog+'</a> | <a href="redirects.php?action=delete&id='+r.id+'" class="del" onclick="return confirm(\'Delete?\')">Delete</a></span>';
+            }
+
+            tui.Grid.applyTheme('default', {
+                cell: { normal:{background:'#fff',border:'#e0e0e0'}, header:{background:'#f6f7f7',border:'#c3c4c7'}, evenRow:{background:'#f9f9f9'} },
+                outline: { border:'#c3c4c7' }
+            });
+
+            var grid = new tui.Grid({
+                el: document.getElementById('redir-grid'),
+                data: gridData,
+                scrollX: false, scrollY: false,
+                bodyHeight: 'auto', minBodyHeight: 60,
+                rowHeight: 'auto', minRowHeight: 40,
+                pageOptions: { useClient: true, perPage: 20 },
+                columns: [
+                    { header:'Source URL', name:'source_url', sortable:true, editor:{type:'text'} },
+                    { header:'Target URL', name:'target_url', sortable:true, editor:{type:'text'} },
+                    { header:'Type', name:'type', width:80, sortable:true, escapeHTML:false, formatter:fmtType, editor:{type:'select', options:{listItems:[{text:'301',value:'301'},{text:'302',value:'302'}]}} },
+                    { header:'Hits', name:'hits', width:70, sortable:true, align:'center' },
+                    { header:'Status', name:'active', width:90, escapeHTML:false, formatter:fmtStatus },
+                    { header:'Actions', name:'id', width:130, escapeHTML:false, formatter:fmtActions, sortable:false }
+                ]
+            });
+
+            // Auto-save on inline edit
+            grid.on('afterChange', function(ev) {
+                ev.changes.forEach(function(c) {
+                    var row = grid.getRow(c.rowKey);
+                    if (!row) return;
+                    var fd = new FormData();
+                    fd.append('action', 'edit');
+                    fd.append('id', row.id);
+                    fd.append('source_url', row.source_url || '');
+                    fd.append('target_url', row.target_url || '');
+                    fd.append('type', row.type || '301');
+                    fetch('redirects.php', { method:'POST', body:fd });
+                });
+            });
+        })();
+        </script>
 
         <p style="margin-top:16px;font-size:12px;color:#646970;">
             <i class="fa-solid fa-circle-info" style="margin-right:4px;"></i>
@@ -168,58 +200,6 @@ $total_hits = $conn->query("SELECT COALESCE(SUM(hits),0) FROM redirects")->fetch
     </div>
 </div>
 
-<!-- Edit Modal -->
-<div id="edit-modal" style="display:none;position:fixed;z-index:9999;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
-    <div style="background:#fff;width:100%;max-width:480px;border-radius:6px;box-shadow:0 5px 15px rgba(0,0,0,.2);overflow:hidden;">
-        <div style="padding:14px 20px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;">
-            <h3 style="margin:0;font-size:16px;">Edit Redirect</h3>
-            <button onclick="closeEdit()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#787c82;">&times;</button>
-        </div>
-        <form method="POST" style="padding:20px;">
-            <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="id" id="edit-id">
-            <div style="margin-bottom:14px;">
-                <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Source URL</label>
-                <input type="text" name="source_url" id="edit-source" required style="width:100%;padding:6px 10px;border:1px solid #8c8f94;border-radius:4px;">
-            </div>
-            <div style="margin-bottom:14px;">
-                <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Target URL</label>
-                <input type="text" name="target_url" id="edit-target" required style="width:100%;padding:6px 10px;border:1px solid #8c8f94;border-radius:4px;">
-            </div>
-            <div style="margin-bottom:14px;">
-                <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Type</label>
-                <select name="type" id="edit-type" style="width:100%;padding:6px;border:1px solid #8c8f94;border-radius:4px;">
-                    <option value="301">301 — Permanent</option>
-                    <option value="302">302 — Temporary</option>
-                </select>
-            </div>
-            <div style="display:flex;justify-content:flex-end;gap:8px;">
-                <button type="button" onclick="closeEdit()" class="button">Cancel</button>
-                <button type="submit" class="button button-primary">Save</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<style>
-.wp-heading-inline { display:inline-block;margin-right:5px;vertical-align:middle; }
-</style>
-
-<script>
-function editRedirect(r) {
-    document.getElementById('edit-id').value = r.id;
-    document.getElementById('edit-source').value = r.source_url;
-    document.getElementById('edit-target').value = r.target_url;
-    document.getElementById('edit-type').value = r.type;
-    var m = document.getElementById('edit-modal');
-    m.style.display = 'flex';
-}
-function closeEdit() {
-    document.getElementById('edit-modal').style.display = 'none';
-}
-document.getElementById('edit-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeEdit();
-});
-</script>
+<style>.wp-heading-inline { display:inline-block;margin-right:5px;vertical-align:middle; }</style>
 
 <?php require_once 'footer.php'; ?>

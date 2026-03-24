@@ -1,6 +1,6 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, custom fields, a WordPress-like first-run installer, trash/recycle bin, CSV import/export, maintenance mode, user activity tracking, a redirects manager, revision diff viewer, related posts, a token-authenticated REST API, a built-in media editor, and multi-site management.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, custom fields, a WordPress-like first-run installer, trash/recycle bin, CSV import/export, maintenance mode, user activity tracking, a redirects manager, revision diff viewer, related posts, a token-authenticated REST API, a built-in media editor, multi-site management, a data explorer, form analytics, and an audit dashboard.
 
 ## Features
 
@@ -103,7 +103,9 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 - Reading Time estimates per post (word count ÷ 200 wpm).
 - Form Conversion Rate (submissions ÷ page views).
 - Kanban Throughput: cards completed per week.
-- Powered by Chart.js; no external analytics service required.
+- Powered by Toast UI Chart (local); no external analytics service required.
+- **Form Analytics:** Submission trends chart, filter by form, stats cards, tui-grid responses table.
+- **Audit Dashboard:** Activity timeline, top actions/users charts, recent activity grid with color-coded action badges.
 
 ### Audit Log
 - Records every significant admin action: login, post create/update/delete, media upload/delete, and more.
@@ -136,6 +138,7 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 - **REST API:** Token-authenticated CRUD API for posts, pages, media, categories, tags, and options. Generate and manage API tokens from the admin panel. CORS-enabled, supports Bearer token and query param auth.
 - **Media Editor:** Crop, resize, rotate, and flip images directly from the media library using an HTML5 Canvas editor. Changes are saved in-place.
 - **Multi-site Manager:** Create and manage multiple sites from a single installation. Each site gets its own set of database tables (prefixed), with shared user authentication. Activate, deactivate, or delete sites.
+- **Data Explorer:** Browse any database table via an interactive tui-grid. Read-only, auto-detect columns, export to CSV.
 - **Database Backup & Restore** interface.
 - **Export / Import** content tools (JSON and CSV).
 

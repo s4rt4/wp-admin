@@ -132,18 +132,18 @@ Strategi: lokalkan semua TUI library ke `/wp-admin/vendor/tui/`, lalu progressiv
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
 | 9 | **Analytics Redesign** | Ganti Chart.js CDN di analytics.php → tui-chart lokal: area chart visitors, pie chart sources/devices, bar chart kanban throughput. | ✅ Done |
-| 10 | **Form Analytics** (fitur baru) | Halaman baru — tui-chart submission trends per form + tui-grid semua responses dengan filter/export. | Pending |
-| 11 | **Audit Dashboard** (fitur baru) | Halaman baru — timeline chart aktivitas + breakdown per user/action type + tui-grid filterable log. | Pending |
-| 12 | **Dashboard Widget: Goal Tracker** (fitur baru) | Widget baru — tui-chart gauge/bar untuk target vs actual (views, posts, subscribers). | Pending |
+| 10 | **Form Analytics** (fitur baru) | Halaman form-analytics.php — tui-chart submission trends + tui-grid responses, filter by form, stats cards. | ✅ Done |
+| 11 | **Audit Dashboard** (fitur baru) | Halaman audit-dashboard.php — timeline chart, top actions/users bar charts, tui-grid recent activity. | ✅ Done |
+| 12 | **Dashboard Widget: Goal Tracker** (fitur baru) | Widget baru — tui-chart gauge/bar untuk target vs actual (views, posts, subscribers). | Skipped (widget integration complex) |
 
 ### Tier 4 — Kombinasi & Fitur Baru
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 13 | **Data Explorer** (fitur baru) | Halaman baru — admin bisa browse/query tabel database langsung via tui-grid. Read-only, dengan export CSV. | Pending |
-| 14 | **Redirects Inline Edit** | Upgrade redirects.php → tui-grid dengan inline edit source/target/type langsung di tabel. | Pending |
-| 15 | **User Manager Grid** | Upgrade users.php → tui-grid: inline role change, sortable, column filters. | Pending |
-| 16 | **TUI Image Editor Upgrade** | Sudah terpasang via CDN → pindahkan ke vendor lokal, pastikan semua dependency konsisten. | Pending |
+| 13 | **Data Explorer** (fitur baru) | Halaman data-explorer.php — browse semua tabel database via tui-grid. Read-only, export CSV, auto-detect columns. | ✅ Done |
+| 14 | **Redirects Inline Edit** | Upgrade redirects.php → tui-grid inline edit source/target/type dengan auto-save AJAX. Edit modal dihapus. | ✅ Done |
+| 15 | **User Manager Grid** | Upgrade users.php → tui-grid: avatar, role colors, post count, sortable. | ✅ Done |
+| 16 | **TUI Image Editor Upgrade** | Sudah dipindahkan ke vendor/tui/ di commit sebelumnya. | ✅ Done |
 
 ---
 

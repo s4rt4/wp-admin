@@ -28,7 +28,11 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     }
 }
 
-$result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
+$conn->set_charset('utf8mb4');
+$result = $conn->query("SELECT u.*, (SELECT COUNT(*) FROM posts WHERE author_id=u.id AND status!='trash') as post_count FROM users u ORDER BY u.created_at DESC");
+$users_data = [];
+while ($r = $result->fetch_assoc()) $users_data[] = $r;
+$currentUserId = (int)$_SESSION['user_id'];
 ?>
 
 <div id="wpcontent">
@@ -40,76 +44,83 @@ $result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
             <div class="notice notice-error is-dismissible"><p><?php echo $error; ?></p></div>
         <?php endif; ?>
 
-        <table class="wp-list-table widefat fixed striped users">
-            <thead>
-                <tr>
-                    <th scope="col" id="username" class="manage-column column-username column-primary sortable desc"><span>Username</span></th>
-                    <th scope="col" id="role" class="manage-column column-role">Role</th>
-                    <th scope="col" id="posts" class="manage-column column-posts num">Posts</th>
-                    <th scope="col" id="date" class="manage-column column-date sortable asc"><span>Created At</span></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($result->num_rows > 0): ?>
-                    <?php while($row = $result->fetch_assoc()): ?>
-                        <tr id="user-<?php echo $row['id']; ?>">
-                            <td class="username column-username has-row-actions column-primary" data-colname="Username">
-                                <?php 
-                                    $avatar_url = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($row['username']))) . "?s=32&d=mm&r=g";
-                                    if (!empty($row['profile_picture']) && file_exists('media/' . $row['profile_picture'])) {
-                                        $avatar_url = 'media/' . $row['profile_picture'];
-                                    }
-                                ?>
-                                <img alt="" src="<?php echo $avatar_url; ?>" class="avatar avatar-32 photo" height="32" width="32" loading="lazy">
-                                <strong><a href="user-new.php?id=<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['username']); ?></a></strong>
-                                <br>
-                                <div class="row-actions">
-                                    <span class="edit"><a href="user-new.php?id=<?php echo $row['id']; ?>">Edit</a> | </span>
-                                    <?php if ($row['id'] != $_SESSION['user_id']): ?>
-                                        <span class="delete"><a href="users.php?action=delete&id=<?php echo $row['id']; ?>" class="submitdelete" onclick="return confirm('Are you sure?')">Delete</a></span>
-                                    <?php else: ?>
-                                        <span class="view">Current User</span>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                            <td class="role column-role" data-colname="Role"><?php echo ucfirst(htmlspecialchars($row['role'])); ?></td>
-                            <td class="posts column-posts" data-colname="Posts">
-                                <?php echo "-"; ?>
-                            </td>
-                            <td class="date column-date" data-colname="Date"><?php echo date('Y/m/d H:i:s', strtotime($row['created_at'])); ?></td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr class="no-items"><td class="colspanchange" colspan="4">No users found.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+        <div id="users-grid"></div>
     </div>
 </div>
 
+<link rel="stylesheet" href="vendor/tui/css/tui-pagination.min.css">
+<link rel="stylesheet" href="vendor/tui/css/tui-grid.min.css">
 <style>
-    /* Table Styling to match WP */
-    .widefat { border-spacing: 0; width: 100%; clear: both; margin: 0; background: #fff; box-shadow: 0 1px 1px rgba(0,0,0,.04); border: 1px solid #c3c4c7; }
-    .widefat thead td, .widefat thead th { border-bottom: 1px solid #c3c4c7; color: #3c434a; font-weight: 400; font-size: 14px; text-align: left; padding: 10px; line-height: 1.3; }
-    .widefat tbody td, .widefat tbody th { color: #3c434a; font-size: 13px; padding: 10px; line-height: 1.5; vertical-align: top; }
-    .widefat td, .widefat th { color: #50575e; }
-    .widefat tr:nth-child(2n+1) { background-color: #f6f7f7; }
-    
-    .column-username { width: 30%; }
-    .column-role { width: 15%; }
-    .column-posts { width: 10%; }
-    .column-date { width: 25%; }
-    
-    .avatar { float: left; margin-right: 10px; margin-top: 1px; border-radius: 50%; object-fit: cover; }
-    
-    .page-title-action { margin-left: 4px; padding: 4px 8px; position: relative; top: -3px; text-decoration: none; border: 1px solid #2271b1; border-radius: 3px; background: #f6f7f7; font-size: 13px; cursor: pointer; color: #2271b1; }
-    .page-title-action:hover { background: #f0f0f1; border-color: #0a4b78; color: #0a4b78; }
-    .row-actions { visibility: hidden; font-size: 13px; padding: 2px 0 0; color: #a7aaad; }
-    tr:hover .row-actions { visibility: visible; }
-    .row-actions a { color: #2271b1; text-decoration: none; }
-    .row-actions a:hover { color: #0073aa; }
-    .row-actions .delete a { color: #b32d2e; }
-    .row-actions .delete a:hover { color: #a32b2b; }
+    .page-title-action { margin-left:4px;padding:4px 8px;text-decoration:none;border:1px solid #2271b1;border-radius:3px;background:#f6f7f7;font-size:13px;color:#2271b1; }
+    .page-title-action:hover { background:#f0f0f1;border-color:#0a4b78;color:#0a4b78; }
+    #users-grid { margin-top:15px; }
+    .row-actions { visibility:hidden;font-size:12px;padding-top:2px; }
+    .tui-grid-cell:hover .row-actions, .tui-grid-row-hover .row-actions { visibility:visible; }
+    .row-actions a { color:#2271b1;text-decoration:none; }
+    .row-actions a:hover { text-decoration:underline; }
+    .row-actions .del { color:#b32d2e; }
+    .tui-grid-cell .tui-grid-cell-content { line-height:1.5; }
 </style>
+<script src="vendor/tui/js/tui-pagination.min.js"></script>
+<script src="vendor/tui/js/tui-grid.min.js"></script>
+<script>
+(function() {
+    var gridData = <?php echo json_encode(array_map(function($u) {
+        return [
+            'id' => (int)$u['id'], 'username' => $u['username'],
+            'role' => $u['role'] ?? 'subscriber',
+            'profile_picture' => $u['profile_picture'] ?? '',
+            'post_count' => (int)($u['post_count'] ?? 0),
+            'created_at' => $u['created_at'],
+        ];
+    }, $users_data), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE) ?: '[]'; ?>;
+    var currentUserId = <?php echo $currentUserId; ?>;
+
+    function esc(s) { var d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
+
+    function fmtUser(o) {
+        var r = o.row;
+        var av = r.profile_picture ? 'media/' + esc(r.profile_picture) : 'https://www.gravatar.com/avatar/' + '?s=32&d=mm';
+        var h = '<img src="'+av+'" width="32" height="32" style="border-radius:50%;float:left;margin-right:10px;object-fit:cover;">';
+        h += '<strong><a href="user-new.php?id='+r.id+'" style="color:#2271b1;text-decoration:none;">'+esc(r.username)+'</a></strong>';
+        h += '<div class="row-actions"><a href="user-new.php?id='+r.id+'">Edit</a>';
+        if (r.id !== currentUserId) h += ' | <a href="users.php?action=delete&id='+r.id+'" class="del" onclick="return confirm(\'Are you sure?\')">Delete</a>';
+        else h += ' | <span style="color:#646970;">Current User</span>';
+        h += '</div>';
+        return h;
+    }
+
+    function fmtRole(o) {
+        var colors = {administrator:'#0073aa',editor:'#e67e22',author:'#46b450',subscriber:'#646970'};
+        var c = colors[o.value] || '#646970';
+        return '<span style="color:'+c+';font-weight:600;">'+esc((o.value||'').charAt(0).toUpperCase()+(o.value||'').slice(1))+'</span>';
+    }
+
+    function fmtDate(o) {
+        var d = new Date(o.value);
+        return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    }
+
+    tui.Grid.applyTheme('default', {
+        cell:{normal:{background:'#fff',border:'#e0e0e0'},header:{background:'#f6f7f7',border:'#c3c4c7'},evenRow:{background:'#f9f9f9'}},
+        outline:{border:'#c3c4c7'}
+    });
+
+    new tui.Grid({
+        el: document.getElementById('users-grid'),
+        data: gridData,
+        scrollX:false, scrollY:false,
+        bodyHeight:'auto', minBodyHeight:60,
+        rowHeight:'auto', minRowHeight:50,
+        pageOptions: { useClient:true, perPage:20 },
+        columns: [
+            { header:'Username', name:'username', sortable:true, escapeHTML:false, formatter:fmtUser },
+            { header:'Role', name:'role', width:130, sortable:true, escapeHTML:false, formatter:fmtRole },
+            { header:'Posts', name:'post_count', width:80, sortable:true, align:'center' },
+            { header:'Created At', name:'created_at', width:160, sortable:true, escapeHTML:false, formatter:fmtDate }
+        ]
+    });
+})();
+</script>
 
 <?php require_once 'footer.php'; ?>

@@ -120,8 +120,8 @@ endif; ?>
         <?php
 endif; ?>
         <?php if (current_user_can('manage_options') && rmv_can_see('tools')): ?>
-        <li class="wp-has-submenu <?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics','Automations','Edit Automation'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
-            <a href="tools.php" class="<?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics','Automations','Edit Automation','Redirects','API Tokens'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
+        <li class="wp-has-submenu <?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics','Form Analytics','Audit Dashboard','Automations','Edit Automation','Data Explorer'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+            <a href="tools.php" class="<?php echo(isset($page_title) && in_array($page_title, ['Tools','Snippets','Tag Manager','Form Builder','Audit Log','Analytics','Form Analytics','Audit Dashboard','Automations','Edit Automation','Redirects','API Tokens','Data Explorer'])) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>"><div class="wp-menu-image dashicons-admin-tools"></div><div class="wp-menu-name">Tools</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
                 <li class="wp-first-item"><a href="tools.php?tab=database">Database Backup</a></li>
@@ -142,6 +142,12 @@ endif; ?>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Analytics') ? 'current' : ''; ?>">
                     <a href="analytics.php">Analytics</a>
                 </li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Form Analytics') ? 'current' : ''; ?>">
+                    <a href="form-analytics.php">Form Analytics</a>
+                </li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Audit Dashboard') ? 'current' : ''; ?>">
+                    <a href="audit-dashboard.php">Audit Dashboard</a>
+                </li>
                 <li class="<?php echo(isset($page_title) && in_array($page_title, ['Automations','Edit Automation'])) ? 'current' : ''; ?>">
                     <a href="automations.php">Automations</a>
                 </li>
@@ -150,6 +156,9 @@ endif; ?>
                 </li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'API Tokens') ? 'current' : ''; ?>">
                     <a href="api-tokens.php">REST API</a>
+                </li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Data Explorer') ? 'current' : ''; ?>">
+                    <a href="data-explorer.php">Data Explorer</a>
                 </li>
             </ul>
         </li>
