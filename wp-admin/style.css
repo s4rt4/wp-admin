@@ -2157,6 +2157,52 @@ html.dark-mode .import-section * { color: #c3c4c7 !important; }
 html.dark-mode .export-section a,
 html.dark-mode .import-section a { color: #72aee6 !important; }
 
+/* ── kanban.php ──────────────────────────────────────────────────────────── */
+/* Action buttons */
+html.dark-mode .kb-action-btn { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .kb-action-btn:hover { background: #3c434a !important; border-color: #72aee6 !important; color: #72aee6 !important; }
+/* Board tabs */
+html.dark-mode .kb-tabs-outer { background: #1a8a75 !important; box-shadow: none !important; }
+html.dark-mode .kb-tab { background: #1a8a75 !important; border-right-color: #148066 !important; }
+html.dark-mode .kb-tab.active { background: #1a1d21 !important; color: #e0e2e4 !important; border-right-color: #1a1d21 !important; }
+html.dark-mode .kb-tab:hover:not(.active) { background: #1a8a75 !important; }
+/* Columns */
+html.dark-mode .kb-column { background: #262a2f !important; box-shadow: 0 1px 3px rgba(0,0,0,.3) !important; }
+html.dark-mode .kb-column-body { background: #262a2f !important; }
+/* Cards */
+html.dark-mode .kb-card { background: #2c3338 !important; box-shadow: 0 1px 3px rgba(0,0,0,.2) !important; }
+html.dark-mode .kb-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.3) !important; }
+html.dark-mode .kb-card h4 { color: #e0e2e4 !important; }
+html.dark-mode .kb-card .meta { color: #9ca3ae !important; }
+html.dark-mode .kb-card .meta * { color: #9ca3ae !important; }
+html.dark-mode .kb-icn-btn { color: #9ca3ae !important; }
+html.dark-mode .kb-icn-btn:hover { background: #3c434a !important; color: #c3c4c7 !important; }
+html.dark-mode .kb-icn-btn.del:hover { background: #3c1a1a !important; color: #ff6b6b !important; }
+/* Add card button */
+html.dark-mode .kb-add-card { background: #2c3338 !important; border-color: #404952 !important; color: #9ca3ae !important; }
+html.dark-mode .kb-add-card:hover { background: #3c434a !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+/* Modal */
+html.dark-mode .kb-modal-box { background: #2c3338 !important; }
+html.dark-mode .kb-modal-header { background: #262a2f !important; border-bottom-color: #404952 !important; }
+html.dark-mode .kb-modal-header h3 { color: #c3c4c7 !important; }
+html.dark-mode .kb-modal-header > button { color: #9ca3ae !important; }
+html.dark-mode .kb-modal-body { background: #2c3338 !important; }
+html.dark-mode .kb-modal-body label { color: #c3c4c7 !important; }
+html.dark-mode .kb-modal-body input[type="text"],
+html.dark-mode .kb-modal-body input[type="date"],
+html.dark-mode .kb-modal-body select,
+html.dark-mode .kb-modal-body textarea { background: #1a1d21 !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+html.dark-mode .kb-modal-footer { background: #262a2f !important; border-top-color: #404952 !important; }
+html.dark-mode .kb-btn-secondary { background: #2c3338 !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .kb-btn-secondary:hover { background: #3c434a !important; }
+html.dark-mode .kb-chk { color: #c3c4c7 !important; }
+/* Activity log pane */
+html.dark-mode #history-pane { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode #history-pane > div:first-child { background: #262a2f !important; border-bottom-color: #404952 !important; }
+html.dark-mode .hist-row { border-bottom-color: #404952 !important; }
+html.dark-mode .hist-time { color: #9ca3ae !important; }
+html.dark-mode .hist-text { color: #c3c4c7 !important; }
+
 /* ── menus.php ──────────────────────────────────────────────────────────── */
 html.dark-mode .accordion-section { background: #2c3338 !important; border-color: #404952 !important; }
 html.dark-mode .accordion-section-title { background: #262a2f !important; border-color: #404952 !important; color: #c3c4c7 !important; }
