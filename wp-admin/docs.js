@@ -85,6 +85,9 @@
         // Users (extended - Tier 1 Batch 3)
         { title: 'User Activity', section: 'Users', topic: 'users-activity', keywords: 'user activity aktivitas online offline last login terakhir aktif status pengguna' },
         { title: 'REST API', section: 'Tools', topic: 'tools-rest-api', keywords: 'rest api token crud endpoint headless json bearer authentication external integrasi' },
+        { title: 'Data Explorer', section: 'Tools', topic: 'tools-data-explorer', keywords: 'data explorer database tabel browse query csv export read only admin jelajah' },
+        { title: 'Form Analytics', section: 'Tools', topic: 'tools-form-analytics', keywords: 'form analytics submission trends chart grafik formulir respons statistik' },
+        { title: 'Audit Dashboard', section: 'Tools', topic: 'tools-audit-dashboard', keywords: 'audit dashboard timeline activity chart grafik aktivitas log user action keamanan' },
         { title: 'Media Editor', section: 'Media', topic: 'media-editor', keywords: 'media editor crop resize rotate flip image gambar edit potong ukuran putar' },
         { title: 'Multi-site', section: 'Settings', topic: 'settings-multisite', keywords: 'multi site multisite beberapa situs domain prefix tabel network kelola' },
         // Media (extended)

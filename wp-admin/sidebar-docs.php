@@ -179,6 +179,9 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-csv') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-csv">CSV Import/Export</a></li>
                 <li class="<?php echo($topic === 'tools-redirects') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-redirects">Redirects Manager</a></li>
                 <li class="<?php echo($topic === 'tools-rest-api') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-rest-api">REST API</a></li>
+                <li class="<?php echo($topic === 'tools-data-explorer') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-data-explorer">Data Explorer</a></li>
+                <li class="<?php echo($topic === 'tools-form-analytics') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-form-analytics">Form Analytics</a></li>
+                <li class="<?php echo($topic === 'tools-audit-dashboard') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-audit-dashboard">Audit Dashboard</a></li>
             </ul>
         </li>
 
