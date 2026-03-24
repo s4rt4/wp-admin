@@ -55,6 +55,9 @@ $LANG = [
         'step2_of_2'     => 'Langkah 2 dari 2',
         'db_name_note'   => 'Database akan dibuat jika belum ada.',
         'req_title'      => 'Cek Persyaratan Sistem',
+        'demo_label'     => 'Install konten demo',
+        'demo_desc'      => 'Tambahkan contoh post, halaman, dan kategori agar CMS tidak kosong.',
+        'demo_ins'       => 'Konten demo berhasil dimasukkan.',
     ],
     'en' => [
         'welcome'        => 'Welcome',
@@ -98,6 +101,9 @@ $LANG = [
         'step1_of_2'     => 'Step 1 of 2',
         'step2_of_2'     => 'Step 2 of 2',
         'db_name_note'   => 'Database will be created if it doesn\'t exist.',
+        'demo_label'     => 'Install demo content',
+        'demo_desc'      => 'Add sample posts, pages, and categories so the CMS isn\'t empty.',
+        'demo_ins'       => 'Demo content installed successfully.',
     ],
 ];
 
@@ -201,9 +207,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['step'] ?? '') === '2') {
     } elseif (strlen($admin_pass) < 6) {
         $install_error = $t['pass_short'];
     } else {
+        $install_demo = isset($_POST['install_demo']) && $_POST['install_demo'] === '1';
         $install_result = run_installation(
             $_SESSION['install_db'] ?? [],
-            $site_name, $site_url, $admin_user, $admin_email, $admin_pass, $lang
+            $site_name, $site_url, $admin_user, $admin_email, $admin_pass, $lang, $install_demo
         );
     }
 }
@@ -215,7 +222,7 @@ if ($install_result !== null && !isset($install_result['error'])) $step = 3;
 
 // ── Installation runner ───────────────────────────────────────────────────────
 function run_installation(array $db, string $site_name, string $site_url,
-    string $admin_user, string $admin_email, string $admin_pass, string $lang): array
+    string $admin_user, string $admin_email, string $admin_pass, string $lang, bool $demo = false): array
 {
     $log = [];
     try {
@@ -241,6 +248,12 @@ function run_installation(array $db, string $site_name, string $site_url,
         insert_defaults($pdo, $site_name, $site_url, $admin_email, $lang, $site_name);
         insert_admin_user($pdo, $admin_user, $admin_email, $admin_pass);
         $log[] = 'defaults_ins';
+
+        // 3b. Demo content
+        if ($demo) {
+            insert_demo_content($pdo, $lang);
+            $log[] = 'demo_ins';
+        }
 
         // 4. Write wp-config.php
         write_wp_config($db['host'], $dbname, $db['user'], $db['pass']);
@@ -717,6 +730,47 @@ function insert_admin_user(PDO $pdo, string $username, string $email, string $pa
 }
 
 // ── Write wp-config.php ───────────────────────────────────────────────────────
+function insert_demo_content(PDO $pdo, string $lang): void
+{
+    $now = date('Y-m-d H:i:s');
+
+    // Demo categories
+    $pdo->exec("INSERT IGNORE INTO categories (name, slug, description) VALUES
+        ('Technology', 'technology', 'Posts about technology and software'),
+        ('Lifestyle', 'lifestyle', 'Posts about lifestyle and daily life'),
+        ('Tutorial', 'tutorial', 'How-to guides and tutorials')");
+
+    // Demo tags
+    $pdo->exec("INSERT IGNORE INTO tags (name, slug) VALUES
+        ('getting-started', 'getting-started'),
+        ('tips', 'tips'),
+        ('news', 'news')");
+
+    // Demo posts
+    $titles = $lang === 'id' ? [
+        ['Selamat Datang di CMS Baru Anda', 'selamat-datang', '<p>Ini adalah post pertama Anda. Edit atau hapus, lalu mulai menulis!</p><p>CMS ini dilengkapi dengan editor Markdown, kalender konten, SEO analysis, dan banyak fitur lainnya.</p>'],
+        ['Panduan Memulai', 'panduan-memulai', '<p>Berikut beberapa langkah untuk memulai:</p><ol><li>Buat post atau halaman baru</li><li>Atur menu navigasi di Appearance → Menus</li><li>Konfigurasi pengaturan di Settings</li><li>Undang pengguna lain jika diperlukan</li></ol>'],
+        ['Tips Menulis Konten yang Baik', 'tips-menulis-konten', '<p>Konten yang baik adalah konten yang bermanfaat bagi pembaca. Berikut tips singkat:</p><ul><li>Gunakan judul yang menarik</li><li>Tulis paragraf pendek</li><li>Sertakan gambar pendukung</li><li>Optimalkan SEO</li></ul>'],
+    ] : [
+        ['Welcome to Your New CMS', 'welcome-to-your-new-cms', '<p>This is your first post. Edit or delete it, then start writing!</p><p>This CMS comes with a Markdown editor, content calendar, SEO analysis, and many more features.</p>'],
+        ['Getting Started Guide', 'getting-started-guide', '<p>Here are some steps to get started:</p><ol><li>Create a new post or page</li><li>Set up navigation menus in Appearance → Menus</li><li>Configure settings in Settings</li><li>Invite other users if needed</li></ol>'],
+        ['Tips for Writing Great Content', 'tips-for-writing-great-content', '<p>Great content is content that provides value to readers. Here are some quick tips:</p><ul><li>Use compelling headlines</li><li>Write short paragraphs</li><li>Include supporting images</li><li>Optimize for SEO</li></ul>'],
+    ];
+
+    $stmt = $pdo->prepare("INSERT INTO posts (title, slug, content, status, author_id, lang, created_at, updated_at) VALUES (?, ?, ?, 'publish', 1, ?, ?, ?)");
+    foreach ($titles as $i => $t) {
+        $date = date('Y-m-d H:i:s', strtotime("-{$i} days"));
+        $stmt->execute([$t[0], $t[1], $t[2], $lang, $date, $date]);
+    }
+
+    // Demo page
+    $page_title = $lang === 'id' ? 'Beranda' : 'Home';
+    $page_content = $lang === 'id'
+        ? '<h1>Selamat Datang</h1><p>Ini adalah halaman beranda Anda. Edit di Page Builder.</p>'
+        : '<h1>Welcome</h1><p>This is your home page. Edit it in the Page Builder.</p>';
+    $pdo->exec("INSERT IGNORE INTO pages (title, slug, content, builder_type, status) VALUES ('$page_title', 'home', '$page_content', 'grapesjs', 'publish')");
+}
+
 function write_wp_config(string $host, string $name, string $user, string $pass): void
 {
     $h = addslashes($host);
@@ -1030,6 +1084,15 @@ $db = $_SESSION['install_db'] ?? ['host' => 'localhost', 'name' => '', 'user' =>
                 <div class="form-group">
                     <label><?php echo $t['admin_pass2']; ?></label>
                     <input type="password" name="admin_pass2" autocomplete="new-password" required>
+                </div>
+
+                <div style="margin:18px 0 6px;padding:14px 16px;background:#f8f9fa;border:1px solid #e0e0e0;border-radius:6px;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:#1d2327;">
+                        <input type="checkbox" name="install_demo" value="1" checked style="width:16px;height:16px;">
+                        <i class="fa-solid fa-box-open" style="color:#0073aa;"></i>
+                        <?php echo $t['demo_label']; ?>
+                    </label>
+                    <p style="margin:6px 0 0 24px;font-size:12px;color:#646970;"><?php echo $t['demo_desc']; ?></p>
                 </div>
 
                 <div class="form-actions">

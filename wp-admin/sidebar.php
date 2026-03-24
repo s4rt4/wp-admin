@@ -163,7 +163,7 @@ endif; ?>
             </ul>
         </li>
         <?php if (rmv_can_see('settings')): ?>
-        <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings' || $page_title === 'SMTP Email' || $page_title === 'Role Menu Visibility' || $page_title === 'Sites')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+        <li class="wp-has-submenu <?php echo(isset($page_title) && ($page_title === 'General Settings' || $page_title === 'Writing Settings' || $page_title === 'Reading Settings' || $page_title === 'Media Settings' || $page_title === 'Permalink Settings' || $page_title === 'SMTP Email' || $page_title === 'Role Menu Visibility' || $page_title === 'Sites' || $page_title === 'Updates')) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
             <a href="settings-general.php"><div class="wp-menu-image dashicons-admin-settings"></div><div class="wp-menu-name">Settings</div></a>
             <div class="wp-menu-arrow-active"></div>
             <ul class="wp-submenu">
@@ -176,6 +176,7 @@ endif; ?>
                 <?php if (current_user_can('manage_options')): ?>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Role Menu Visibility') ? 'current' : ''; ?>"><a href="settings-roles-menu.php">Role Visibility</a></li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Sites') ? 'current' : ''; ?>"><a href="sites.php">Multi-site</a></li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Updates') ? 'current' : ''; ?>"><a href="update.php">Updates</a></li>
                 <?php endif; ?>
             </ul>
         </li>
