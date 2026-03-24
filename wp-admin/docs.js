@@ -74,6 +74,7 @@
         { title: 'SEO Settings', section: 'Posts', topic: 'posts-seo', keywords: 'seo meta title description keyword preview google snippet analysis score optimasi pencarian' },
         { title: 'Content Calendar', section: 'Posts', topic: 'posts-calendar', keywords: 'calendar kalender bulan jadwal scheduled published konten rencana plan' },
         { title: 'Custom Fields', section: 'Posts', topic: 'posts-custom-fields', keywords: 'custom fields metadata post meta key value field tambahan data ekstra' },
+        { title: 'Bulk SEO Editor', section: 'Posts', topic: 'posts-seo-editor', keywords: 'bulk seo editor spreadsheet meta title description slug focus keyword massal edit batch' },
         { title: 'Trash / Recycle Bin', section: 'Posts', topic: 'posts-trash', keywords: 'trash recycle bin hapus sampah restore pulihkan permanent delete kosongkan' },
         { title: 'Revision Diff Viewer', section: 'Posts', topic: 'posts-diff', keywords: 'revision diff viewer compare bandingkan versi perbandingan side by side riwayat perubahan' },
         { title: 'Related Posts', section: 'Posts', topic: 'posts-related', keywords: 'related posts terkait hubungan relasi artikel saran suggestion link' },

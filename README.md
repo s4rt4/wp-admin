@@ -17,6 +17,7 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - Character-length progress bars for SEO title (30–60 chars) and meta description (120–160 chars).
     - **SEO Analysis checklist** with 8 checks: keyword in SEO title, meta description, post title, URL slug, and content body; plus title length, description length, and content word count.
     - Score bar (0–8) with green/yellow/red threshold colours.
+    - **Bulk SEO Editor:** Spreadsheet-style page to edit SEO title, meta description, slug, and focus keyword for all posts at once. Auto-saves via AJAX. Character-count indicators for optimal lengths.
 - **Content Calendar:** Monthly calendar view of published (green) and scheduled (orange) posts with ← / → month navigation, today highlight, click-to-edit events, and per-month stats.
 - **Custom Fields:** Free-form key/value metadata on any post, stored in `post_meta`. Add, edit, and delete rows inline in the sidebar; saved automatically with the post.
 - **Trash / Recycle Bin:** Soft-delete for posts and pages — items move to Trash first, with Restore and Delete Permanently actions. "Empty Trash" button to purge all at once.
@@ -184,7 +185,7 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 - **Backend:** Native PHP (no frameworks).
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript.
 - **Database:** MySQL.
-- **Libraries / Editors:** GrapesJS, Editor.js, Toast UI Editor, Toast UI Image Editor, Monaco Editor, Chart.js, SortableJS, Fabric.js.
+- **Libraries / Editors:** GrapesJS, Editor.js, Toast UI Editor, Toast UI Image Editor, Toast UI Grid, Monaco Editor, Chart.js, SortableJS, Fabric.js.
 - **Vendored assets:** TUI libraries are bundled locally in `wp-admin/vendor/tui/` for offline use and faster loading.
 
 ---

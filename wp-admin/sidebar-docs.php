@@ -78,6 +78,7 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'posts-seo') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-seo">SEO Settings</a></li>
                 <li class="<?php echo($topic === 'posts-calendar') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-calendar">Content Calendar</a></li>
                 <li class="<?php echo($topic === 'posts-custom-fields') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-custom-fields">Custom Fields</a></li>
+                <li class="<?php echo($topic === 'posts-seo-editor') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-seo-editor">Bulk SEO Editor</a></li>
                 <li class="<?php echo($topic === 'posts-trash') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-trash">Trash / Recycle Bin</a></li>
                 <li class="<?php echo($topic === 'posts-diff') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-diff">Revision Diff Viewer</a></li>
                 <li class="<?php echo($topic === 'posts-related') ? 'current' : ''; ?>"><a href="docs.php?topic=posts-related">Related Posts</a></li>

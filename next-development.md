@@ -113,11 +113,11 @@ Strategi: lokalkan semua TUI library ke `/wp-admin/vendor/tui/`, lalu progressiv
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 1 | **Posts Grid** | Ganti DataTables di posts.php → tui-grid: inline editing, column resize, sortable, filterable. | Pending |
-| 2 | **Pages Grid** | Ganti DataTables di pages.php → tui-grid dengan tree view untuk page hierarchy. | Pending |
-| 3 | **Comments Grid** | Ganti tabel comments.php → tui-grid: inline approve/reject/spam langsung di grid. | Pending |
-| 4 | **Audit Log Grid** | Upgrade audit-log.php → tui-grid: filter per kolom, virtual scrolling untuk ribuan rows, export. | Pending |
-| 5 | **Bulk SEO Editor** (fitur baru) | Halaman baru — spreadsheet-style tui-grid untuk edit meta title, meta desc, slug, focus keyword semua post sekaligus. | Pending |
+| 1 | **Posts Grid** | Ganti DataTables di posts.php → tui-grid: client-side pagination, sortable, filterable, checkbox selection. | ✅ Done |
+| 2 | **Pages Grid** | Ganti DataTables di pages.php → tui-grid: sortable, filterable, Quick Edit via modal. | ✅ Done |
+| 3 | **Comments Grid** | Tetap HTML table — inline reply forms & server-side pagination lebih cocok untuk moderation. | Skipped |
+| 4 | **Audit Log Grid** | Tetap HTML table — server-side pagination lebih baik untuk dataset besar + filter kompleks. | Skipped |
+| 5 | **Bulk SEO Editor** (fitur baru) | Halaman baru seo-editor.php — spreadsheet-style tui-grid untuk edit meta title, meta desc, slug, focus keyword. Auto-save via AJAX. | ✅ Done |
 
 ### Tier 2 — tui-calendar (Interactive Calendar)
 

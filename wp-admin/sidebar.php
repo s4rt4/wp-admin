@@ -43,6 +43,7 @@ function rmv_can_see(string $slug): bool {
                 <li><a href="categories.php">Categories</a></li>
                 <li><a href="tags.php">Tags</a></li>
                 <li><a href="calendar.php">Calendar</a></li>
+                <li><a href="seo-editor.php">Bulk SEO Editor</a></li>
             </ul>
         </li>
         <?php

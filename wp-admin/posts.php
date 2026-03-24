@@ -140,6 +140,34 @@ if (!current_user_can('edit_others_posts')) {
 }
 
 $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as locker_name FROM posts p LEFT JOIN users u ON p.author_id = u.id LEFT JOIN users lu ON p.locked_by = lu.id $sql_where ORDER BY p.created_at DESC");
+
+// Batch fetch for tui-grid
+$posts_data = [];
+while ($row = $result->fetch_assoc()) $posts_data[] = $row;
+$post_ids = array_column($posts_data, 'id');
+$cats_map = []; $tags_map = [];
+if (!empty($post_ids)) {
+    $ids_str = implode(',', array_map('intval', $post_ids));
+    $cr = $conn->query("SELECT pc.post_id, c.name FROM categories c JOIN post_categories pc ON c.id=pc.category_id WHERE pc.post_id IN ($ids_str)");
+    if ($cr) while ($c = $cr->fetch_assoc()) $cats_map[$c['post_id']][] = $c['name'];
+    $tr = $conn->query("SELECT pt.post_id, t.name FROM tags t JOIN post_tags pt ON t.id=pt.tag_id WHERE pt.post_id IN ($ids_str)");
+    if ($tr) while ($t = $tr->fetch_assoc()) $tags_map[$t['post_id']][] = $t['name'];
+}
+$grid_rows = [];
+foreach ($posts_data as $r) {
+    $grid_rows[] = [
+        'id' => (int)$r['id'], 'featured_image' => $r['featured_image'] ?? '',
+        'title' => $r['title'], 'slug' => $r['slug'] ?? '',
+        'lang' => $r['lang'] ?? 'id', 'translation_of' => $r['translation_of'] ?? null,
+        'locked_by' => $r['locked_by'] ? (int)$r['locked_by'] : null,
+        'locker_name' => $r['locker_name'] ?? '',
+        'status' => $r['status'], 'scheduled_at' => $r['scheduled_at'] ?? '',
+        'author_name' => $r['author_name'] ?? 'Unknown', 'author_id' => (int)($r['author_id'] ?? 0),
+        'categories' => implode(', ', $cats_map[$r['id']] ?? []) ?: 'Uncategorized',
+        'tags' => implode(', ', $tags_map[$r['id']] ?? []) ?: '',
+        'created_at' => $r['created_at'],
+    ];
+}
 ?>
 
 <div id="wpcontent">
@@ -191,186 +219,163 @@ $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as lo
                class="button button-small <?php echo $lang_filter === 'en' ? 'button-primary' : ''; ?>">🇬🇧 EN (<?php echo $count_en; ?>)</a>
         </div>
 
-        <table class="wp-list-table widefat fixed striped posts">
-            <thead>
-                <tr>
-                    <td id="cb" class="manage-column column-cb check-column"><input id="cb-select-all-1" type="checkbox"></td>
-                    <th scope="col" id="thumb" class="manage-column column-thumb" style="width: 60px;"><span>Image</span></th>
-                    <th scope="col" id="title" class="manage-column column-title column-primary sortable desc"><span>Title</span></th>
-                    <th scope="col" id="lang" class="manage-column" style="width:50px;">Lang</th>
-                    <th scope="col" id="status" class="manage-column column-status">Status</th>
-                    <th scope="col" id="author" class="manage-column column-author">Author</th>
-                    <th scope="col" id="categories" class="manage-column column-categories">Categories</th>
-                    <th scope="col" id="tags" class="manage-column column-tags">Tags</th>
-                    <th scope="col" id="date" class="manage-column column-date sortable asc"><span>Date</span></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($result->num_rows > 0): ?>
-                    <?php while($row = $result->fetch_assoc()): ?>
-                        <tr class="iedit author-self level-0 post-<?php echo $row['id']; ?> type-post status-publish format-standard hentry category-uncategorized">
-                            <td class="check-column"><input id="cb-select-<?php echo $row['id']; ?>" type="checkbox" name="post[]" value="<?php echo $row['id']; ?>"></td>
-                            <td class="thumb column-thumb" data-colname="Image">
-                                <?php if (!empty($row['featured_image'])): 
-                                    $img_url = $row['featured_image'];
-                                    // Handle relative paths from wp-admin context
-                                    if (strpos($img_url, 'http') !== 0 && strpos($img_url, '../') !== 0) {
-                                        $img_url = '../' . $img_url;
-                                    }
-                                ?>
-                                    <img src="<?php echo htmlspecialchars($img_url); ?>" width="50" height="50" style="object-fit:cover; border-radius:3px; display:block;" alt="">
-                                <?php else: ?>
-                                    <div style="width:50px; height:50px; background:#f0f0f1; border-radius:3px;"></div>
-                                <?php endif; ?>
-                            </td>
-                            <td class=”title column-title has-row-actions column-primary page-title” data-colname=”Title”>
-                                <strong>
-                                    <a class=”row-title” href=”post-new.php?id=<?php echo $row['id']; ?>” aria-label=”Edit “<?php echo htmlspecialchars($row['title']); ?>””><?php echo htmlspecialchars($row['title']); ?></a>
-                                    <?php if (!empty($row['locked_by']) && $row['locked_by'] != $_SESSION['user_id']): ?>
-                                    <span title=”Being edited by <?php echo htmlspecialchars($row['locker_name'] ?? 'Someone'); ?>” style=”display:inline-flex;align-items:center;gap:3px;margin-left:6px;font-size:11px;color:#a00;background:#fce8e8;padding:1px 7px;border-radius:20px;font-weight:600;vertical-align:middle;”>
-                                        &#128274; <?php echo htmlspecialchars($row['locker_name'] ?? 'Someone'); ?>
-                                    </span>
-                                    <?php endif; ?>
-                                </strong>
-                                <div class=”row-actions”>
-                                    <?php if ($row['status'] === 'trash'): ?>
-                                    <span class=”restore”><a href=”posts.php?action=restore&id=<?php echo $row['id']; ?>”>Restore</a> | </span>
-                                    <span class=”delete”><a href=”posts.php?action=delete_permanent&id=<?php echo $row['id']; ?>” class=”submitdelete” style=”color:#b32d2e;” onclick=”return confirm('Delete permanently? This cannot be undone.')”>Delete Permanently</a></span>
-                                    <?php else: ?>
-                                    <span class=”edit”><a href=”post-new.php?id=<?php echo $row['id']; ?>”>Edit</a> | </span>
-                                    <span class=”quick-edit”><a href=”#” class=”quick-edit-btn” data-id=”<?php echo $row['id']; ?>” data-title=”<?php echo htmlspecialchars($row['title']); ?>” data-slug=”<?php echo htmlspecialchars($row['slug']); ?>” data-status=”<?php echo $row['status']; ?>”>Quick Edit</a> | </span>
-                                    <span class=”trash”><a href=”posts.php?action=delete&id=<?php echo $row['id']; ?>” class=”submitdelete” onclick=”return confirm('Move to trash?')”>Trash</a> | </span>
-                                    <span class=”view”><a href=”../post/<?php echo $row['slug']; ?>” target=”_blank”>View</a> | </span>
-                                    <span class=”duplicate”><a href=”posts.php?action=duplicate&id=<?php echo $row['id']; ?>”>Duplicate</a> | </span>
-                                    <?php
-                                    $other_lang = ($row['lang'] ?? 'id') === 'id' ? 'en' : 'id';
-                                    $flag       = $other_lang === 'en' ? '🇬🇧' : '🇮🇩';
-                                    $origin_id  = empty($row['translation_of']) ? $row['id'] : $row['translation_of'];
-                                    ?>
-                                    <span class=”translate”><a href=”post-new.php?translation_of=<?php echo $origin_id; ?>&lang=<?php echo $other_lang; ?>”><?php echo $flag; ?> Add <?php echo strtoupper($other_lang); ?></a></span>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                            <td data-colname=”Lang” style=”font-size:18px;text-align:center;”>
-                                <?php echo ($row['lang'] ?? 'id') === 'en' ? '🇬🇧' : '🇮🇩'; ?>
-                                <?php if (!empty($row['translation_of'])): ?>
-                                    <br><small style=”font-size:10px;color:#aaa;”>trans.</small>
-                                <?php endif; ?>
-                            </td>
-                            <td class=”status column-status” data-colname=”Status”>
-                                <?php if ($row['status'] === 'scheduled'): ?>
-                                    <span class="post-state" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;border-radius:3px;padding:1px 6px;font-size:11px;">&#128197; Scheduled</span>
-                                    <?php if (!empty($row['scheduled_at'])): ?>
-                                    <br><small style="color:#787c82;font-size:11px;"><?php echo date('M j, Y @ H:i', strtotime($row['scheduled_at'])); ?></small>
-                                    <?php endif; ?>
-                                <?php else: ?>
-                                    <?php
-                                        $status_label = ucfirst($row['status']);
-                                        $status_class = $row['status'] == 'publish' ? 'published' : 'draft';
-                                        echo "<span class='post-state $status_class'>$status_label</span>";
-                                    ?>
-                                <?php endif; ?>
-                            </td>
-                            <td class="author column-author" data-colname="Author">
-                                <a href="posts.php?author=<?php echo $row['author_id']; ?>"><?php echo htmlspecialchars($row['author_name'] ?? 'Unknown'); ?></a>
-                            </td>
-                            <td class="categories column-categories" data-colname="Categories">
-                                <?php 
-                                $cat_sql = "SELECT c.name FROM categories c JOIN post_categories pc ON c.id = pc.category_id WHERE pc.post_id = " . $row['id'];
-                                $cat_res = $conn->query($cat_sql);
-                                $cats = [];
-                                if ($cat_res) {
-                                    while($c = $cat_res->fetch_assoc()) {
-                                        $cats[] = htmlspecialchars($c['name']);
-                                    }
-                                }
-                                echo !empty($cats) ? implode(', ', $cats) : 'Uncategorized';
-                                ?>
-                            </td>
-                            <td class="tags column-tags" data-colname="Tags">
-                                <?php 
-                                $tag_sql = "SELECT t.name FROM tags t JOIN post_tags pt ON t.id = pt.tag_id WHERE pt.post_id = " . $row['id'];
-                                $tag_res = $conn->query($tag_sql);
-                                $tags = [];
-                                if ($tag_res) {
-                                    while($t = $tag_res->fetch_assoc()) {
-                                        $tags[] = htmlspecialchars($t['name']);
-                                    }
-                                }
-                                echo !empty($tags) ? implode(', ', $tags) : '<span aria-hidden="true">—</span>';
-                                ?>
-                            </td>
-                            <td class="date column-date" data-colname="Date"><?php echo $row['status'] == 'publish' ? 'Published' : 'Last Modified'; ?><br><abbr title="<?php echo $row['created_at']; ?>"><?php echo date('Y/m/d h:i a', strtotime($row['created_at'])); ?></abbr></td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <!-- No posts found (handled by DataTables) -->
-                <?php endif; ?>
-            </tbody>
-
-        </table>
+        <div id=”posts-grid”></div>
     </div>
 </div>
 
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<!-- Custom Admin Styles for Table/Header -->
+<!-- tui-grid -->
+<link rel="stylesheet" href="vendor/tui/css/tui-grid.min.css">
 <style>
-    /* Header & Button Fixes */
     .wp-heading-inline { display: inline-block; margin-right: 5px; vertical-align: middle; }
     .page-title-action {
-        display: inline-block;
-        border: 1px solid #0073aa;
-        color: #0073aa;
-        padding: 4px 8px;
-        text-decoration: none;
-        font-size: 13px;
-        border-radius: 3px;
-        background: #f3f5f6;
-        vertical-align: middle;
-        margin-left: 4px;
-        line-height: normal; 
+        display: inline-block; border: 1px solid #0073aa; color: #0073aa; padding: 4px 8px;
+        text-decoration: none; font-size: 13px; border-radius: 3px; background: #f3f5f6;
+        vertical-align: middle; margin-left: 4px; line-height: normal;
     }
     .page-title-action:hover { background: #f0f0f1; border-color: #005f8a; color: #005f8a; }
-    
-    /* Subsubsub Filters */
     ul.subsubsub { list-style: none; margin: 8px 0 0; padding: 0; font-size: 13px; float: left; color: #646970; width: 100%; }
     ul.subsubsub li { display: inline-block; margin: 0; padding: 0; }
     ul.subsubsub li a { color: #0073aa; text-decoration: none; padding: 0.2em; border-right: 1px solid #ddd; margin-right: 5px; }
     ul.subsubsub li a:last-child { border: none; }
     ul.subsubsub li a.current { color: #000; font-weight: 600; }
-
-    /* DataTables Tweaks to match WP */
-    .dataTables_wrapper { margin-top: 15px; background: #fff; padding: 10px; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
-    table.dataTable.no-footer { border-bottom: 1px solid #c3c4c7; }
-    table.dataTable thead th, table.dataTable thead td { border-bottom: 1px solid #c3c4c7; }
-    .row-actions { visibility: hidden; font-size: 12px; }
-    tr:hover .row-actions { visibility: visible; }
+    #posts-grid { margin-top: 15px; }
+    .row-actions { visibility: hidden; font-size: 12px; padding-top: 2px; }
+    .tui-grid-cell:hover .row-actions,
+    .tui-grid-row-hover .row-actions { visibility: visible; }
+    .row-actions a { color: #0073aa; text-decoration: none; }
+    .row-actions a:hover { color: #005f8a; text-decoration: underline; }
+    .row-actions .submitdelete { color: #b32d2e; }
+    .post-state { display: inline-block; padding: 1px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; }
+    .post-state.published { background: #d1fae5; color: #065f46; }
+    .post-state.draft { background: #f0f0f1; color: #646970; }
+    .post-state.trash { background: #fce8e8; color: #b32d2e; }
+    .tui-grid-cell .tui-grid-cell-content { line-height: 1.5; }
+    /* Search bar */
+    .grid-toolbar { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; }
+    .grid-toolbar input[type="search"] { padding: 5px 10px; border: 1px solid #8c8f94; border-radius: 4px; font-size: 13px; width: 250px; }
+    .grid-toolbar input[type="search"]:focus { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; outline: none; }
+    .grid-toolbar label { font-size: 13px; color: #1d2327; font-weight: 400; }
 </style>
-
-<!-- jQuery & DataTables JS -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
+<script src="vendor/tui/js/tui-grid.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('.wp-list-table').DataTable({
-            "paging": true,
-            "lengthChange": true,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "autoWidth": false,
-            "pageLength": 20,
-            "columnDefs": [
-                { "orderable": false, "targets": [0, 1] } // Disable sort on checkbox and thumbnail columns
-            ],
-            "language": {
-                "search": "Search Posts:",
-                "lengthMenu": "Show _MENU_ posts"
-            }
-        });
+(function() {
+    var currentUserId = <?php echo (int)$_SESSION['user_id']; ?>;
+    var isTrash = <?php echo json_encode($status_filter === 'trash'); ?>;
+    var gridData = <?php echo json_encode($grid_rows, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
+    function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    function fmtImage(o) {
+        var v = o.value;
+        if (!v) return '<div style="width:50px;height:50px;background:#f0f0f1;border-radius:3px;"></div>';
+        var url = (v.indexOf('http') === 0 || v.indexOf('../') === 0) ? v : '../' + v;
+        return '<img src="' + esc(url) + '" width="50" height="50" style="object-fit:cover;border-radius:3px;display:block;" alt="">';
+    }
+
+    function fmtTitle(o) {
+        var r = o.row;
+        var h = '<strong><a href="post-new.php?id=' + r.id + '" style="color:#0073aa;text-decoration:none;font-size:13px;">' + esc(r.title) + '</a>';
+        if (r.locked_by && r.locked_by !== currentUserId) {
+            h += ' <span style="display:inline-flex;align-items:center;gap:3px;margin-left:6px;font-size:11px;color:#a00;background:#fce8e8;padding:1px 7px;border-radius:20px;font-weight:600;">&#128274; ' + esc(r.locker_name) + '</span>';
+        }
+        h += '</strong><div class="row-actions">';
+        if (isTrash) {
+            h += '<span><a href="posts.php?action=restore&id=' + r.id + '">Restore</a> | </span>';
+            h += '<span><a href="posts.php?action=delete_permanent&id=' + r.id + '" class="submitdelete" onclick="return confirm(\'Delete permanently? This cannot be undone.\')">Delete Permanently</a></span>';
+        } else {
+            h += '<span><a href="post-new.php?id=' + r.id + '">Edit</a> | </span>';
+            h += '<span><a href="#" onclick="openQuickEdit({id:' + r.id + ',title:\'' + esc(r.title).replace(/'/g, "\\'") + '\',slug:\'' + esc(r.slug).replace(/'/g, "\\'") + '\',status:\'' + r.status + '\'});return false;">Quick Edit</a> | </span>';
+            h += '<span><a href="posts.php?action=delete&id=' + r.id + '" class="submitdelete" onclick="return confirm(\'Move to trash?\')">Trash</a> | </span>';
+            h += '<span><a href="../post/' + encodeURIComponent(r.slug) + '" target="_blank">View</a> | </span>';
+            h += '<span><a href="posts.php?action=duplicate&id=' + r.id + '">Duplicate</a> | </span>';
+            var otherLang = (r.lang === 'en') ? 'id' : 'en';
+            var flag = (otherLang === 'en') ? '&#127468;&#127463;' : '&#127470;&#127465;';
+            var originId = r.translation_of || r.id;
+            h += '<span><a href="post-new.php?translation_of=' + originId + '&lang=' + otherLang + '">' + flag + ' Add ' + otherLang.toUpperCase() + '</a></span>';
+        }
+        h += '</div>';
+        return h;
+    }
+
+    function fmtLang(o) {
+        var r = o.row;
+        var flag = (r.lang === 'en') ? '&#127468;&#127463;' : '&#127470;&#127465;';
+        var h = '<span style="font-size:18px;">' + flag + '</span>';
+        if (r.translation_of) h += '<br><small style="font-size:10px;color:#aaa;">trans.</small>';
+        return h;
+    }
+
+    function fmtStatus(o) {
+        var r = o.row;
+        if (r.status === 'scheduled') {
+            var h = '<span class="post-state" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;border-radius:3px;padding:1px 6px;font-size:11px;">&#128197; Scheduled</span>';
+            if (r.scheduled_at) h += '<br><small style="color:#787c82;font-size:11px;">' + esc(r.scheduled_at) + '</small>';
+            return h;
+        }
+        var cls = r.status === 'publish' ? 'published' : (r.status === 'trash' ? 'trash' : 'draft');
+        return '<span class="post-state ' + cls + '">' + esc(r.status.charAt(0).toUpperCase() + r.status.slice(1)) + '</span>';
+    }
+
+    function fmtAuthor(o) {
+        return '<a href="posts.php?author=' + o.row.author_id + '" style="color:#0073aa;text-decoration:none;">' + esc(o.row.author_name) + '</a>';
+    }
+
+    function fmtDate(o) {
+        var r = o.row;
+        var d = new Date(r.created_at);
+        var label = r.status === 'publish' ? 'Published' : 'Last Modified';
+        var fmt = d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0')
+                + ' ' + String(d.getHours()%12||12).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0')
+                + (d.getHours()>=12?' pm':' am');
+        return label + '<br><abbr title="' + esc(r.created_at) + '">' + fmt + '</abbr>';
+    }
+
+    tui.Grid.applyTheme('default', {
+        cell: { normal: { background: '#fff', border: '#e0e0e0' }, header: { background: '#f6f7f7', border: '#c3c4c7' },
+                evenRow: { background: '#f9f9f9' } },
+        outline: { border: '#c3c4c7' }
     });
+
+    var grid = new tui.Grid({
+        el: document.getElementById('posts-grid'),
+        data: gridData,
+        scrollX: false, scrollY: false,
+        bodyHeight: 'auto', minBodyHeight: 60,
+        rowHeight: 'auto', minRowHeight: 56,
+        pageOptions: { useClient: true, perPage: 20 },
+        rowHeaders: [{ type: 'checkbox', width: 40 }],
+        columns: [
+            { header: 'Image', name: 'featured_image', width: 70, sortable: false, escapeHTML: false, align: 'center', formatter: fmtImage },
+            { header: 'Title', name: 'title', sortable: true, escapeHTML: false, formatter: fmtTitle },
+            { header: 'Lang', name: 'lang', width: 60, sortable: true, escapeHTML: false, align: 'center', formatter: fmtLang },
+            { header: 'Status', name: 'status', width: 110, sortable: true, escapeHTML: false, align: 'center', formatter: fmtStatus },
+            { header: 'Author', name: 'author_name', width: 120, sortable: true, escapeHTML: false, formatter: fmtAuthor },
+            { header: 'Categories', name: 'categories', width: 150, sortable: true },
+            { header: 'Tags', name: 'tags', width: 150, sortable: true, formatter: function(o) { return o.value || '<span style="color:#aaa;">&mdash;</span>'; }, escapeHTML: false },
+            { header: 'Date', name: 'created_at', width: 160, sortable: true, escapeHTML: false, formatter: fmtDate }
+        ]
+    });
+
+    // Search toolbar
+    var toolbar = document.createElement('div');
+    toolbar.className = 'grid-toolbar';
+    toolbar.innerHTML = '<label>Search Posts: <input type="search" id="grid-search" placeholder="Type to filter..."></label>';
+    document.getElementById('posts-grid').parentNode.insertBefore(toolbar, document.getElementById('posts-grid'));
+
+    var allData = gridData.slice();
+    document.getElementById('grid-search').addEventListener('input', function() {
+        var q = this.value.toLowerCase();
+        if (!q) { grid.resetData(allData); return; }
+        var filtered = allData.filter(function(r) {
+            return (r.title && r.title.toLowerCase().indexOf(q) > -1)
+                || (r.author_name && r.author_name.toLowerCase().indexOf(q) > -1)
+                || (r.categories && r.categories.toLowerCase().indexOf(q) > -1)
+                || (r.tags && r.tags.toLowerCase().indexOf(q) > -1)
+                || (r.slug && r.slug.toLowerCase().indexOf(q) > -1);
+        });
+        grid.resetData(filtered);
+    });
+})();
 </script>
 
 <!-- Quick Edit Modal -->
@@ -566,48 +571,30 @@ $result = $conn->query("SELECT p.*, u.username as author_name, lu.username as lo
 
 <script>
     function openQuickEdit(data) {
-        $('#qe-post_id').val(data.id);
-        $('#qe-post_title').val(data.title);
-        $('#qe-post_name').val(data.slug);
-        $('#qe-post_status').val(data.status);
-        
-        $('#quick-edit-modal').addClass('show').show();
+        document.getElementById('qe-post_id').value = data.id;
+        document.getElementById('qe-post_title').value = data.title;
+        document.getElementById('qe-post_name').value = data.slug;
+        document.getElementById('qe-post_status').value = data.status;
+        var modal = document.getElementById('quick-edit-modal');
+        modal.style.display = 'flex';
+        setTimeout(function() { modal.classList.add('show'); }, 10);
     }
 
     function closeQuickEdit() {
-        $('#quick-edit-modal').removeClass('show');
-        setTimeout(() => {
-            $('#quick-edit-modal').hide();
-        }, 200);
+        var modal = document.getElementById('quick-edit-modal');
+        modal.classList.remove('show');
+        setTimeout(function() { modal.style.display = 'none'; }, 200);
     }
 
-    $(document).ready(function() {
-        // Quick Edit Click Handler
-        $(document).on('click', '.quick-edit-btn', function(e) {
-            e.preventDefault();
-            const data = {
-                id: $(this).data('id'),
-                title: $(this).data('title'),
-                slug: $(this).data('slug'),
-                status: $(this).data('status')
-            };
-            openQuickEdit(data);
-        });
-        
-        // Close modal when clicking outside
-        $(window).on('click', function(event) {
-            if (event.target == document.getElementById('quick-edit-modal')) {
-                closeQuickEdit();
-            }
-        });
-        
-        // Slug generation on title change
-        $('#qe-post_title').on('input', function() {
-            if (!$('#qe-post_name').val()) {
-                 const slug = $(this).val().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-                 $('#qe-post_name').val(slug);
-            }
-        });
+    document.addEventListener('click', function(e) {
+        if (e.target === document.getElementById('quick-edit-modal')) closeQuickEdit();
+    });
+
+    document.getElementById('qe-post_title').addEventListener('input', function() {
+        var slugEl = document.getElementById('qe-post_name');
+        if (!slugEl.value) {
+            slugEl.value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        }
     });
 </script>
 
