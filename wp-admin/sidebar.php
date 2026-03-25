@@ -185,6 +185,9 @@ endif; ?>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Role Menu Visibility') ? 'current' : ''; ?>"><a href="settings-roles-menu.php">Role Visibility</a></li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Sites') ? 'current' : ''; ?>"><a href="sites.php">Multi-site</a></li>
                 <li class="<?php echo(isset($page_title) && $page_title === 'Updates') ? 'current' : ''; ?>"><a href="update.php">Updates</a></li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Security Headers') ? 'current' : ''; ?>"><a href="security.php">Security Headers</a></li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'File Integrity') ? 'current' : ''; ?>"><a href="integrity.php">File Integrity</a></li>
+                <li class="<?php echo(isset($page_title) && $page_title === 'Login Security') ? 'current' : ''; ?>"><a href="login-security.php">Login Security</a></li>
                 <?php endif; ?>
             </ul>
         </li>

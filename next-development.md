@@ -185,10 +185,10 @@ Fokus: membawa CMS dari "admin panel" ke **platform CMS profesional**. Installer
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 16 | **Security Headers Manager** | Halaman security.php — toggle CSP, X-Frame-Options, HSTS, X-Content-Type-Options, Referrer-Policy. Preview header yang akan dikirim. Auto-inject via PHP di header.php. | Pending |
-| 17 | **Rate Limiter** | Middleware rate limiting — max N requests per IP per menit untuk login, API, form submit. Tabel `rate_limits`. Block IP yang melebihi threshold. Configurable dari settings. | Pending |
-| 18 | **File Integrity Monitor** | Scan core files, hash dengan SHA-256, simpan di DB. Halaman integrity.php — bandingkan hash saat ini vs baseline. Alert jika ada file yang berubah tanpa update resmi. | Pending |
-| 19 | **Login Security Dashboard** | Halaman login-security.php — geografis login attempts (IP → country via free GeoIP), failed login timeline chart, blocked IPs list, active sessions management (force logout). | Pending |
+| 16 | **Security Headers Manager** | security.php — toggle X-Frame-Options, X-Content-Type, Referrer-Policy, HSTS, CSP, Permissions-Policy. Header preview. Saved in options table. Dark mode. | ✅ Done |
+| 17 | **Rate Limiter** | `includes/rate-limiter.php` — `rate_limit_check($conn, $endpoint, $max, $window)`. Tabel `rate_limits` track hits per IP. `rate_limit_get_blocked()` untuk dashboard. | ✅ Done |
+| 18 | **File Integrity Monitor** | integrity.php — scan core PHP/JS/CSS files, SHA-256 hash baseline, compare scan vs baseline. Shows modified/new/deleted files. Dark mode. | ✅ Done |
+| 19 | **Login Security Dashboard** | login-security.php — success/fail stats, failed attempts chart (tui-chart), top failed IPs, active sessions with force logout, recent login attempts table. Dark mode. | ✅ Done |
 
 ### Tier 5 — Content & Media Powerups
 
