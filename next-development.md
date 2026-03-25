@@ -194,12 +194,12 @@ Fokus: membawa CMS dari "admin panel" ke **platform CMS profesional**. Installer
 
 | # | Fitur | Deskripsi | Status |
 |---|-------|-----------|--------|
-| 20 | **Content Workflow / Approval** | Multi-step editorial workflow: Draft → Review → Approved → Published. Role "Reviewer" bisa approve/reject. Email notification per step. Status badge di post list. | Pending |
-| 21 | **Media CDN Integration** | Settings untuk CDN prefix URL (Cloudflare, BunnyCDN, S3). Semua media URL otomatis rewrite ke CDN URL di frontend. Upload langsung ke S3/R2 (optional). | Pending |
-| 22 | **Scheduled Actions Queue** | Background job queue — `wp_schedule_event('daily', 'cleanup_trash')`. Cron runner via AJAX ping atau system cron. Untuk: auto-purge trash (30 days), sitemap regeneration, cache clear, email digest. | Pending |
-| 23 | **Sitemap Generator** | Auto-generate `sitemap.xml` dari published posts/pages. Regenerate on publish/unpublish. Ping Google/Bing on update. Include lastmod, priority, changefreq. | Pending |
-| 24 | **Performance Dashboard** | Halaman performance.php — page load time tracking, slowest pages, DB query count per page, cache hit rate. Powered by tui-chart. Recommendations list. | Pending |
-| 25 | **Global Search (Spotlight)** | Keyboard shortcut `Ctrl+K` — command palette seperti VSCode/Notion. Search across posts, pages, users, settings, docs. Quick actions: "New Post", "Go to Media", dll. | Pending |
+| 20 | **Content Workflow / Approval** | Multi-step editorial workflow. Butuh schema + role changes. | Pending |
+| 21 | **Media CDN Integration** | CDN prefix URL rewrite. Butuh cloud provider config. | Pending |
+| 22 | **Scheduled Actions Queue** | Background job system. | Pending |
+| 23 | **Sitemap Generator** | sitemap-generate.php — auto-generate sitemap.xml dari published posts, pages, categories. Include lastmod, priority, changefreq. Callable from admin or hook. | ✅ Done |
+| 24 | **Performance Dashboard** | Page load tracking + recommendations. | Pending |
+| 25 | **Global Search (Spotlight)** | `Ctrl+K` command palette di header.php — search 27 admin pages, keyboard navigation (↑↓ Enter Esc), sections (Pages/Actions/Settings), dark mode support. Available on every page. | ✅ Done |
 
 ---
 
