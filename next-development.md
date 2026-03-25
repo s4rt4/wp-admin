@@ -203,6 +203,47 @@ Fokus: membawa CMS dari "admin panel" ke **platform CMS profesional**. Installer
 
 ---
 
+## Plan Batch Keenam — Referensi Top 20 Plugin WordPress
+
+> **PENTING: Sebelum mengeksekusi setiap fitur di bawah, WAJIB cek dulu apakah CMS sudah punya fitur serupa.**
+> - Jika sudah ada dan lengkap → **Skip** (tandai "Sudah ada").
+> - Jika sudah ada tapi belum sempurna → **Sempurnakan** yang sudah ada, jangan buat baru.
+> - Jika belum ada sama sekali → **Buat baru**.
+>
+> Referensi: Yoast SEO, Contact Form 7, Elementor, WooCommerce, WPForms, Akismet, Wordfence,
+> All-in-One WP Migration, Jetpack, UpdraftPlus, WP Super Cache, Rank Math, LiteSpeed Cache,
+> Redirection, ACF, Duplicate Post, Cookie Notice, Really Simple SSL, W3 Total Cache.
+
+### Tier 1 — Quick Wins (Easy, High Impact)
+
+| # | Fitur | Deskripsi | Cek Dulu | Status |
+|---|-------|-----------|----------|--------|
+| 1 | **Duplicate Post/Page** | Tombol "Duplicate" di post list dan page list yang clone semua fields (title, content, categories, tags, custom fields, SEO) sebagai draft baru. Ref: Yoast Duplicate Post (4M installs). | Cek: `posts.php` dan `pages.php` — apakah sudah ada tombol Duplicate di row actions? Jika sudah ada tapi tidak clone categories/tags/custom fields, sempurnakan. | Pending |
+| 2 | **Spam Filter (Honeypot)** | Anti-spam tanpa API external: (a) honeypot hidden field yang bot isi, (b) time-based check (reject jika submit < 2 detik), (c) keyword blocklist. Terapkan ke comment form dan contact form. Ref: Akismet (6M installs). | Cek: `comments.php` — apakah sudah ada spam blacklist di Comment Settings? Jika ya, tambahkan honeypot + time check saja. | Pending |
+| 3 | **Schema / JSON-LD Output** | Structured data di frontend: Article schema untuk post, Breadcrumb schema, WebSite schema di homepage. Auto-generate dari post metadata (title, author, date, image, description). Ref: Yoast SEO, Rank Math. | Cek: Frontend `read.php` atau `index.php` — apakah sudah ada Open Graph meta tags? Jika ya, tambahkan JSON-LD di samping OG tags. | Pending |
+| 4 | **404 Monitor** | Log setiap 404 error (URL, referrer, IP, timestamp) ke tabel `404_log`. Halaman admin `404-monitor.php` untuk lihat top 404 URLs dan buat redirect langsung. Auto-redirect saat post/page slug berubah. Ref: Rank Math, Redirection. | Cek: `redirects.php` — apakah sudah ada fitur 404 logging? Cek juga `post-new.php` — apakah ada hook saat slug berubah untuk auto-create redirect? | Pending |
+| 5 | **Lazy Loading Images** | Tambahkan `loading="lazy"` ke semua `<img>` di frontend output. Bisa juga tambah `decoding="async"`. Ref: Jetpack, LiteSpeed Cache. | Cek: Frontend template files — apakah `<img>` tags sudah punya `loading="lazy"`? Jika belum, tambahkan di output filter atau langsung di template. | Pending |
+| 6 | **DB Optimization** | Halaman `db-optimize.php`: clean post revisions (keep last N), purge spam comments, purge trashed posts/pages older than 30 days, OPTIMIZE TABLE untuk semua tabel. Tampilkan ukuran sebelum/sesudah. Ref: WP-Optimize, LiteSpeed Cache. | Cek: `tools.php` — apakah tab "Site Health" sudah punya fitur cleanup? Jika ya, perluas. Jika tidak, buat halaman baru. | Pending |
+| 7 | **Auto-redirect on Slug Change** | Saat user mengubah slug post/page, otomatis buat redirect 301 dari slug lama ke slug baru. Simpan di tabel `redirects` yang sudah ada. Ref: Redirection (2M installs). | Cek: `post-new.php` dan `builder.php` — apakah ada logic deteksi slug change? Tabel `redirects` sudah ada, tinggal hook. | Pending |
+
+### Tier 2 — Medium Effort, High Impact
+
+| # | Fitur | Deskripsi | Cek Dulu | Status |
+|---|-------|-----------|----------|--------|
+| 8 | **Page Caching** | Full-page HTML cache: simpan rendered output sebagai file .html statis, serve langsung bypass PHP. Cache invalidation otomatis saat content di-save/update/delete. Exclusion rules (logged-in users, admin pages, POST requests). Cache stats dashboard. Ref: WP Super Cache (1M+), W3 Total Cache, LiteSpeed Cache — 3 dari top 20 plugin soal caching. | Cek: Apakah sudah ada caching mechanism di `index.php` frontend atau `.htaccess`? | Pending |
+| 9 | **Cookie Consent / GDPR Banner** | Banner consent di frontend: configurable message, accept/reject buttons, link privacy policy. Cookie categories (necessary, analytics, marketing). Script blocking — defer analytics/marketing scripts sampai user consent. Consent log (timestamp + IP) untuk compliance. Halaman settings di admin. Ref: Cookie Notice (2M installs). | Cek: Frontend template — apakah sudah ada cookie banner? Cek `options` table untuk cookie-related settings. | Pending |
+| 10 | **WAF Middleware** | Request-level security filter: scan setiap incoming request untuk pola SQL injection (`UNION SELECT`, `OR 1=1`), XSS (`<script>`, `onerror=`), path traversal (`../`). Block dan log ke audit_log. Configurable sensitivity. Ref: Wordfence (5M installs). | Cek: `auth_check.php` atau `.htaccess` — apakah sudah ada request filtering? Rate limiter sudah ada tapi belum ada pattern-based WAF. | Pending |
+| 11 | **Scheduled Remote Backup** | Extend backup system: (a) scheduled auto-backup via cron (daily/weekly), (b) upload ke remote storage (FTP via PHP ftp functions, atau local path), (c) retention policy (keep last N backups, auto-delete old), (d) backup history log. Ref: UpdraftPlus (3M installs). | Cek: `tools.php` tab "Database Backup" — apa saja yang sudah bisa? Apakah sudah ada scheduling? | Pending |
+
+### Tier 3 — Medium Effort, Medium Impact
+
+| # | Fitur | Deskripsi | Cek Dulu | Status |
+|---|-------|-----------|----------|--------|
+| 12 | **Related Posts Engine** | Algoritma rekomendasi post berdasarkan: shared categories, shared tags, keyword similarity di title. Tampilkan di frontend di bawah post content. Configurable jumlah (3-6 posts). Ref: Jetpack related posts. | Cek: `post-new.php` sidebar — apakah sudah ada "Related Posts" metabox? Jika sudah ada (manual select), tambahkan opsi "Auto-suggest" berdasarkan tags/categories. | Pending |
+| 13 | **DB Cleanup + Table Optimization** | Extend DB Optimization (#6): (a) clean expired sessions, (b) clean old notifications (> 90 days), (c) clean old audit logs sesuai retention policy, (d) clean expired rate_limit entries, (e) OPTIMIZE TABLE semua tabel sekaligus dengan progress bar. | Cek: Apakah audit-log.php sudah punya "Purge Old Logs"? Jika ya, integrasikan ke satu halaman cleanup terpusat. | Pending |
+
+---
+
 ## Catatan Multi-language
 
 User **harus menulis konten secara manual** dalam setiap bahasa (standar industri: WordPress, Craft CMS, Statamic). CMS yang mengurus:
