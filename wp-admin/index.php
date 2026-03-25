@@ -47,7 +47,7 @@ window.Chart = function(ctx, config) {
     var el = ctx.canvas || ctx;
     var div = document.createElement('div');
     div.style.width = '100%';
-    div.style.height = (el.height || 200) + 'px';
+    div.style.height = '220px';
     el.parentNode.replaceChild(div, el);
     var isDark = document.documentElement.classList.contains('dark-mode');
     var dk = isDark ? {chart:{backgroundColor:'#2c3338'},plot:{backgroundColor:'#2c3338'},xAxis:{label:{color:'#9ca3ae'}},yAxis:{label:{color:'#9ca3ae'}}} : {};
@@ -55,7 +55,7 @@ window.Chart = function(ctx, config) {
     var color = ds.borderColor || ds.backgroundColor || '#0073aa';
     var fn = config.type === 'line' ? 'areaChart' : 'barChart';
     var th = fn === 'areaChart' ? Object.assign({series:{area:{colors:[color]}}},dk) : Object.assign({series:{bar:{colors:[color]}}},dk);
-    toastui.Chart[fn]({el:div, data:{categories:config.data.labels, series:[{name:ds.label||'Data',data:ds.data}]}, options:{chart:{width:'auto',height:parseInt(div.style.height)},legend:{visible:false},series:{spline:true,showDot:false},theme:th,usageStatistics:false}});
+    toastui.Chart[fn]({el:div, data:{categories:config.data.labels, series:[{name:ds.label||'Data',data:ds.data}]}, options:{chart:{width:'auto',height:220},legend:{visible:false},series:{spline:true,showDot:false},theme:th,usageStatistics:false}});
 };
 </script>
 
