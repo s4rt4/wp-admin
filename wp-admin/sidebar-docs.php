@@ -182,9 +182,26 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-data-explorer') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-data-explorer">Data Explorer</a></li>
                 <li class="<?php echo($topic === 'tools-form-analytics') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-form-analytics">Form Analytics</a></li>
                 <li class="<?php echo($topic === 'tools-audit-dashboard') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-audit-dashboard">Audit Dashboard</a></li>
-                <li class="<?php echo($topic === 'tools-plugins') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-plugins">Plugins</a></li>
-                <li class="<?php echo($topic === 'tools-messages') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-messages">Messages</a></li>
             </ul>
+        </li>
+
+        <!-- Plugins -->
+        <li class="wp-has-submenu <?php echo(strpos($topic, 'tools-plugins') === 0) ? 'wp-has-current-submenu wp-menu-open' : ''; ?>">
+            <a href="docs.php?topic=tools-plugins">
+                <div class="wp-menu-image dashicons-admin-plugins"></div>
+                <div class="wp-menu-name">Plugins</div>
+            </a>
+            <ul class="wp-submenu">
+                <li class="wp-first-item <?php echo($topic === 'tools-plugins') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-plugins">Plugin Development Guide</a></li>
+            </ul>
+        </li>
+
+        <!-- Messages -->
+        <li class="<?php echo($topic === 'tools-messages') ? 'current' : ''; ?>">
+            <a href="docs.php?topic=tools-messages">
+                <div class="wp-menu-image dashicons-email"></div>
+                <div class="wp-menu-name">Messages</div>
+            </a>
         </li>
 
         <!-- Settings -->
