@@ -10,20 +10,35 @@
  */
 function get_option($option_name, $default = false) {
     global $conn;
-    
-    // Prepare statement to prevent SQL injection
+
+    // Ensure we have a DB connection
+    if (!$conn || !($conn instanceof mysqli) || $conn->connect_error) {
+        try {
+            require_once __DIR__ . '/../wp-admin/db_config.php';
+            if (defined('DB_HOST') && defined('DB_USER') && defined('DB_PASS') && defined('DB_NAME')) {
+                $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+                if ($conn->connect_error) return $default;
+                $conn->set_charset('utf8mb4');
+            } else {
+                return $default;
+            }
+        } catch (\Throwable $e) {
+            return $default;
+        }
+    }
+
     $stmt = $conn->prepare("SELECT option_value FROM options WHERE option_name = ? LIMIT 1");
     if (!$stmt) return $default;
-    
+
     $stmt->bind_param("s", $option_name);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         return $row['option_value'];
     }
-    
+
     return $default;
 }
 
