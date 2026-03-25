@@ -118,6 +118,13 @@ function topic_label(string $topic): string
  */
 function topic_section(string $topic): string
 {
+    // Direct overrides for topics that don't belong to their prefix section
+    $overrides = [
+        'tools-plugins' => 'Plugins',
+        'tools-messages' => 'Messages',
+    ];
+    if (isset($overrides[$topic])) return $overrides[$topic];
+
     $section_map = [
         'dashboard' => 'Dashboard',
         'posts' => 'Posts',
