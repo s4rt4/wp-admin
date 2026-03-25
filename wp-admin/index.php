@@ -38,8 +38,26 @@ foreach ($registry as $wid => $meta) {
 
 include 'header.php';
 ?>
-<!-- Chart.js (needed by chart widgets) -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- TUI Chart + Chart.js shim for dashboard widgets -->
+<link rel="stylesheet" href="vendor/tui/css/tui-chart.min.css">
+<script src="vendor/tui/js/tui-chart.min.js"></script>
+<script>
+/* Chart.js compatibility shim — widgets call new Chart(ctx, config) */
+window.Chart = function(ctx, config) {
+    var el = ctx.canvas || ctx;
+    var div = document.createElement('div');
+    div.style.width = '100%';
+    div.style.height = (el.height || 200) + 'px';
+    el.parentNode.replaceChild(div, el);
+    var isDark = document.documentElement.classList.contains('dark-mode');
+    var dk = isDark ? {chart:{backgroundColor:'#2c3338'},plot:{backgroundColor:'#2c3338'},xAxis:{label:{color:'#9ca3ae'}},yAxis:{label:{color:'#9ca3ae'}}} : {};
+    var ds = config.data.datasets[0];
+    var color = ds.borderColor || ds.backgroundColor || '#0073aa';
+    var fn = config.type === 'line' ? 'areaChart' : 'barChart';
+    var th = fn === 'areaChart' ? Object.assign({series:{area:{colors:[color]}}},dk) : Object.assign({series:{bar:{colors:[color]}}},dk);
+    toastui.Chart[fn]({el:div, data:{categories:config.data.labels, series:[{name:ds.label||'Data',data:ds.data}]}, options:{chart:{width:'auto',height:parseInt(div.style.height)},legend:{visible:false},series:{spline:true,showDot:false},theme:th,usageStatistics:false}});
+};
+</script>
 
 <?php include 'sidebar.php'; ?>
 
@@ -145,7 +163,7 @@ include 'header.php';
 </div>
 
 <!-- SortableJS -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="vendor/sortable.min.js"></script>
 <script>
 (function () {
     const API = 'api/widget-prefs.php';

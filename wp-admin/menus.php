@@ -680,7 +680,7 @@ html.dark-mode .move-up, html.dark-mode .move-down { background: #3c434a; border
 html.dark-mode .move-up:hover, html.dark-mode .move-down:hover { background: #50575e; }
 </style>
 
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="vendor/datatables/jquery.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 <script>
     $(document).ready(function() {

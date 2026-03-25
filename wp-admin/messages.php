@@ -37,10 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $stmt->execute();
 
         // Notify recipient
-        require_once 'includes/notifications.php';
-        notifications_ensure_table($conn);
+        require_once 'includes/notify.php';
         $from_name = $_SESSION['username'] ?? 'Someone';
-        notify_user($conn, $to, "New message from $from_name", $subject ?: '(no subject)', 'message', 'messages.php');
+        create_notification($to, 'message', "New message from $from_name: " . ($subject ?: '(no subject)'), 'messages.php');
 
         $msg_success = 'Message sent.';
     }

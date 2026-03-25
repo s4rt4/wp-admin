@@ -95,7 +95,7 @@ if (isset($_SESSION['user_id'])) {
 
 <script>
 (function() {
-    const API = 'api-notifications.php';
+    const API = 'api/notifications.php';
     const bell    = document.getElementById('notif-bell');
     const badge   = document.getElementById('notif-badge');
     const dropdown= document.getElementById('notif-dropdown');
@@ -130,7 +130,7 @@ if (isset($_SESSION['user_id'])) {
             return '<a href="' + escHtml(href) + '" onclick="notifMarkRead(' + n.id + ')" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid #f0f0f1;background:' + bg + ';text-decoration:none;color:#1d2327;">'
                 + '<span style="font-size:18px;flex-shrink:0;line-height:1.4;">' + icon + '</span>'
                 + '<span style="flex:1;min-width:0;">'
-                + '<span style="font-size:13px;font-weight:' + fw + ';display:block;line-height:1.4;">' + escHtml(n.title || n.message) + '</span>'
+                + '<span style="font-size:13px;font-weight:' + fw + ';display:block;line-height:1.4;">' + escHtml(n.message) + '</span>'
                 + '<span style="font-size:11px;color:#8c8f94;">' + timeAgo(n.created_at) + '</span>'
                 + '</span>'
                 + (!n.is_read ? '<span style="width:8px;height:8px;background:#2271b1;border-radius:50%;flex-shrink:0;margin-top:6px;"></span>' : '')
@@ -144,7 +144,7 @@ if (isset($_SESSION['user_id'])) {
 
     function fetchCount() {
         fetch(API + '?action=count').then(r=>r.json()).then(d => {
-            if (d.count !== undefined) updateBadge(d.count);
+            if (d.success) updateBadge(d.unread);
         }).catch(function(){});
     }
 
@@ -157,8 +157,8 @@ if (isset($_SESSION['user_id'])) {
         open = true;
         dropdown.style.display = 'block';
         list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;font-size:13px;">Loading...</p>';
-        fetch(API + '?action=list').then(r=>r.json()).then(d => {
-            if (d.notifications) { renderItems(d.notifications); updateBadge(d.unread || 0); }
+        fetch(API + '?action=list&limit=15').then(r=>r.json()).then(d => {
+            if (d.success) { renderItems(d.items); updateBadge(d.unread); }
         }).catch(function(){});
     }
 
@@ -181,13 +181,13 @@ if (isset($_SESSION['user_id'])) {
     if (markAllBtn) {
         markAllBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            fetch(API + '?action=read', {method:'POST'})
+            fetch(API, {method:'POST', body: new URLSearchParams({action:'mark_all_read'})})
                 .then(function(){ updateBadge(0); openDropdown(); });
         });
     }
 
     window.notifMarkRead = function(id) {
-        fetch(API + '?action=read_one&id=' + id, {method:'POST'});
+        fetch(API, {method:'POST', body: new URLSearchParams({action:'mark_read', id: id})});
     };
 
     fetchCount();

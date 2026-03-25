@@ -7,24 +7,8 @@ $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if ($conn->connect_error) die("Connection failed");
 $conn->set_charset('utf8mb4');
 
-// Ensure tables exist — create them if missing
-$conn->query("CREATE TABLE IF NOT EXISTS `forms` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `name` VARCHAR(255) NOT NULL DEFAULT 'Untitled Form',
-    `fields` LONGTEXT,
-    `settings` LONGTEXT,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-$conn->query("CREATE TABLE IF NOT EXISTS `form_submissions` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `form_id` INT NOT NULL DEFAULT 0,
-    `data` LONGTEXT,
-    `submitted_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-$has_forms = $conn->query("SHOW TABLES LIKE 'forms'")->num_rows > 0;
+// Use same tables as form-builder.php
+$has_forms = $conn->query("SHOW TABLES LIKE 'form_builder'")->num_rows > 0;
 $has_subs  = $conn->query("SHOW TABLES LIKE 'form_submissions'")->num_rows > 0;
 
 $forms = [];
@@ -33,7 +17,7 @@ $chart_data = [];
 $submissions = [];
 
 if ($has_forms) {
-    $res = $conn->query("SELECT * FROM forms ORDER BY created_at DESC");
+    $res = $conn->query("SELECT * FROM form_builder ORDER BY created_at DESC");
     if ($res) while ($r = $res->fetch_assoc()) $forms[] = $r;
 }
 
@@ -46,9 +30,9 @@ if ($has_subs) {
         "AND submitted_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY DATE(submitted_at) ORDER BY d");
     if ($res) while ($r = $res->fetch_assoc()) { $chart_labels[] = date('M j', strtotime($r['d'])); $chart_data[] = (int)$r['c']; }
 
-    // All submissions — only JOIN forms table if it exists
+    // All submissions
     if ($has_forms) {
-        $sql = "SELECT s.*, f.name as form_name FROM form_submissions s LEFT JOIN forms f ON s.form_id = f.id " .
+        $sql = "SELECT s.*, f.name as form_name FROM form_submissions s LEFT JOIN form_builder f ON s.form_id = f.id " .
             ($selected_form ? "WHERE s.form_id=$selected_form " : "") .
             "ORDER BY s.submitted_at DESC LIMIT 200";
     } else {
@@ -135,7 +119,7 @@ include 'sidebar.php';
         return [
             'id' => (int)$s['id'],
             'form_name' => $s['form_name'] ?? 'Unknown',
-            'data' => mb_strimwidth(strip_tags($s['data'] ?? $s['submission_data'] ?? ''), 0, 120, '...'),
+            'data' => mb_strimwidth(strip_tags($s['data_json'] ?? $s['data'] ?? ''), 0, 120, '...'),
             'submitted_at' => $s['submitted_at'] ?? $s['created_at'] ?? '',
         ];
     }, $submissions), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE) ?: '[]'; ?>;

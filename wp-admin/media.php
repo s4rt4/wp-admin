@@ -574,7 +574,7 @@ function formatFileSize($bytes) {
     }
 </style>
 
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="vendor/datatables/jquery.min.js"></script>
 <script>
 $(document).ready(function() {
     // ===== Upload Modal =====

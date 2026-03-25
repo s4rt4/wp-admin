@@ -145,7 +145,7 @@ $result = $conn->query("SELECT * FROM categories ORDER BY name ASC");
 </div>
 
 <!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="vendor/datatables/dataTables.min.css">
 <!-- Custom Admin Styles -->
 <style>
     /* Form Styles */
@@ -165,8 +165,8 @@ $result = $conn->query("SELECT * FROM categories ORDER BY name ASC");
 </style>
 
 <!-- jQuery & DataTables JS -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="vendor/datatables/jquery.min.js"></script>
+<script src="vendor/datatables/dataTables.min.js"></script>
 
 <script>
     $(document).ready(function() {
