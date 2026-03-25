@@ -88,6 +88,12 @@
         { title: 'Data Explorer', section: 'Tools', topic: 'tools-data-explorer', keywords: 'data explorer database tabel browse query csv export read only admin jelajah' },
         { title: 'Form Analytics', section: 'Tools', topic: 'tools-form-analytics', keywords: 'form analytics submission trends chart grafik formulir respons statistik' },
         { title: 'Audit Dashboard', section: 'Tools', topic: 'tools-audit-dashboard', keywords: 'audit dashboard timeline activity chart grafik aktivitas log user action keamanan' },
+        { title: 'Plugins', section: 'Tools', topic: 'tools-plugins', keywords: 'plugin hook event action filter extend ekstensi tambahan addon' },
+        { title: 'Messages', section: 'Tools', topic: 'tools-messages', keywords: 'messages pesan internal inbox sent compose reply balas chat komunikasi' },
+        { title: 'Security Headers', section: 'Settings', topic: 'settings-security', keywords: 'security headers csp hsts x-frame referrer policy keamanan header' },
+        { title: 'File Integrity', section: 'Settings', topic: 'settings-integrity', keywords: 'file integrity hash sha256 scan baseline monitor integritas' },
+        { title: 'Login Security', section: 'Settings', topic: 'settings-login-security', keywords: 'login security failed attempts ip block session force logout keamanan masuk' },
+        { title: 'Updates', section: 'Settings', topic: 'settings-updates', keywords: 'update pembaruan version versi migration migrasi github release' },
         { title: 'Media Editor', section: 'Media', topic: 'media-editor', keywords: 'media editor crop resize rotate flip image gambar edit potong ukuran putar' },
         { title: 'Multi-site', section: 'Settings', topic: 'settings-multisite', keywords: 'multi site multisite beberapa situs domain prefix tabel network kelola' },
         // Media (extended)

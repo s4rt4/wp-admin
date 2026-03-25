@@ -1,6 +1,6 @@
 # Custom PHP CMS
 
-A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, custom fields, a WordPress-like first-run installer, trash/recycle bin, CSV import/export, maintenance mode, user activity tracking, a redirects manager, revision diff viewer, related posts, a token-authenticated REST API, a built-in media editor, multi-site management, a data explorer, form analytics, and an audit dashboard.
+A lightweight, custom-built Content Management System (CMS) using native PHP. This project started as a simple admin panel and has evolved into a fully functional CMS with advanced page building capabilities, custom code snippets, a Kanban project board, a drag-and-drop form builder, two-factor authentication, analytics, a comprehensive documentation system, a fully personalised per-user dashboard, multi-language content support, virtual media folders, a visual automation/workflow builder, SEO analysis, a content calendar, custom fields, a WordPress-like first-run installer, trash/recycle bin, CSV import/export, maintenance mode, user activity tracking, a redirects manager, revision diff viewer, related posts, a token-authenticated REST API, a built-in media editor, multi-site management, a data explorer, form analytics, an audit dashboard, a plugin system with hook/event architecture, real-time notifications, internal messaging, security hardening tools, a sitemap generator, and a global search spotlight (`Ctrl+K`).
 
 ## Features
 
@@ -84,6 +84,10 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - Token-based, 1-hour expiry, single-use links.
     - Anti-enumeration: always shows a success message regardless of whether the email exists.
 - **Brute-force login protection** with lockout after repeated failed attempts.
+- **Rate Limiter:** Configurable per-IP request throttling for login, API, and form submissions. Automatic cleanup of expired entries.
+- **Security Headers Manager:** Toggle X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS, CSP, and Permissions-Policy from the admin panel. Header preview before saving.
+- **File Integrity Monitor:** SHA-256 hash baseline of all core PHP/JS/CSS files. Run scans to detect modified, new, or deleted files. Visual diff report.
+- **Login Security Dashboard:** Successful/failed login stats, failed attempts timeline chart, top offending IPs, active sessions with force-logout, recent login attempts log.
 - **Role-based Menu Visibility:** Admins can hide specific sidebar sections from non-admin roles without revoking underlying capabilities.
 - Admin Authentication and protected API endpoints.
 - Dynamic routing (Pretty URLs) and SEO-friendly frontend (Open Graph, Twitter Cards).
@@ -121,7 +125,8 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
     - Drag any media item onto a folder to assign it; drag onto "All Media" to unassign.
     - Create, rename, and delete folders without touching the filesystem.
 - **Comment Moderation:** Approve, reject, and spam workflow with bulk actions.
-- **Notification Center:** In-app notifications for system events.
+- **Notification Center:** In-app notifications with real-time polling (30s interval). Bell badge in topbar updates live. Mark as read individually or all at once.
+- **Internal Messaging:** Send messages between admin users. Inbox/Sent tabs, compose form, reply threads, unread badges. Auto-notifies recipient.
 - **Frontend Admin Bar:** Contextual bar on public pages for logged-in users — quick edit and preview links.
 - **Shortcode & Snippet System:** Create PHP/CSS/JS snippets and embed them anywhere via auto-generated shortcodes. Navigation Menus also act as shortcodes.
 - **Dark Mode:** Toggle between light and dark admin UI; preference saved per browser.
@@ -138,6 +143,15 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 - **REST API:** Token-authenticated CRUD API for posts, pages, media, categories, tags, and options. Generate and manage API tokens from the admin panel. CORS-enabled, supports Bearer token and query param auth.
 - **Media Editor:** Crop, resize, rotate, and flip images directly from the media library using an HTML5 Canvas editor. Changes are saved in-place.
 - **Multi-site Manager:** Create and manage multiple sites from a single installation. Each site gets its own set of database tables (prefixed), with shared user authentication. Activate, deactivate, or delete sites.
+- **Plugin System:**
+    - WordPress-like Hook/Event API: `add_action()`, `do_action()`, `add_filter()`, `apply_filters()` with priority support.
+    - Plugin folder structure: `plugins/my-plugin/plugin.json` + `main.php`.
+    - Admin page (`plugins.php`) to activate/deactivate plugins.
+    - Includes sample plugin: **Contact Form Mailer** — auto-emails every form submission.
+- **Sitemap Generator:** Auto-generate `sitemap.xml` from published posts, pages, and categories. Includes lastmod, priority, and changefreq.
+- **Global Search (Spotlight):** Press `Ctrl+K` on any admin page to open a command palette. Search 27+ pages, quick actions (New Post, New Page), keyboard navigation (↑↓ Enter Esc).
+- **Auto-Updater:** Check for updates via GitHub Releases API. View current version, changelog, and release link. Run pending database migrations from the UI.
+- **Database Migration System:** Versioned migration files in `migrations/` folder. Auto-runs on login. No more scattered `ALTER TABLE` statements.
 - **Data Explorer:** Browse any database table via an interactive tui-grid. Read-only, auto-detect columns, export to CSV.
 - **Database Backup & Restore** interface.
 - **Export / Import** content tools (JSON and CSV).
@@ -167,9 +181,10 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 3. **First-run installer:**
     - On first visit, you will be automatically redirected to the installer wizard (`/wp-admin/install.php`).
     - **Step 1 — Language:** Choose Indonesian or English.
-    - **Step 2 — Database:** Enter your DB host, name, username, and password. Use the "Test Connection" button to verify before proceeding.
-    - **Step 3 — Site Info:** Set your site name, URL, and admin account (username, email, password).
-    - Click **Install** — the wizard creates all database tables, inserts default options and roles, and writes `wp-admin/wp-config.php` with your credentials.
+    - **Step 2 — Requirements:** Automatic system check (PHP version, extensions, writable directories, memory). Must pass before proceeding.
+    - **Step 3 — Database:** Enter your DB host, name, username, and password. Use the "Test Connection" button to verify.
+    - **Step 4 — Site Info:** Set your site name, URL, admin account, and optionally install demo content (sample posts, pages, categories).
+    - Click **Install** — the wizard creates all database tables, inserts defaults, generates `wp-config.php` with environment config (`WP_ENV`, `WP_DEBUG`, `AUTH_SECRET_KEY`).
     - You will be redirected to the login page when done.
 
 > **Note:** `wp-admin/wp-config.php` is excluded from the repository (`.gitignore`) — credentials never leave your machine.
@@ -188,7 +203,7 @@ A lightweight, custom-built Content Management System (CMS) using native PHP. Th
 - **Backend:** Native PHP (no frameworks).
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript.
 - **Database:** MySQL.
-- **Libraries / Editors:** GrapesJS, Editor.js, Toast UI Editor, Toast UI Image Editor, Toast UI Grid, Monaco Editor, Chart.js, SortableJS, Fabric.js.
+- **Libraries / Editors:** GrapesJS, Editor.js, Toast UI Editor, Toast UI Image Editor, Toast UI Grid, Toast UI Chart, Toast UI Calendar, Monaco Editor, SortableJS, Fabric.js.
 - **Vendored assets:** TUI libraries are bundled locally in `wp-admin/vendor/tui/` for offline use and faster loading.
 
 ---

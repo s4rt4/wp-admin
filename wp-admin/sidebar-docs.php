@@ -182,6 +182,8 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'tools-data-explorer') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-data-explorer">Data Explorer</a></li>
                 <li class="<?php echo($topic === 'tools-form-analytics') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-form-analytics">Form Analytics</a></li>
                 <li class="<?php echo($topic === 'tools-audit-dashboard') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-audit-dashboard">Audit Dashboard</a></li>
+                <li class="<?php echo($topic === 'tools-plugins') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-plugins">Plugins</a></li>
+                <li class="<?php echo($topic === 'tools-messages') ? 'current' : ''; ?>"><a href="docs.php?topic=tools-messages">Messages</a></li>
             </ul>
         </li>
 
@@ -201,6 +203,10 @@ $l = $labels[$lang];
                 <li class="<?php echo($topic === 'settings-role-visibility') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-role-visibility">Role Visibility</a></li>
                 <li class="<?php echo($topic === 'settings-maintenance') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-maintenance">Maintenance Mode</a></li>
                 <li class="<?php echo($topic === 'settings-multisite') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-multisite">Multi-site</a></li>
+                <li class="<?php echo($topic === 'settings-updates') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-updates">Updates</a></li>
+                <li class="<?php echo($topic === 'settings-security') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-security">Security Headers</a></li>
+                <li class="<?php echo($topic === 'settings-integrity') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-integrity">File Integrity</a></li>
+                <li class="<?php echo($topic === 'settings-login-security') ? 'current' : ''; ?>"><a href="docs.php?topic=settings-login-security">Login Security</a></li>
             </ul>
         </li>
 
