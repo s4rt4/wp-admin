@@ -15,8 +15,10 @@ if (!isset($_SESSION['_last_ping']) || time() - $_SESSION['_last_ping'] > 60) {
     try {
         require_once __DIR__ . '/db_config.php';
         $pdo_ping = getDBConnection();
-        $stmt_ping = $pdo_ping->prepare("UPDATE users SET last_active = NOW() WHERE id = ?");
-        $stmt_ping->execute([$_SESSION['user_id']]);
+        if ($pdo_ping) {
+            $stmt_ping = $pdo_ping->prepare("UPDATE users SET last_active = NOW() WHERE id = ?");
+            $stmt_ping->execute([$_SESSION['user_id']]);
+        }
     } catch (\Exception $e) {}
 
     // Load active plugins (hooks system + plugin files)
@@ -52,7 +54,8 @@ function get_current_user_role() {
 
     // Fallback: Fetch from DB if not in session
     require_once __DIR__ . '/db_config.php';
-    if (!isset($pdo)) { $pdo = getDBConnection(); }
+    $pdo = getDBConnection();
+    if (!$pdo) return 'subscriber';
     
     $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);

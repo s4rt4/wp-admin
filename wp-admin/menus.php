@@ -20,6 +20,7 @@ if (!function_exists('selected')) {
 
 
 $pdo = getDBConnection();
+if (!$pdo) { echo '<div style="margin:40px;color:red;">Database connection unavailable. Please try again.</div>'; require_once 'footer.php'; exit; }
 
 // Database Migration: Add navigation_label, custom_url, and parent_id columns if they don't exist
 try {

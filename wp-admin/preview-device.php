@@ -10,10 +10,13 @@ if (empty($slug)) {
 
 // Fetch Page Title for display
 $pdo = getDBConnection();
-$stmt = $pdo->prepare("SELECT title FROM pages WHERE slug = ?");
-$stmt->execute([$slug]);
-$page = $stmt->fetch();
-$pageTitle = $page ? $page['title'] : 'Preview';
+$pageTitle = 'Preview';
+if ($pdo) {
+    $stmt = $pdo->prepare("SELECT title FROM pages WHERE slug = ?");
+    $stmt->execute([$slug]);
+    $page = $stmt->fetch();
+    $pageTitle = $page ? $page['title'] : 'Preview';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

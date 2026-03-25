@@ -36,10 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     // Admin always sees everything — not stored
     $pdo  = getDBConnection();
-    $val  = json_encode($visibility);
-    $stmt = $pdo->prepare("INSERT INTO options (option_name,option_value) VALUES('role_menu_visibility',?) ON DUPLICATE KEY UPDATE option_value=VALUES(option_value)");
-    $stmt->execute([$val]);
-    $message = 'Visibility settings saved.';
+    if (!$pdo) {
+        $message = 'Database connection unavailable. Settings not saved.';
+    } else {
+        $val  = json_encode($visibility);
+        $stmt = $pdo->prepare("INSERT INTO options (option_name,option_value) VALUES('role_menu_visibility',?) ON DUPLICATE KEY UPDATE option_value=VALUES(option_value)");
+        $stmt->execute([$val]);
+        $message = 'Visibility settings saved.';
+    }
 }
 
 // Load current settings

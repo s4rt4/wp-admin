@@ -4,7 +4,7 @@ require_once 'db_config.php';
 require_once 'includes/mailer.php';
 
 if (!current_user_can('manage_options')) {
-    wp_die('Access denied.');
+    die('Access denied.');
 }
 
 $page_title  = 'SMTP Email';
@@ -15,15 +15,19 @@ $allowed = ['smtp_host','smtp_port','smtp_user','smtp_pass','smtp_encryption','s
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_smtp'])) {
     $pdo = getDBConnection();
-    foreach ($allowed as $key) {
-        $val = $_POST[$key] ?? '';
-        if ($key === 'smtp_pass' && $val === '') {
-            continue; // keep existing password
+    if ($pdo) {
+        foreach ($allowed as $key) {
+            $val = $_POST[$key] ?? '';
+            if ($key === 'smtp_pass' && $val === '') {
+                continue; // keep existing password
+            }
+            $stmt = $pdo->prepare("INSERT INTO options (option_name, option_value) VALUES (?,?) ON DUPLICATE KEY UPDATE option_value=VALUES(option_value)");
+            $stmt->execute([$key, $val]);
         }
-        $stmt = $pdo->prepare("INSERT INTO options (option_name, option_value) VALUES (?,?) ON DUPLICATE KEY UPDATE option_value=VALUES(option_value)");
-        $stmt->execute([$key, $val]);
+        $success_msg = 'SMTP settings saved.';
+    } else {
+        $error_msg = 'Database connection unavailable. Settings not saved.';
     }
-    $success_msg = 'SMTP settings saved.';
 }
 
 function smtp_opt(string $k, string $default = ''): string {

@@ -7,6 +7,10 @@ require_once 'db_config.php';
 $pdo = getDBConnection();
 $msg = '';
 
+if (!$pdo) {
+    $msg = '<div class="notice notice-error"><p>Database connection unavailable.</p></div>';
+}
+
 // Default headers config
 $defaults = [
     'x_frame_options' => 'SAMEORIGIN',

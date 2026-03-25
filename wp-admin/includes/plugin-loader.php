@@ -32,6 +32,10 @@ function get_active_plugins(): array {
 function set_active_plugins(array $plugins): void {
     require_once __DIR__ . '/../db_config.php';
     $pdo = getDBConnection();
+    if (!$pdo) {
+        error_log('set_active_plugins: database connection failed.');
+        return;
+    }
     $json = json_encode(array_values($plugins));
     $pdo->prepare("INSERT INTO options (option_name, option_value) VALUES ('active_plugins', ?) ON DUPLICATE KEY UPDATE option_value=VALUES(option_value)")
         ->execute([$json]);

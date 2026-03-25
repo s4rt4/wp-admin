@@ -6,6 +6,7 @@ require_once 'sidebar.php';
 require_once 'db_config.php';
 
 $pdo = getDBConnection();
+if (!$pdo) { echo '<div style="margin:40px;color:red;">Database connection unavailable. Please try again.</div>'; require_once 'footer.php'; exit; }
 
 // Handle trash (soft delete)
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
