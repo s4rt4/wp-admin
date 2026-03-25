@@ -241,6 +241,7 @@ Fokus: membawa CMS dari "admin panel" ke **platform CMS profesional**. Installer
 |---|-------|-----------|----------|--------|
 | 12 | **Related Posts Engine** | Algoritma rekomendasi post berdasarkan: shared categories, shared tags, keyword similarity di title. Tampilkan di frontend di bawah post content. Configurable jumlah (3-6 posts). Ref: Jetpack related posts. | Cek: `post-new.php` sidebar — apakah sudah ada "Related Posts" metabox? Jika sudah ada (manual select), tambahkan opsi "Auto-suggest" berdasarkan tags/categories. | Pending |
 | 13 | **DB Cleanup + Table Optimization** | Extend DB Optimization (#6): (a) clean expired sessions, (b) clean old notifications (> 90 days), (c) clean old audit logs sesuai retention policy, (d) clean expired rate_limit entries, (e) OPTIMIZE TABLE semua tabel sekaligus dengan progress bar. | Cek: Apakah audit-log.php sudah punya "Purge Old Logs"? Jika ya, integrasikan ke satu halaman cleanup terpusat. | Pending |
+| 14 | **Site Migration Tool** | Export seluruh situs sebagai satu file ZIP (DB dump + media files + wp-config). Import di instalasi baru: upload ZIP, extract, search-and-replace URL lama → URL baru (penting saat pindah domain/host), jalankan migration. Progress bar untuk proses besar. Halaman `migrate.php`. Ref: All-in-One WP Migration (5M installs). | Cek: `tools.php` tab "Import/Export" — apakah sudah bisa export/import DB? Jika ya, extend dengan: (a) bundling media files ke ZIP, (b) URL search-and-replace saat import, (c) progress indicator. | Pending |
 
 ---
 
