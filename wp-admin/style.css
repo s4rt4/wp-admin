@@ -1927,6 +1927,10 @@ html.dark-mode ul.subsubsub { color: #9ca3ae; }
 html.dark-mode #titlediv,
 html.dark-mode #titlewrap { background: #2c3338 !important; }
 html.dark-mode #title { background: #1a1d21 !important; border-color: #404952 !important; color: #e0e2e4 !important; padding: 6px 14px !important; border-radius: 4px !important; margin: 6px !important; width: calc(100% - 12px) !important; }
+/* Category/Tag tabs in post editor */
+html.dark-mode .category-tabs li.tabs { background: #1a1d21 !important; border-color: #404952 !important; }
+html.dark-mode .category-tabs li.tabs a { color: #e0e2e4 !important; }
+html.dark-mode .category-tabs li:not(.tabs) a { color: #72aee6 !important; }
 html.dark-mode #seo-metabox { background: #2c3338 !important; border-color: #404952 !important; }
 html.dark-mode #seo-metabox .hndle,
 html.dark-mode #seo-metabox h3 { color: #c3c4c7 !important; border-bottom-color: #404952 !important; }
