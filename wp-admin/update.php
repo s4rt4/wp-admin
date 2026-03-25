@@ -42,6 +42,7 @@ function check_github_release(): array {
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
+    if ($code === 404) return ['current' => CMS_VERSION, 'latest' => CMS_VERSION, 'update_available' => false, 'name' => 'No releases yet', 'body' => '', 'date' => '', 'url' => '', 'zip' => ''];
     if ($code !== 200 || !$body) return ['error' => 'Could not reach GitHub API (HTTP ' . $code . ')'];
 
     $data = json_decode($body, true);

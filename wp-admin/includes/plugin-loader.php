@@ -19,10 +19,12 @@ function get_active_plugins(): array {
     try {
         require_once __DIR__ . '/../db_config.php';
         $pdo = getDBConnection();
+        if (!$pdo) return [];
         $stmt = $pdo->query("SELECT option_value FROM options WHERE option_name='active_plugins'");
+        if (!$stmt) return [];
         $row = $stmt->fetch();
         return $row ? (json_decode($row['option_value'], true) ?: []) : [];
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
         return [];
     }
 }

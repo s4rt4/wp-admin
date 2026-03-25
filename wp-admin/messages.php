@@ -117,11 +117,12 @@ require_once 'sidebar.php';
 .msg-reply .meta { font-size:11px;color:#646970;margin-bottom:6px; }
 
 /* Dark mode */
-html.dark-mode .msg-list,.msg-compose,.msg-view { background:#2c3338;border-color:#404952; }
+html.dark-mode .msg-list,
+html.dark-mode .msg-compose,
+html.dark-mode .msg-view { background:#2c3338;border-color:#404952;color:#c3c4c7; }
 html.dark-mode .msg-item { color:#c3c4c7;border-bottom-color:#404952; }
 html.dark-mode .msg-item:hover { background:#3c434a; }
 html.dark-mode .msg-item.unread { background:#1e2a38; }
-html.dark-mode .msg-compose,.html.dark-mode .msg-view { background:#2c3338;border-color:#404952;color:#c3c4c7; }
 html.dark-mode .msg-compose label { color:#c3c4c7; }
 html.dark-mode .msg-compose input,html.dark-mode .msg-compose select,html.dark-mode .msg-compose textarea { background:#1a1d21;border-color:#50575e;color:#c3c4c7; }
 html.dark-mode .msg-tabs { border-bottom-color:#404952; }

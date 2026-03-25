@@ -74,8 +74,10 @@ require_once 'sidebar.php';
 .ls-badge.success { background:#d1fae5;color:#065f46; }
 .ls-badge.fail { background:#fce8e8;color:#b32d2e; }
 .ls-badge.online { background:#d1fae5;color:#065f46; }
-html.dark-mode .ls-stat,.ls-card { background:#2c3338;border-color:#404952; }
+html.dark-mode .ls-stat,
+html.dark-mode .ls-card { background:#2c3338 !important;border-color:#404952 !important; }
 html.dark-mode .ls-stat .num { color:#e0e2e4; }
+html.dark-mode .ls-card h3 { color:#c3c4c7; }
 html.dark-mode .ls-table th { border-bottom-color:#404952;color:#9ca3ae; }
 html.dark-mode .ls-table td { border-bottom-color:#404952;color:#c3c4c7; }
 </style>
