@@ -214,6 +214,10 @@ if (isset($_SESSION['user_id'])) {
         const dark = !html.classList.contains('dark-mode');
         localStorage.setItem(KEY, dark);
         apply(dark);
+        // Reload if page has charts (they can't re-theme at runtime)
+        if (document.querySelector('.toastui-chart-wrapper')) {
+            setTimeout(function() { location.reload(); }, 150);
+        }
     });
 })();
 </script>
