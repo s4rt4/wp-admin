@@ -658,6 +658,45 @@ function create_all_tables(PDO $pdo): void
             `used` tinyint(1) NOT NULL DEFAULT 0,
             `created_at` datetime DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+        "CREATE TABLE IF NOT EXISTS `messages` (
+            `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `from_user` int NOT NULL,
+            `to_user` int NOT NULL,
+            `subject` varchar(255) NOT NULL DEFAULT '',
+            `body` text NOT NULL,
+            `is_read` tinyint(1) DEFAULT 0,
+            `parent_id` bigint UNSIGNED DEFAULT NULL,
+            `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_to` (`to_user`, `is_read`),
+            INDEX `idx_from` (`from_user`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+        "CREATE TABLE IF NOT EXISTS `migrations` (
+            `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `version` varchar(100) NOT NULL,
+            `applied_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY `uq_version` (`version`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+        "CREATE TABLE IF NOT EXISTS `file_hashes` (
+            `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `file_path` varchar(500) NOT NULL,
+            `hash` varchar(64) NOT NULL,
+            `size` bigint NOT NULL DEFAULT 0,
+            `scanned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY `uq_path` (`file_path`(191))
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+        "CREATE TABLE IF NOT EXISTS `rate_limits` (
+            `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `ip` varchar(45) NOT NULL,
+            `endpoint` varchar(100) NOT NULL,
+            `hits` int NOT NULL DEFAULT 1,
+            `window_start` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY `uq_ip_endpoint` (`ip`, `endpoint`),
+            INDEX `idx_window` (`window_start`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
     ];
 
     foreach ($tables as $sql) {
