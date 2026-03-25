@@ -2258,4 +2258,56 @@ html.dark-mode .toastui-calendar-grid-row { background: #2c3338 !important; }
 html.dark-mode .toastui-calendar-see-more-container { background: #2c3338 !important; color: #c3c4c7 !important; box-shadow: 0 4px 16px rgba(0,0,0,.4) !important; }
 html.dark-mode .toastui-calendar-weekday-event-title { color: inherit !important; }
 html.dark-mode .toastui-calendar-template-time { color: #c3c4c7 !important; }
+
+/* ── Toast UI Editor (post-new.php) dark mode ───────────────────────────── */
+html.dark-mode .toastui-editor-defaultUI { border-color: #404952 !important; }
+html.dark-mode .toastui-editor-defaultUI-toolbar { background: #262a2f !important; border-bottom-color: #404952 !important; }
+html.dark-mode .toastui-editor-toolbar-icons { background-position-y: -48px; filter: invert(0.8); }
+html.dark-mode .toastui-editor-defaultUI-toolbar button { color: #c3c4c7 !important; border-color: transparent !important; }
+html.dark-mode .toastui-editor-defaultUI-toolbar button:hover { background: #3c434a !important; }
+html.dark-mode .toastui-editor-md-container,
+html.dark-mode .toastui-editor-ww-container { background: #1a1d21 !important; }
+html.dark-mode .toastui-editor-md-container .toastui-editor-md-preview { background: #1a1d21 !important; color: #c3c4c7 !important; }
+html.dark-mode .ProseMirror { background: #1a1d21 !important; color: #c3c4c7 !important; }
+html.dark-mode .toastui-editor-contents { color: #c3c4c7 !important; }
+html.dark-mode .toastui-editor-contents p,
+html.dark-mode .toastui-editor-contents li,
+html.dark-mode .toastui-editor-contents h1,
+html.dark-mode .toastui-editor-contents h2,
+html.dark-mode .toastui-editor-contents h3,
+html.dark-mode .toastui-editor-contents h4,
+html.dark-mode .toastui-editor-contents h5,
+html.dark-mode .toastui-editor-contents h6 { color: #c3c4c7 !important; }
+html.dark-mode .toastui-editor-contents a { color: #72aee6 !important; }
+html.dark-mode .toastui-editor-contents code { background: #2c3338 !important; color: #e0e2e4 !important; }
+html.dark-mode .toastui-editor-contents pre { background: #262a2f !important; }
+html.dark-mode .toastui-editor-contents blockquote { border-left-color: #404952 !important; color: #9ca3ae !important; }
+html.dark-mode .toastui-editor-contents table th { background: #262a2f !important; border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .toastui-editor-contents table td { border-color: #404952 !important; color: #c3c4c7 !important; }
+html.dark-mode .toastui-editor-contents hr { border-color: #404952 !important; }
+html.dark-mode .toastui-editor-md-splitter { background: #404952 !important; }
+html.dark-mode .toastui-editor-mode-switch { background: #262a2f !important; border-top-color: #404952 !important; }
+html.dark-mode .toastui-editor-mode-switch .tab-item { color: #9ca3ae !important; background: #262a2f !important; border-color: #404952 !important; }
+html.dark-mode .toastui-editor-mode-switch .tab-item.active { color: #e0e2e4 !important; background: #2c3338 !important; }
+html.dark-mode .toastui-editor-popup { background: #2c3338 !important; border-color: #404952 !important; box-shadow: 0 4px 16px rgba(0,0,0,.4) !important; }
+html.dark-mode .toastui-editor-popup-body { color: #c3c4c7 !important; }
+html.dark-mode .toastui-editor-popup-body input,
+html.dark-mode .toastui-editor-popup-body select { background: #1a1d21 !important; border-color: #50575e !important; color: #c3c4c7 !important; }
+html.dark-mode .toastui-editor-popup-body label { color: #c3c4c7 !important; }
+html.dark-mode .toastui-editor-context-menu { background: #2c3338 !important; border-color: #404952 !important; }
+html.dark-mode .toastui-editor-context-menu li { color: #c3c4c7 !important; }
+html.dark-mode .toastui-editor-context-menu li:hover { background: #3c434a !important; }
+/* Placeholder text */
+html.dark-mode .toastui-editor-md-container .toastui-editor-md-preview .toastui-editor-contents,
+html.dark-mode .ProseMirror .placeholder { color: #646970 !important; }
+/* CodeMirror (markdown mode) */
+html.dark-mode .CodeMirror { background: #1a1d21 !important; color: #c3c4c7 !important; }
+html.dark-mode .CodeMirror-gutters { background: #262a2f !important; border-right-color: #404952 !important; }
+html.dark-mode .CodeMirror-linenumber { color: #646970 !important; }
+html.dark-mode .CodeMirror-cursor { border-left-color: #c3c4c7 !important; }
+html.dark-mode .CodeMirror-selected { background: #3c434a !important; }
+html.dark-mode .CodeMirror .cm-header { color: #72aee6 !important; }
+html.dark-mode .CodeMirror .cm-link { color: #72aee6 !important; }
+html.dark-mode .CodeMirror .cm-string { color: #6ee7b7 !important; }
+html.dark-mode .CodeMirror .cm-comment { color: #646970 !important; }
 html.dark-mode .toastui-calendar-weekday-grid-date-decorator { background: #2271b1 !important; }
