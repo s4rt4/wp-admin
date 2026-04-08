@@ -37,9 +37,19 @@ function getDBConnection() {
 }
 
 // Global MySQLi connection for legacy code & functions
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+try {
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+} catch (\Throwable $e) {
+    // Database doesn't exist or credentials wrong — redirect to installer
+    if (!headers_sent()) {
+        $install_url = (strpos($_SERVER['SCRIPT_NAME'], '/wp-admin/') !== false)
+            ? 'install.php'
+            : 'wp-admin/install.php';
+        header('Location: ' . $install_url);
+        exit;
+    }
+    die("Database connection failed: " . $e->getMessage());
 }
 
 // Include Helper Functions
