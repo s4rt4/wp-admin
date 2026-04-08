@@ -1126,6 +1126,9 @@ $db = $_SESSION['install_db'] ?? ['host' => 'localhost', 'name' => '', 'user' =>
                     <label><?php echo $t['admin_email']; ?></label>
                     <input type="email" name="admin_email" value="<?php echo htmlspecialchars($_POST['admin_email'] ?? ''); ?>" autocomplete="email" required>
                 </div>
+                <!-- Hidden dummy fields to prevent browser autocomplete from filling DB credentials -->
+                <input type="text" name="_dummy_user" style="display:none!important" tabindex="-1" autocomplete="off">
+                <input type="password" name="_dummy_pass" style="display:none!important" tabindex="-1" autocomplete="off">
                 <div class="form-group">
                     <label><?php echo $t['admin_pass']; ?></label>
                     <input type="password" name="admin_pass" autocomplete="new-password" required>
@@ -1259,6 +1262,13 @@ function testDB() {
         btn.innerHTML = '<i class="fa-solid fa-plug"></i> <?php echo $t['db_test']; ?>';
     });
 }
+// Force-clear password fields on step 2 to prevent autocomplete fill
+document.addEventListener('DOMContentLoaded', function() {
+    var ap = document.querySelector('input[name="admin_pass"]');
+    var ap2 = document.querySelector('input[name="admin_pass2"]');
+    if (ap) { setTimeout(function(){ ap.value=''; }, 100); }
+    if (ap2) { setTimeout(function(){ ap2.value=''; }, 100); }
+});
 </script>
 </body>
 </html>
