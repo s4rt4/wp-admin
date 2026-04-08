@@ -5,9 +5,19 @@
  */
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-// Already installed → go to login
+// Already installed → verify DB is actually reachable before redirecting
 if (file_exists(__DIR__ . '/wp-config.php')) {
-    header('Location: login.php'); exit;
+    require_once __DIR__ . '/wp-config.php';
+    try {
+        $test = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+        if (!$test->connect_error) {
+            $test->close();
+            header('Location: login.php'); exit;
+        }
+    } catch (\Throwable $e) {
+        // DB not reachable — delete stale wp-config.php and let installer run
+        @unlink(__DIR__ . '/wp-config.php');
+    }
 }
 
 // ── Translations ──────────────────────────────────────────────────────────────
